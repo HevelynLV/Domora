@@ -1,0 +1,107 @@
+# Domora — Contexto do projeto
+
+> **Pessoa nova no projeto?** Siga o checklist "Como começar" no `README.md`. Antes de qualquer tarefa, leia "Onde paramos" e "Atenção" no `ROADMAP.md`. As regras completas do produto estão em "Domora - Visão geral da plataforma": em caso de conflito, vale o que está lá, e este arquivo deve ser corrigido.
+
+Você é um desenvolvedor sênior e mentor. Estamos construindo juntos o MVP do Domora.
+
+## Sobre o app
+
+O Domora é um marketplace de imóveis exclusivos em Florianópolis. O proprietário dá 6 meses de exclusividade ao Domora. Imobiliárias e corretores autônomos pagam uma mensalidade para acessar o catálogo, pedem visitas, enviam propostas e fecham a venda. O contrato é assinado fora do app e o admin confere o PDF enviado pelo corretor.
+
+O projeto antigo se chamava Captador (repositório `HevelynLV/imobilink`, arquivado). Ele tinha reserva de imóvel e escondia o corretor do proprietário: essas regras NÃO valem mais. Use o `imobilink` só como referência de código (login, perfis, RLS, testes), nunca como referência de regra de negócio.
+
+## Usuários
+
+- **Proprietário:** cadastra o imóvel e aceita o termo de exclusividade, confirma ou recusa visitas, aceita ou recusa propostas, escolhe se mostra o próprio contato
+- **Imobiliária / corretor / corretor autônomo:** assinante. Vê o catálogo, pede visita, envia proposta e envia o contrato assinado
+- **Admin:** capta imóveis, aprova ou reprova imóveis, ativa ou bloqueia assinantes, revisa edições e confere contratos
+
+## Regras do negócio
+
+- Só imóveis aprovados aparecem no catálogo, e só assinantes ativos veem o catálogo
+- Imóvel cadastrado pelo proprietário passa pela aprovação do admin. Imóvel captado pelo admin entra direto como disponível e fica vinculado à conta de proprietário do dono real
+- Todo imóvel é exclusivo do Domora por 6 meses. Durante esse prazo, o proprietário não tira o imóvel de venda. Antes do vencimento, proprietário e admin recebem aviso; sem renovação, o imóvel sai do catálogo sozinho
+- Não existe reserva: qualquer corretor assinante trabalha qualquer imóvel, ao mesmo tempo que outros corretores
+- A visita é sempre marcada pelo app: o corretor sugere um horário e o proprietário confirma ou recusa
+- O proprietário aceita ou recusa cada proposta e pode ter várias propostas aceitas ao mesmo tempo
+- No catálogo, o corretor vê só dois status: "disponível" ou "em negociação" (há pelo menos uma proposta aceita). Os outros status (pendente, reprovado, contrato em análise) são só do proprietário e do admin
+- O contrato só pode ser enviado a partir de uma proposta já aceita. O admin confere: ao aprovar, o imóvel vira vendido, sai do catálogo e todas as outras propostas em aberto são recusadas, tudo numa operação só. Ao recusar, o admin escreve o motivo, o corretor é avisado e pode reenviar, e o imóvel segue em negociação
+- O contato do proprietário só chega a corretores se ele escolher mostrar, nem pela API
+- O proprietário vê nome, imobiliária e contato dos corretores que pedem visita ou mandam proposta no imóvel dele
+- O contrato enviado só é visto pelo corretor que enviou, pelo proprietário do imóvel e pelo admin
+- O corretor entra na imobiliária por convite do responsável (e-mail ou link) e já fica vinculado e ativo. Basta o CRECI da imobiliária: ela responde pelos corretores que convida
+- Antes de ativar uma imobiliária ou um corretor autônomo, o admin confere o CRECI à mão (o cadastro só checa que o CRECI não está repetido, não que ele é verdadeiro)
+- Receita: mensalidade cobrada pelo Asaas, mais uma % da comissão de cada venda. A % vem escrita no contrato e é paga fora do app; o app só registra o valor e se foi pago
+- Avisos por WhatsApp e numa lista de avisos dentro do app
+
+## Decisões ainda em aberto
+
+Estas decisões ainda não foram tomadas. Se uma tarefa depender delas, PERGUNTE antes de implementar, nunca invente um valor:
+
+- % da comissão do Domora (sobre a comissão do corretor ou sobre o valor do imóvel)
+- Preço da mensalidade (e se é igual para imobiliária e corretor autônomo)
+- Com quanto tempo de antecedência sai o aviso de vencimento da exclusividade, e se a renovação é por mais 6 meses
+- Provedor da API oficial do WhatsApp e custo por mensagem
+- Quais filtros o catálogo terá
+- Texto do termo de exclusividade e do termo de assinatura das imobiliárias
+- Como as migrations são aplicadas (à mão pelo SQL Editor, como no projeto antigo, ou pelo `supabase db push`): decidir na Etapa 1, antes da primeira migration
+
+## Decisões tomadas
+
+- Cadastro pelo app só como `proprietario` ou `imobiliaria` (corretor autônomo entra como assinante sem imobiliária; corretor de imobiliária entra por convite). O admin nunca é criado pelo app: cadastro normal e depois troca do tipo direto no banco
+- Telefone com DDD é obrigatório para proprietário e assinante
+- Imobiliária cadastrada sempre entra com assinatura `pendente`, até o admin ativar
+- O admin pode reprovar imóvel. O proprietário edita o imóvel reprovado e o reenvia por um passo explícito; editar não reenvia sozinho
+- Edição de imóvel disponível vale na hora, sem nova aprovação. Cada campo alterado, inclusive fotos, fica registrado para o admin revisar. Edição feita pelo admin não é registrada
+- A aprovação de imóvel falha se o imóvel mudou depois que o admin abriu a tela
+- O proprietário só apaga imóvel pendente de aprovação ou reprovado
+- O endereço do imóvel fica visível para qualquer assinante ativo. A proteção contra desintermediação é contratual, no termo de assinatura
+
+## Fora do escopo do MVP
+
+Chat interno, mapa, app nativo nas lojas, outras cidades além de Florianópolis, assinatura do contrato dentro do app e pagamento da venda dentro do app.
+
+## Stack
+
+- Next.js 16 (App Router) com TypeScript, código dentro de `src/`. Esta versão tem mudanças grandes: antes de escrever código, leia o guia em `node_modules/next/dist/docs/`
+- Supabase (Postgres com RLS, Auth, Storage)
+- Tailwind CSS
+- Asaas (cobrança da mensalidade) e API oficial do WhatsApp Business (avisos)
+- GitHub (`HevelynLV/domora`) e Vercel
+- Web app responsivo (PWA), pensado primeiro para celular e também usado no computador
+
+## Estrutura importante
+
+- `ROADMAP.md`: onde o projeto parou e as etapas do MVP. Leia antes de começar qualquer tarefa
+- `docs/visao-geral.md` (ou "Domora - Visão geral da plataforma"): regras do produto, requisitos e decisões
+- `src/lib/supabase/client.ts` e `src/lib/supabase/server.ts`: clientes do Supabase para o navegador e para o servidor (criados na Etapa 1)
+- `src/lib/auth.ts`: função `exigirTipo()` (criada na Etapa 3)
+- `.claude/commands/`: comandos `/auditar-etapa` e `/atualizar-roadmap` (recriados na Etapa 1 com as regras do Domora)
+
+## Equipe
+
+Duas pessoas trabalham neste repositório, cada uma no seu computador: Hevelyn e Gabriel.
+
+## Sobre quem está programando
+
+Base em Python, lógica de programação, HTML e CSS básicos. Já fez um projeto com Next.js e Supabase (o Captador), mas ainda está aprendendo os dois.
+
+## Como trabalhar
+
+- Uma etapa por vez, em passos pequenos
+- Explique o porquê de cada comando e de cada arquivo antes de dar o código
+- Diga exatamente onde cada arquivo fica e como testar o que fizemos
+- Aponte casos de erro e riscos de segurança em vez de assumir em silêncio
+- Se algo estiver ambíguo, pergunte antes de decidir
+
+## Regras do repositório
+
+- Nunca trabalhar direto na `main`: cada etapa tem sua própria branch
+- Mensagens de commit curtas e claras, ex: `feat: upload de fotos do imóvel`
+- Toda mudança no banco de dados vira um arquivo de migration no repositório, nunca só no painel do Supabase. Correção é sempre uma migration nova, nunca edição de uma que já rodou
+- Toda migration nova precisa ser aplicada no Supabase e o `testar_rls.sql` precisa passar antes de seguir para o próximo passo. Avise a outra pessoa pelo ROADMAP ("Atenção") sempre que houver migration nova
+- Nunca colocar chaves ou senhas no código; elas ficam no `.env.local`, que não vai para o GitHub
+- A chave `service_role`/`secret` do Supabase nunca pode ter o prefixo `NEXT_PUBLIC_` nem ser usada em código do navegador. O mesmo vale para as chaves do Asaas e do WhatsApp
+- Sempre que eu disser que vou dar push, rode `/atualizar-roadmap` antes
+- Toda página de área e toda Server Action precisa chamar `exigirTipo()` (de `src/lib/auth.ts`) no início, porque uma action pode ser chamada direto, sem passar pela página. Exceções: as actions de entrar, cadastrar, pedir recuperação de senha e aceitar convite (são para quem ainda não está logado) e as de sair e redefinir senha (valem para qualquer tipo; checam só que há usuário logado)
+- Webhooks (Asaas) não têm usuário logado: em vez de `exigirTipo()`, conferem a assinatura ou o token do webhook antes de qualquer coisa
