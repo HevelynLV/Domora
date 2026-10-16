@@ -1,13 +1,13 @@
-# Domora — Roadmap
+# PAUTA — Roadmap
 
 ## Onde paramos
 
-Última atualização: 14/10/2026 · por Hevelyn
+Última atualização: 16/10/2026 · por Hevelyn
 Etapa atual: 0. Protótipo do design (nenhum código escrito ainda)
 
-O que aconteceu (replanejamento de 13 e 14/10/2026):
+O que aconteceu (replanejamento de 13 e 14/10/2026 e troca de nome em 16/10/2026):
 - O projeto antigo se chamava **Captador** (repositório `HevelynLV/imobilink`, pasta local `capimoveis`). Ele chegou até a Etapa 3 (login e perfis), mas o modelo de negócio mudou tanto que vamos recomeçar do zero
-- O app agora se chama **Domora**. O produto inteiro foi redefinido: ideia, diferencial, usuários, 32 requisitos funcionais, 16 não funcionais e 14 etapas. Tudo está em "Domora - Visão geral da plataforma", que é a fonte da verdade do projeto
+- No replanejamento, o app passou a se chamar Domora e, em 16/10/2026, **PAUTA**. O produto inteiro foi redefinido: ideia, diferencial, usuários, 32 requisitos funcionais, 16 não funcionais e 14 etapas. Tudo está em "PAUTA - Visão geral da plataforma", que é a fonte da verdade do projeto
 - As mudanças que mais pesam em relação ao Captador: não existe mais reserva (vários corretores trabalham o mesmo imóvel ao mesmo tempo); a exclusividade é de 6 meses, com aviso e renovação; o proprietário confirma as visitas, aceita várias propostas e vê os dados do corretor; o contrato é assinado fora do app e o admin confere o PDF; a receita é mensalidade (Asaas) mais uma % da comissão; os avisos saem por WhatsApp; corretores entram por convite da imobiliária; corretor autônomo pode assinar; o piloto é em Florianópolis
 
 Próximo passo exato:
@@ -19,23 +19,23 @@ Próximo passo exato:
 - O protótipo está pronto quando o fluxo inteiro pode ser clicado, do cadastro do imóvel até o "vendido". Ajustes de fluxo que aparecerem nele voltam para a Visão geral antes da Etapa 1
 
 Antes da Etapa 1 (fazer à mão, cada pessoa pelo próprio painel):
-- [ ] Avisar o Gabriel do replanejamento e combinar o arquivamento
+- [ ] Avisar o Gabriel do replanejamento e da troca do nome para PAUTA, e combinar o arquivamento
 - [ ] Fechar sem aceitar o Pull Request da Etapa 3 no `imobilink`
 - [ ] Arquivar o repositório `HevelynLV/imobilink` (GitHub → Settings → General → Danger Zone → Archive this repository). Ele fica só leitura e serve de consulta
-- [ ] Criar o repositório `domora` no GitHub, vazio
-- [ ] Criar um projeto novo no Supabase (região São Paulo) e convidar o Gabriel
+- [ ] Criar o repositório `pauta` no GitHub, vazio
+- [ ] Criar um projeto novo no Supabase (região São Paulo), com o nome PAUTA, e convidar o Gabriel
 - [ ] Depois que o projeto novo estiver funcionando: pausar o projeto antigo do Supabase (`gaxvhygqwcvfgpudywmi`)
 
 Pendências e decisões em aberto (cada uma precisa estar resolvida antes da etapa indicada):
 - Etapa 4: texto do termo de exclusividade que o proprietário aceita no cadastro
 - Etapa 6: quais filtros o catálogo terá
-- Etapa 9: qual a % de comissão do Domora (sobre a comissão do corretor ou sobre o valor do imóvel)
+- Etapa 9: qual a % de comissão do PAUTA (sobre a comissão do corretor ou sobre o valor do imóvel)
 - Etapa 10: provedor da API oficial do WhatsApp (Meta direto ou um intermediário como Twilio ou Z-API) e o custo por mensagem
 - Etapa 11: preço da mensalidade (igual para imobiliária e corretor autônomo?)
 - Etapa 12: com quanto tempo de antecedência sai o aviso de vencimento da exclusividade, e se a renovação é por mais 6 meses
 - Etapa 13: termo de assinatura do corretor e da imobiliária, com a cláusula contra desintermediação e a responsabilidade da imobiliária pelos corretores convidados
 
-Lições do Captador (problemas já encontrados no projeto antigo; tratar desde o início no Domora):
+Lições do Captador (problemas já encontrados no projeto antigo; tratar desde o início no PAUTA):
 - Etapa 1: o Next.js 16 tem mudanças grandes em relação ao que os tutoriais mostram. Antes de escrever código, ler o guia em `node_modules/next/dist/docs/` (o arquivo `AGENTS.md` gerado pelo Next avisa isso)
 - Etapa 1: no Captador, as migrations eram aplicadas à mão pelo SQL Editor, e o histórico de migrations do Supabase ficava vazio. No projeto novo dá para decidir, desde o início, se continua assim ou se passa a usar `supabase db push`. Decidir antes da primeira migration
 - Etapa 2: o roteiro de teste do RLS deixava um schema `teste_rls` no banco, e alguns testes dependiam uns dos outros. Fazer cada teste independente e limpar o que criar
@@ -49,17 +49,18 @@ Lições do Captador (problemas já encontrados no projeto antigo; tratar desde 
 - LGPD: planejar a exclusão e a anonimização de usuários e imóveis antes do piloto
 
 Atenção (algo que a próxima pessoa precisa saber):
-- Primeira vez no projeto? Veja o "Domora README" e a "Domora - Visão geral da plataforma"
-- Ainda não existe repositório nem banco do Domora. Não use o `imobilink` nem o projeto Supabase antigo para trabalho novo
+- Primeira vez no projeto? Veja o "PAUTA README" e a "PAUTA - Visão geral da plataforma"
+- O nome do app agora é **PAUTA** (antes, Domora). Repositório e projeto Supabase devem ser criados já com o nome novo
+- Ainda não existe repositório nem banco do PAUTA. Não use o `imobilink` nem o projeto Supabase antigo para trabalho novo
 
 ## Migrations aplicadas no banco
 
-Nenhuma ainda. O projeto Supabase do Domora será criado na Etapa 1. Toda migration nova entra aqui assim que for aplicada e o `testar_rls.sql` passar.
+Nenhuma ainda. O projeto Supabase do PAUTA será criado na Etapa 1. Toda migration nova entra aqui assim que for aplicada e o `testar_rls.sql` passar.
 
 ## Etapas do MVP
 
 - [ ] 0. Protótipo do design — Pronto quando: o fluxo inteiro pode ser clicado, do cadastro do imóvel até o vendido
-- [ ] 1. Setup — Pronto quando: a página abre em localhost, conecta ao Supabase novo e o código está no repositório `domora`
+- [ ] 1. Setup — Pronto quando: a página abre em localhost, conecta ao Supabase novo e o código está no repositório `pauta`
 - [ ] 2. Banco de dados — Pronto quando: o `testar_rls.sql` passa e um assinante bloqueado não vê nenhum imóvel
 - [ ] 3. Login e perfis — Pronto quando: cada tipo de usuário só abre a própria área
 - [ ] 4. Imóvel — Pronto quando: imóvel do proprietário, com fotos e termo aceito, aparece como pendente; imóvel captado pelo admin entra disponível e vinculado ao dono
@@ -80,5 +81,6 @@ Projeto antigo (Captador, repositório `imobilink`):
 - 30/09/2026 · Gabriel · Etapa 2: banco de dados, RLS, auditoria e correções (71 testes passando)
 - 05/10/2026 · Hevelyn · Etapa 3: cadastro, login e perfis, auditoria e correções, testes e2e com Playwright (15 passando), README de início
 
-Domora:
+PAUTA (antes, Domora):
 - 13 e 14/10/2026 · Hevelyn · Replanejamento do MVP: o Captador vira Domora, o modelo de negócio é redefinido, o projeto recomeça do zero e o plano passa a ter 14 etapas (0 a 13)
+- 16/10/2026 · Hevelyn · Troca do nome do app de Domora para PAUTA; repositório novo passa a se chamar `pauta`

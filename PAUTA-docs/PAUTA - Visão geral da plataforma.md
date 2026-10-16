@@ -1,14 +1,14 @@
-# Domora — Visão geral da plataforma
+# PAUTA — Visão geral da plataforma
 
-Última revisão: 14/10/2026 · Hevelyn
+Última revisão: 16/10/2026 · Hevelyn
 
 ## Ideia
 
-O Domora é um marketplace de imóveis exclusivos: um catálogo de imóveis captados por nós ou cadastrados pelo próprio proprietário, que imobiliárias e corretores autônomos acessam pagando uma mensalidade, para vender.
+O PAUTA é um marketplace de imóveis exclusivos: um catálogo de imóveis captados por nós ou cadastrados pelo próprio proprietário, que imobiliárias e corretores autônomos acessam pagando uma mensalidade, para vender.
 
 Como funciona, em seis passos:
 
-1. O **proprietário/admin** cadastra o imóvel com fotos e informações na plataforma, e o proprietário aceita o termo de exclusividade: durante o prazo, o imóvel só é vendido pelo Domora. O imóvel captado pelo admin fica vinculado à conta do dono real, que passa a usar o app como qualquer proprietário.
+1. O **proprietário/admin** cadastra o imóvel com fotos e informações na plataforma, e o proprietário aceita o termo de exclusividade: durante o prazo, o imóvel só é vendido pelo PAUTA. O imóvel captado pelo admin fica vinculado à conta do dono real, que passa a usar o app como qualquer proprietário.
 2. O imóvel cadastrado direto pelo proprietário precisa ser validado pelo admin antes de entrar no catálogo.
 3. A **imobiliária/corretor** assinante navega no catálogo pelo celular ou pelo site. Qualquer corretor pode trabalhar qualquer imóvel, ao mesmo tempo que outros corretores.
 4. O **corretor** pede uma visita pelo app, sugerindo um horário, e o proprietário confirma ou recusa no app.
@@ -19,9 +19,9 @@ O proprietário acompanha tudo pelo app (status, visitas, propostas), com opçã
 
 ## Diferencial
 
-O Domora reúne num só catálogo imóveis conferidos, captados por nós ou pelos proprietários, e dá ao proprietário controle sobre visitas, propostas e o próprio contato. O peso de cada ponto abaixo ainda precisa ser validado com proprietários e imobiliárias reais.
+O PAUTA reúne num só catálogo imóveis conferidos, captados por nós ou pelos proprietários, e dá ao proprietário controle sobre visitas, propostas e o próprio contato. O peso de cada ponto abaixo ainda precisa ser validado com proprietários e imobiliárias reais.
 
-- **Imóveis exclusivos:** durante o prazo da exclusividade, o imóvel só é vendido pelo Domora, e não está anunciado por várias imobiliárias ao mesmo tempo.
+- **Imóveis exclusivos:** durante o prazo da exclusividade, o imóvel só é vendido pelo PAUTA, e não está anunciado por várias imobiliárias ao mesmo tempo.
 - **Curadoria:** todo imóvel passa pela aprovação do admin antes de aparecer, e toda imobiliária tem o CRECI conferido antes de entrar.
 - **Privacidade do proprietário:** ele escolhe se mostra o próprio contato; se não mostrar, visitas e propostas passam só pelo app.
 - **Transparência para o proprietário:** ele vê em tempo real as visitas e propostas do próprio imóvel.
@@ -29,7 +29,7 @@ O Domora reúne num só catálogo imóveis conferidos, captados por nós ou pelo
 
 ## Nome do app
 
-O nome usado em toda a documentação é **Domora** (antes, Captador). O repositório novo no GitHub vai se chamar `domora`; o antigo, `imobilink`, fica arquivado para consulta.
+O nome usado em toda a documentação é **PAUTA** (antes, Domora e, antes disso, Captador). O repositório novo no GitHub vai se chamar `pauta`; o antigo, `imobilink`, fica arquivado para consulta.
 
 ## Usuários e perfis
 
@@ -45,7 +45,7 @@ Uma imobiliária pode ter vários corretores, cada um com login próprio, que en
 
 ## Tecnologias
 
-O Domora é um web app responsivo (PWA), feito primeiro para celular e site, sem app nas lojas no MVP.
+O PAUTA é um web app responsivo (PWA), feito primeiro para celular e site, sem app nas lojas no MVP.
 
 | Camada | Tecnologia | Para quê | Quando entra |
 | --- | --- | --- | --- |
@@ -99,7 +99,7 @@ O que o app faz. Todos os 32 estão a construir no repositório novo (RF01 a RF0
 | RF29 | Avisos | Avisar usuários de eventos (imóvel aprovado, pedido de visita, proposta, contrato, venda, vencimento da exclusividade) por WhatsApp e por uma lista de avisos dentro do app | A construir |
 | RF30 | Exclusividade | Proprietário e admin recebem um aviso antes de os 6 meses de exclusividade vencerem (antecedência: a definir) | A construir |
 | RF31 | Exclusividade | Proprietário renova a exclusividade e o imóvel continua no catálogo; sem renovação, o imóvel sai do catálogo no vencimento | A construir |
-| RF32 | Venda | Ao aprovar o contrato, o admin registra o valor da comissão do Domora que consta no contrato e, depois, se ela foi paga | A construir |
+| RF32 | Venda | Ao aprovar o contrato, o admin registra o valor da comissão do PAUTA que consta no contrato e, depois, se ela foi paga | A construir |
 
 ## Requisitos não funcionais
 
@@ -130,12 +130,12 @@ Ficam para depois do MVP: chat interno, mapa, app nativo nas lojas e outras cida
 
 ## Etapas do MVP
 
-O projeto recomeça do zero num repositório `domora` e num projeto Supabase novos; o `imobilink` fica arquivado para consulta. Antes de programar, um protótipo do design das telas. Cada etapa entrega uma fatia do fluxo funcionando, com banco, tela e teste. O acompanhamento fica no Roadmap.
+O projeto recomeça do zero num repositório `pauta` e num projeto Supabase novos; o `imobilink` fica arquivado para consulta. Antes de programar, um protótipo do design das telas. Cada etapa entrega uma fatia do fluxo funcionando, com banco, tela e teste. O acompanhamento fica no Roadmap.
 
 | Etapa | O que entrega | Pronto quando | Decidir antes |
 | --- | --- | --- | --- |
 | 0. Protótipo | Telas principais dos três perfis, sem código de verdade | O fluxo inteiro pode ser clicado do cadastro do imóvel até o vendido | — |
-| 1. Setup | Repositório `domora`, Next.js, Supabase novo, Vercel | A página abre em localhost e conecta ao Supabase | — |
+| 1. Setup | Repositório `pauta`, Next.js, Supabase novo, Vercel | A página abre em localhost e conecta ao Supabase | — |
 | 2. Banco | Tabelas e RLS do modelo novo | `testar_rls.sql` passa: assinante bloqueado não vê nada | — |
 | 3. Login e perfis | Cadastro, login, áreas separadas | Cada tipo de usuário só abre a própria área | — |
 | 4. Imóvel | Cadastro com fotos e termo; captação pelo admin; aprovar ou reprovar | Imóvel do proprietário fica pendente; o do admin entra disponível | Texto do termo de exclusividade |
@@ -143,18 +143,22 @@ O projeto recomeça do zero num repositório `domora` e num projeto Supabase nov
 | 6. Catálogo | Filtros, status disponível ou em negociação | Assinante ativo filtra no celular; bloqueado não vê nada | Quais filtros |
 | 7. Visita | Pedido e confirmação | O corretor vê a resposta do proprietário | — |
 | 8. Proposta | Envio e aceite, várias ao mesmo tempo | Duas propostas aceitas deixam o imóvel em negociação | — |
-| 9. Contrato e venda | Envio, conferência, comissão | Aprovar marca vendido e recusa as outras numa operação só | % do Domora |
+| 9. Contrato e venda | Envio, conferência, comissão | Aprovar marca vendido e recusa as outras numa operação só | % do PAUTA |
 | 10. Avisos | Lista no app e WhatsApp | Cada evento gera aviso nos dois canais | Provedor do WhatsApp |
 | 11. Cobrança | Asaas em ambiente de testes | Assinante vencido perde o acesso sozinho | Preço da mensalidade |
 | 12. Exclusividade | Aviso de vencimento e renovação | Sem renovação, o imóvel sai do catálogo sozinho | Antecedência do aviso |
 | 13. PWA, testes e deploy | SMTP, PWA, roteiro completo, Vercel | O app abre no celular de outra pessoa pelo endereço público | Termo de assinatura |
 
+## Decisões tomadas em 16/10/2026
+
+- O nome do app passa a ser **PAUTA** (antes, Domora). O repositório novo no GitHub vai se chamar `pauta`.
+
 ## Decisões tomadas na revisão de 13/10/2026
 
-- O nome do app é **Domora**.
-- Todo imóvel é exclusivo do Domora por 6 meses, e o proprietário não tira o imóvel de venda nesse período. Antes do vencimento, proprietário e admin recebem um aviso: se o proprietário renovar, o imóvel continua no catálogo; se não, sai. Não há reserva: qualquer corretor assinante trabalha qualquer imóvel, ao mesmo tempo que outros.
+- O nome do app é Domora (substituído por **PAUTA** em 16/10/2026).
+- Todo imóvel é exclusivo do PAUTA por 6 meses, e o proprietário não tira o imóvel de venda nesse período. Antes do vencimento, proprietário e admin recebem um aviso: se o proprietário renovar, o imóvel continua no catálogo; se não, sai. Não há reserva: qualquer corretor assinante trabalha qualquer imóvel, ao mesmo tempo que outros.
 - Corretor autônomo pode assinar, além das imobiliárias.
-- O Domora também capta imóveis: o admin cadastra e vincula o imóvel à conta do dono real, que usa o app como qualquer proprietário.
+- O PAUTA também capta imóveis: o admin cadastra e vincula o imóvel à conta do dono real, que usa o app como qualquer proprietário.
 - O proprietário escolhe se mostra o próprio contato aos corretores. Ele sempre vê nome, imobiliária e contato dos corretores que pedem visita ou mandam proposta no imóvel dele.
 - A visita é sempre marcada pelo app: o corretor sugere o horário e o proprietário confirma ou recusa.
 - O proprietário aceita ou recusa cada proposta e pode negociar com vários corretores ao mesmo tempo.
@@ -172,7 +176,7 @@ Estes pontos travam requisitos acima e precisam de resposta antes de virar códi
 
 **Negócio**
 
-- [ ] Comissão do Domora: qual % (da comissão do corretor ou do valor do imóvel)
+- [ ] Comissão do PAUTA: qual % (da comissão do corretor ou do valor do imóvel)
 - [ ] Preço da mensalidade (igual para imobiliária e corretor autônomo?)
 
 **Fluxo da venda**

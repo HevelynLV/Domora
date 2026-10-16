@@ -1,26 +1,26 @@
-# Domora
+# PAUTA
 
-Marketplace de imóveis exclusivos em Florianópolis. O proprietário dá 6 meses de exclusividade ao Domora; imobiliárias e corretores autônomos assinantes acessam o catálogo, pedem visitas, enviam propostas e fecham a venda, com o contrato assinado fora do app e conferido pelo admin.
+Marketplace de imóveis exclusivos em Florianópolis. O proprietário dá 6 meses de exclusividade ao PAUTA; imobiliárias e corretores autônomos assinantes acessam o catálogo, pedem visitas, enviam propostas e fecham a venda, com o contrato assinado fora do app e conferido pelo admin.
 
 Stack: Next.js (App Router, TypeScript), Supabase (Postgres, Auth, Storage), Tailwind CSS, Vercel, Asaas (cobrança) e WhatsApp (avisos).
 
 Documentos do projeto:
-- **Domora - Visão geral da plataforma:** ideia, regras do negócio, usuários, requisitos e decisões. É a fonte da verdade: em caso de dúvida, vale o que está lá
-- **Domora Roadmap:** onde o projeto parou, o próximo passo e as etapas do MVP. Leia "Onde paramos" e "Atenção" antes de qualquer tarefa
+- **PAUTA - Visão geral da plataforma:** ideia, regras do negócio, usuários, requisitos e decisões. É a fonte da verdade: em caso de dúvida, vale o que está lá
+- **PAUTA Roadmap:** onde o projeto parou, o próximo passo e as etapas do MVP. Leia "Onde paramos" e "Atenção" antes de qualquer tarefa
 - **CLAUDE.md:** as instruções que o Claude Code segue no repositório. Será escrito na Etapa 1, a partir da Visão geral
 
-No repositório `domora`, este arquivo vira `README.md` e o Roadmap vira `ROADMAP.md`, na raiz do projeto.
+No repositório `pauta`, este arquivo vira `README.md` e o Roadmap vira `ROADMAP.md`, na raiz do projeto.
 
-> **Situação atual:** o projeto está na Etapa 0 (protótipo do design). O repositório `domora` e o projeto Supabase novo ainda não existem; eles são criados na Etapa 1. Os passos marcados com *(a partir da Etapa 1)* só valem depois disso.
+> **Situação atual:** o projeto está na Etapa 0 (protótipo do design). O repositório `pauta` e o projeto Supabase novo ainda não existem; eles são criados na Etapa 1. Os passos marcados com *(a partir da Etapa 1)* só valem depois disso.
 
-## Como começar a trabalhar no Domora
+## Como começar a trabalhar no PAUTA
 
 Checklist para quem chega no projeto. Faça na ordem, uma vez por computador.
 
 ### 1. Acessos
 
-- [ ] Convite como colaborador no GitHub, no repositório `HevelynLV/domora` *(a partir da Etapa 1)*. Quem já está no projeto envia em Settings → Collaborators. Aceite pelo e-mail ou em github.com/notifications
-- [ ] Convite no Supabase *(a partir da Etapa 1)*: quem já está no projeto envia em **Organization → Members → Invite**. Aceite pelo e-mail e confira que o projeto do Domora aparece no seu painel. O ID do projeto entra aqui quando ele for criado
+- [ ] Convite como colaborador no GitHub, no repositório `HevelynLV/pauta` *(a partir da Etapa 1)*. Quem já está no projeto envia em Settings → Collaborators. Aceite pelo e-mail ou em github.com/notifications
+- [ ] Convite no Supabase *(a partir da Etapa 1)*: quem já está no projeto envia em **Organization → Members → Invite**. Aceite pelo e-mail e confira que o projeto do PAUTA aparece no seu painel. O ID do projeto entra aqui quando ele for criado
 
 > **O banco é compartilhado.** Todos usam o mesmo projeto do Supabase. O que uma pessoa aplica no banco vale para a outra na hora. Combine antes de mexer no banco.
 
@@ -49,8 +49,8 @@ Confira: `node -v`, `git --version` e `claude --version` respondem sem erro.
 
 - [ ] Clonar o repositório e instalar as dependências:
   ```bash
-  git clone https://github.com/HevelynLV/domora.git
-  cd domora
+  git clone https://github.com/HevelynLV/pauta.git
+  cd pauta
   npm install
   ```
 - [ ] Baixar o navegador dos testes automáticos (uma vez por computador):
@@ -131,4 +131,4 @@ Uma etapa por vez, sempre numa branch própria. Nunca trabalhe direto na `main`.
 7. **Atualizar o Roadmap:** `/atualizar-roadmap` (sempre antes do push)
 8. **Enviar:** `git push -u origin <nome-da-branch>` e abra um **Pull Request** para a `main` no GitHub. A outra pessoa revisa e aceita
 
-Os comandos `/auditar-etapa` e `/atualizar-roadmap` vêm do projeto antigo e serão recriados na Etapa 1, com as regras de negócio do Domora.
+Os comandos `/auditar-etapa` e `/atualizar-roadmap` vêm do projeto antigo e serão recriados na Etapa 1, com as regras de negócio do PAUTA.

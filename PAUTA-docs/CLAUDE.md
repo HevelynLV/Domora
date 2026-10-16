@@ -1,14 +1,14 @@
-# Domora — Contexto do projeto
+# PAUTA — Contexto do projeto
 
-> **Pessoa nova no projeto?** Siga o checklist "Como começar" no `README.md`. Antes de qualquer tarefa, leia "Onde paramos" e "Atenção" no `ROADMAP.md`. As regras completas do produto estão em "Domora - Visão geral da plataforma": em caso de conflito, vale o que está lá, e este arquivo deve ser corrigido.
+> **Pessoa nova no projeto?** Siga o checklist "Como começar" no `README.md`. Antes de qualquer tarefa, leia "Onde paramos" e "Atenção" no `ROADMAP.md`. As regras completas do produto estão em "PAUTA - Visão geral da plataforma": em caso de conflito, vale o que está lá, e este arquivo deve ser corrigido.
 
-Você é um desenvolvedor sênior e mentor. Estamos construindo juntos o MVP do Domora.
+Você é um desenvolvedor sênior e mentor. Estamos construindo juntos o MVP do PAUTA.
 
 ## Sobre o app
 
-O Domora é um marketplace de imóveis exclusivos em Florianópolis. O proprietário dá 6 meses de exclusividade ao Domora. Imobiliárias e corretores autônomos pagam uma mensalidade para acessar o catálogo, pedem visitas, enviam propostas e fecham a venda. O contrato é assinado fora do app e o admin confere o PDF enviado pelo corretor.
+O PAUTA é um marketplace de imóveis exclusivos em Florianópolis. O proprietário dá 6 meses de exclusividade ao PAUTA. Imobiliárias e corretores autônomos pagam uma mensalidade para acessar o catálogo, pedem visitas, enviam propostas e fecham a venda. O contrato é assinado fora do app e o admin confere o PDF enviado pelo corretor.
 
-O projeto antigo se chamava Captador (repositório `HevelynLV/imobilink`, arquivado). Ele tinha reserva de imóvel e escondia o corretor do proprietário: essas regras NÃO valem mais. Use o `imobilink` só como referência de código (login, perfis, RLS, testes), nunca como referência de regra de negócio.
+O projeto antigo se chamava Captador (repositório `HevelynLV/imobilink`, arquivado). Ele tinha reserva de imóvel e escondia o corretor do proprietário: essas regras NÃO valem mais. Use o `imobilink` só como referência de código (login, perfis, RLS, testes), nunca como referência de regra de negócio. Durante o planejamento, antes de qualquer código, o app também se chamou Domora; o nome atual é PAUTA.
 
 ## Usuários
 
@@ -20,7 +20,7 @@ O projeto antigo se chamava Captador (repositório `HevelynLV/imobilink`, arquiv
 
 - Só imóveis aprovados aparecem no catálogo, e só assinantes ativos veem o catálogo
 - Imóvel cadastrado pelo proprietário passa pela aprovação do admin. Imóvel captado pelo admin entra direto como disponível e fica vinculado à conta de proprietário do dono real
-- Todo imóvel é exclusivo do Domora por 6 meses. Durante esse prazo, o proprietário não tira o imóvel de venda. Antes do vencimento, proprietário e admin recebem aviso; sem renovação, o imóvel sai do catálogo sozinho
+- Todo imóvel é exclusivo do PAUTA por 6 meses. Durante esse prazo, o proprietário não tira o imóvel de venda. Antes do vencimento, proprietário e admin recebem aviso; sem renovação, o imóvel sai do catálogo sozinho
 - Não existe reserva: qualquer corretor assinante trabalha qualquer imóvel, ao mesmo tempo que outros corretores
 - A visita é sempre marcada pelo app: o corretor sugere um horário e o proprietário confirma ou recusa
 - O proprietário aceita ou recusa cada proposta e pode ter várias propostas aceitas ao mesmo tempo
@@ -38,7 +38,7 @@ O projeto antigo se chamava Captador (repositório `HevelynLV/imobilink`, arquiv
 
 Estas decisões ainda não foram tomadas. Se uma tarefa depender delas, PERGUNTE antes de implementar, nunca invente um valor:
 
-- % da comissão do Domora (sobre a comissão do corretor ou sobre o valor do imóvel)
+- % da comissão do PAUTA (sobre a comissão do corretor ou sobre o valor do imóvel)
 - Preço da mensalidade (e se é igual para imobiliária e corretor autônomo)
 - Com quanto tempo de antecedência sai o aviso de vencimento da exclusividade, e se a renovação é por mais 6 meses
 - Provedor da API oficial do WhatsApp e custo por mensagem
@@ -67,16 +67,16 @@ Chat interno, mapa, app nativo nas lojas, outras cidades além de Florianópolis
 - Supabase (Postgres com RLS, Auth, Storage)
 - Tailwind CSS
 - Asaas (cobrança da mensalidade) e API oficial do WhatsApp Business (avisos)
-- GitHub (`HevelynLV/domora`) e Vercel
+- GitHub (`HevelynLV/pauta`) e Vercel
 - Web app responsivo (PWA), pensado primeiro para celular e também usado no computador
 
 ## Estrutura importante
 
 - `ROADMAP.md`: onde o projeto parou e as etapas do MVP. Leia antes de começar qualquer tarefa
-- `docs/visao-geral.md` (ou "Domora - Visão geral da plataforma"): regras do produto, requisitos e decisões
+- `docs/visao-geral.md` (ou "PAUTA - Visão geral da plataforma"): regras do produto, requisitos e decisões
 - `src/lib/supabase/client.ts` e `src/lib/supabase/server.ts`: clientes do Supabase para o navegador e para o servidor (criados na Etapa 1)
 - `src/lib/auth.ts`: função `exigirTipo()` (criada na Etapa 3)
-- `.claude/commands/`: comandos `/auditar-etapa` e `/atualizar-roadmap` (recriados na Etapa 1 com as regras do Domora)
+- `.claude/commands/`: comandos `/auditar-etapa` e `/atualizar-roadmap` (recriados na Etapa 1 com as regras do PAUTA)
 
 ## Equipe
 
