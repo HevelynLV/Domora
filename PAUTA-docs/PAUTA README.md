@@ -7,9 +7,10 @@ Stack: Next.js (App Router, TypeScript), Supabase (Postgres, Auth, Storage), Tai
 Documentos do projeto:
 - **PAUTA - Visão geral da plataforma:** ideia, regras do negócio, usuários, requisitos e decisões. É a fonte da verdade: em caso de dúvida, vale o que está lá
 - **PAUTA Roadmap:** onde o projeto parou, o próximo passo e as etapas do MVP. Leia "Onde paramos" e "Atenção" antes de qualquer tarefa
+- **PAUTA Roadmap de prompts:** os prompts para usar com o Claude Code em cada etapa, na ordem, do abrir ao fechar a etapa
 - **CLAUDE.md:** as instruções que o Claude Code segue no repositório. Será escrito na Etapa 1, a partir da Visão geral
 
-No repositório `pauta`, este arquivo vira `README.md` e o Roadmap vira `ROADMAP.md`, na raiz do projeto.
+No repositório `pauta`, este arquivo vira `README.md` e o Roadmap vira `ROADMAP.md`, na raiz do projeto, e o Roadmap de prompts vira `docs/prompts.md`.
 
 > **Situação atual:** o projeto está na Etapa 0 (protótipo do design). O repositório `pauta` e o projeto Supabase novo ainda não existem; eles são criados na Etapa 1. Os passos marcados com *(a partir da Etapa 1)* só valem depois disso.
 

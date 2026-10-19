@@ -74,6 +74,9 @@ Chat interno, mapa, app nativo nas lojas, outras cidades além de Florianópolis
 
 - `ROADMAP.md`: onde o projeto parou e as etapas do MVP. Leia antes de começar qualquer tarefa
 - `docs/visao-geral.md` (ou "PAUTA - Visão geral da plataforma"): regras do produto, requisitos e decisões
+- `docs/prompts.md` (ou "PAUTA Roadmap de prompts"): a sequência de prompts de cada etapa, do abrir ao fechar. Quando um prompt dele for usado, siga também o que o passo pede (testes, migration, pendências no ROADMAP). O arquivo é carregado como contexto em toda sessão pela linha abaixo
+
+@docs/prompts.md
 - `src/lib/supabase/client.ts` e `src/lib/supabase/server.ts`: clientes do Supabase para o navegador e para o servidor (criados na Etapa 1)
 - `src/lib/auth.ts`: função `exigirTipo()` (criada na Etapa 3)
 - `.claude/commands/`: comandos `/auditar-etapa` e `/atualizar-roadmap` (recriados na Etapa 1 com as regras do PAUTA)
