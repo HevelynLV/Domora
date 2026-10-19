@@ -43,32 +43,38 @@ Me dê 2 ou 3 opções, com o impacto de cada uma no código, no custo e no pilo
 ## Etapa 0 — Protótipo do design
 
 **Pronto quando:** o fluxo inteiro pode ser clicado, do cadastro do imóvel até o "vendido".
-**Sem código de verdade:** um protótipo em HTML clicável, fora do repositório `pauta`.
+**Situação:** o protótipo já existe: **"PAUTA — Protótipo"** no Claude (https://claude.ai/artifact/GBqYuzenozHgGygiGrSS12), com 48 telas (24 de celular e 24 de site) e o roteiro clicável do fluxo inteiro. Falta revisar e completar.
 
-**0.1 Direção visual**
+**Telas que já existem**, pelo nome do arquivo (as de site têm o prefixo `Site`):
+
+| Área | Telas |
+| --- | --- |
+| Entrada | Main (início), Entrar, Cadastro, CadastroImobiliaria, AguardandoAtivacao, Convite |
+| Proprietário | ProImoveis, ProNovo, ProFotos, ProTermo, ProEnviado, ProImovel (visitas e propostas), ProAvisos |
+| Corretor e imobiliária | CorCatalogo, CorImovel, CorVisita, CorProposta, CorNegociacoes, CorContrato, CorAvisos, ImobEquipe |
+| Admin | AdmPainel, AdmAprovar, AdmCaptar, AdmAssinantes, AdmEdicoes, AdmContratos, AdmVendido |
+
+**0.1 Revisar o protótipo**
 
 ```text
-Vamos fazer o protótipo do PAUTA (Etapa 0). Leia a "PAUTA - Visão geral da plataforma".
-Estas são minhas referências visuais: <links, prints, cores, logo, o que eu NÃO gosto>.
-Me proponha 2 direções visuais (paleta, tipografia, estilo dos cards de imóvel, tom dos textos), pensadas primeiro para celular. Mostre cada uma numa tela de exemplo: o card do imóvel no catálogo.
+Leia a "PAUTA - Visão geral da plataforma" e o protótipo https://claude.ai/artifact/GBqYuzenozHgGygiGrSS12, tela por tela.
+Me entregue três listas:
+1. Regras e requisitos da Visão geral que não têm tela. Confira em especial: pagamento da mensalidade e assinante com pagamento vencido ou bloqueado (Etapa 11), renovação da exclusividade pelo proprietário (Etapa 12), recuperação de senha, imóvel reprovado com motivo e reenvio, e apagar imóvel pendente
+2. Telas que contradizem a Visão geral
+3. Textos e títulos que ainda usam o nome antigo, Domora
+Não mude nada ainda: me mostre as listas para decidirmos.
 ```
 
-**0.2 Mapa das telas**
+**0.2 Completar o protótipo**
 
 ```text
-Seguimos com a direção <1 ou 2>. Antes de desenhar, liste todas as telas dos três perfis (lista em "Próximo passo exato" do Roadmap) e como uma leva à outra, num diagrama de fluxo. Marque onde aparecem os status do imóvel e quem vê cada um.
+Das listas, vamos fazer os itens <lista>. Crie as telas que faltam no mesmo estilo das outras (domora.css e site.css), em celular e site, e ligue-as ao roteiro clicável. Troque Domora por PAUTA em todos os textos e títulos, inclusive no título do protótipo.
 ```
 
-**0.3 Telas (repita para cada perfil: entrada, proprietário, corretor, admin)**
+**0.3 Percorrer o fluxo**
 
 ```text
-Faça o protótipo clicável das telas de <entrada | proprietário | corretor | admin>, com dados de exemplo de Florianópolis (bairros reais, preços realistas). Tamanho de celular primeiro; mostre também uma tela no tamanho do computador.
-```
-
-**0.4 Percorrer o fluxo**
-
-```text
-Junte as telas num protótipo só e percorra comigo o fluxo inteiro: proprietário cadastra → admin aprova → corretor vê no catálogo → pede visita → proprietário confirma → corretor envia proposta → proprietário aceita → corretor envia contrato → admin aprova → vendido.
+Percorra comigo o fluxo inteiro no protótipo: proprietário cadastra → admin aprova → corretor vê no catálogo → pede visita → proprietário confirma → corretor envia proposta → proprietário aceita → corretor envia contrato → admin aprova → vendido.
 No fim, liste tudo o que o protótipo revelou que a Visão geral não diz ou diz diferente. Não mude a Visão geral sozinho: me mostre a lista para decidirmos.
 ```
 
@@ -91,7 +97,10 @@ Depois, leia o guia em node_modules/next/dist/docs/ e me resuma o que mudou no N
 
 ```text
 Traga os documentos do planejamento para o repositório: "PAUTA README" vira README.md, "PAUTA Roadmap" vira ROADMAP.md, "PAUTA - Visão geral da plataforma" vira docs/visao-geral.md, "PAUTA Roadmap de prompts" vira docs/prompts.md, e o CLAUDE.md vai para a raiz. Ajuste os links internos e o README para o que já existe agora. Não mude regras de negócio.
+Traga também o protótipo https://claude.ai/artifact/GBqYuzenozHgGygiGrSS12 para docs/prototipo/: todos os arquivos .dc.html, o domora.css e o site.css (só os arquivos da pasta project/ do protótipo). Assim o Gabriel e as próximas sessões leem as telas sem depender do link. Acrescente ao CLAUDE.md, em "Estrutura importante": "docs/prototipo/: as telas do protótipo; toda tela nova segue o layout da tela correspondente".
 ```
+
+Se o Claude Code não conseguir abrir o link do protótipo, exporte os arquivos pelo próprio protótipo (Compartilhar › Exportar) e coloque em `docs/prototipo/` à mão.
 
 **1.3 Conectar ao Supabase**
 
@@ -119,7 +128,7 @@ Se o comando antigo do imobilink servir de base, me diga o que aproveitou e o qu
 
 ```text
 Configure o Playwright com um primeiro teste que abre a página inicial, e o script npm run test:e2e.
-Depois, leve para o Tailwind as cores, fontes e espaçamentos do protótipo da Etapa 0 (<onde estão os arquivos do protótipo>), para usarmos os mesmos tokens em todas as telas.
+Depois, leve para o Tailwind as cores, fontes (Bricolage Grotesque e Figtree), raios, espaçamentos e componentes básicos (botão, card, badge de status, menu de baixo do celular) do protótipo: docs/prototipo/domora.css (celular) e docs/prototipo/site.css (site). Use os mesmos nomes de cor do protótipo, para cada tela poder ser comparada com o original. Monte uma página de amostra com esses componentes para eu comparar com o protótipo.
 ```
 
 **1.7 Auditar** *(sessão nova: `/clear`)*
@@ -206,11 +215,13 @@ Depois confira o "Pronto quando" da Etapa 2, item por item. Se estiver tudo cert
 ## Etapa 3 — Login e perfis
 
 **Pronto quando:** cada tipo de usuário só abre a própria área.
+**Telas do protótipo:** Main, Entrar, Cadastro, CadastroImobiliaria, AguardandoAtivacao, SiteInicio, SiteEntrar e SiteCadastro, mais o menu de baixo de cada área.
 
 **3.1 Abrir a etapa** *(`/clear` + modo de planejamento)*
 
 ```text
 Vamos começar a Etapa 3 (login e perfis) do PAUTA. Leia "Onde paramos" e "Atenção" no ROADMAP.md, os requisitos RF01 a RF04, RNF02, RNF03 e RNF10 na docs/visao-geral.md e as lições do Captador sobre a Etapa 3. Confira se estou na branch etapa-3-login.
+As telas desta etapa no protótipo (docs/prototipo/) são: Main, Entrar, Cadastro, CadastroImobiliaria, AguardandoAtivacao, SiteInicio, SiteEntrar e SiteCadastro, mais o menu de baixo de cada área. Construa seguindo o layout delas, com os componentes do passo 1.6; se o protótipo e a Visão geral divergirem, me pergunte.
 Me entregue o plano em passos pequenos, os riscos de segurança e as suas perguntas. Não escreva código ainda.
 ```
 
@@ -264,12 +275,14 @@ Depois confira o "Pronto quando" da Etapa 3, item por item. Se estiver tudo cert
 ## Etapa 4 — Imóvel
 
 **Pronto quando:** imóvel do proprietário, com fotos e termo aceito, aparece como pendente; imóvel captado pelo admin entra disponível e vinculado ao dono.
+**Telas do protótipo:** ProImoveis, ProNovo, ProFotos, ProTermo, ProEnviado, AdmPainel, AdmAprovar, AdmCaptar e AdmEdicoes, e as versões Site de cada uma.
 **Decidir antes:** texto do termo de exclusividade.
 
 **4.1 Abrir a etapa** *(`/clear` + modo de planejamento)*
 
 ```text
 Vamos começar a Etapa 4 (imóvel) do PAUTA. Leia "Onde paramos" e "Atenção" no ROADMAP.md, os requisitos RF07 a RF14, RF17 e RNF11 na docs/visao-geral.md e o que já existe no banco para imóveis. Confira se estou na branch etapa-4-imovel.
+As telas desta etapa no protótipo (docs/prototipo/) são: ProImoveis, ProNovo, ProFotos, ProTermo, ProEnviado, AdmPainel, AdmAprovar, AdmCaptar e AdmEdicoes, e as versões Site de cada uma. Construa seguindo o layout delas, com os componentes do passo 1.6; se o protótipo e a Visão geral divergirem, me pergunte.
 Me entregue o plano em passos pequenos, as mudanças no banco, os riscos e as suas perguntas. Não escreva código ainda.
 ```
 
@@ -332,11 +345,13 @@ Depois confira o "Pronto quando" da Etapa 4, item por item. Se estiver tudo cert
 ## Etapa 5 — Assinantes
 
 **Pronto quando:** o admin ativa imobiliária e autônomo, e o corretor convidado entra já vinculado e ativo.
+**Telas do protótipo:** AdmAssinantes, Convite, ImobEquipe e AguardandoAtivacao, e as versões Site.
 
 **5.1 Abrir a etapa** *(`/clear` + modo de planejamento)*
 
 ```text
 Vamos começar a Etapa 5 (assinantes) do PAUTA. Leia "Onde paramos" e "Atenção" no ROADMAP.md e os requisitos RF05, RF06, RF15 e RF16 na docs/visao-geral.md. Confira se estou na branch etapa-5-assinantes.
+As telas desta etapa no protótipo (docs/prototipo/) são: AdmAssinantes, Convite, ImobEquipe e AguardandoAtivacao, e as versões Site. Construa seguindo o layout delas, com os componentes do passo 1.6; se o protótipo e a Visão geral divergirem, me pergunte.
 Me entregue o plano em passos pequenos, as mudanças no banco, os riscos e as suas perguntas. Não escreva código ainda.
 ```
 
@@ -377,12 +392,14 @@ Depois confira o "Pronto quando" da Etapa 5, item por item. Se estiver tudo cert
 ## Etapa 6 — Catálogo
 
 **Pronto quando:** assinante ativo filtra pelo celular e vê "disponível" ou "em negociação"; bloqueado não vê nada; vendido não aparece.
+**Telas do protótipo:** CorCatalogo, CorImovel, SiteCorCatalogo e SiteCorImovel.
 **Decidir antes:** quais filtros.
 
 **6.1 Abrir a etapa** *(`/clear` + modo de planejamento)*
 
 ```text
 Vamos começar a Etapa 6 (catálogo) do PAUTA. Leia "Onde paramos" e "Atenção" no ROADMAP.md e os requisitos RF18 a RF20, RNF06, RNF09 e RNF14 na docs/visao-geral.md. Os filtros decididos são: <lista>. Confira se estou na branch etapa-6-catalogo.
+As telas desta etapa no protótipo (docs/prototipo/) são: CorCatalogo, CorImovel, SiteCorCatalogo e SiteCorImovel. Construa seguindo o layout delas, com os componentes do passo 1.6; se o protótipo e a Visão geral divergirem, me pergunte.
 Me entregue o plano em passos pequenos, os riscos e as suas perguntas. Não escreva código ainda.
 ```
 
@@ -417,11 +434,13 @@ Depois confira o "Pronto quando" da Etapa 6, item por item. Se estiver tudo cert
 ## Etapa 7 — Visita
 
 **Pronto quando:** o corretor pede visita, o proprietário confirma ou recusa e o corretor vê a resposta.
+**Telas do protótipo:** CorVisita, ProImovel (aba Visitas), SiteCorImovel (janela de pedir visita) e SiteProImovel.
 
 **7.1 Abrir a etapa** *(`/clear` + modo de planejamento)*
 
 ```text
 Vamos começar a Etapa 7 (visita) do PAUTA. Leia "Onde paramos" e "Atenção" no ROADMAP.md e os requisitos RF21, RF22 e RNF07 na docs/visao-geral.md. Confira se estou na branch etapa-7-visita.
+As telas desta etapa no protótipo (docs/prototipo/) são: CorVisita, ProImovel (aba Visitas), SiteCorImovel (janela de pedir visita) e SiteProImovel. Construa seguindo o layout delas, com os componentes do passo 1.6; se o protótipo e a Visão geral divergirem, me pergunte.
 Me entregue o plano em passos pequenos, a tabela de visitas com as políticas de RLS, os riscos e as suas perguntas. Me diga também o que acontece com as visitas pendentes se o imóvel for vendido. Não escreva código ainda.
 ```
 
@@ -459,11 +478,13 @@ Depois confira o "Pronto quando" da Etapa 7, item por item. Se estiver tudo cert
 ## Etapa 8 — Proposta
 
 **Pronto quando:** duas propostas aceitas no mesmo imóvel deixam ele "em negociação".
+**Telas do protótipo:** CorProposta, CorNegociacoes, ProImovel (aba Propostas), SiteCorImovel (janela de proposta), SiteCorNegociacoes e SiteProImovel.
 
 **8.1 Abrir a etapa** *(`/clear` + modo de planejamento)*
 
 ```text
 Vamos começar a Etapa 8 (proposta) do PAUTA. Leia "Onde paramos" e "Atenção" no ROADMAP.md e os requisitos RF20, RF23 e RF24 na docs/visao-geral.md. Veja também como a Etapa 6 preparou o status "em negociação". Confira se estou na branch etapa-8-proposta.
+As telas desta etapa no protótipo (docs/prototipo/) são: CorProposta, CorNegociacoes, ProImovel (aba Propostas), SiteCorImovel (janela de proposta), SiteCorNegociacoes e SiteProImovel. Construa seguindo o layout delas, com os componentes do passo 1.6; se o protótipo e a Visão geral divergirem, me pergunte.
 Me entregue o plano em passos pequenos, a tabela de propostas com as políticas de RLS, os riscos e as suas perguntas. Não escreva código ainda.
 ```
 
@@ -501,12 +522,14 @@ Depois confira o "Pronto quando" da Etapa 8, item por item. Se estiver tudo cert
 ## Etapa 9 — Contrato e venda
 
 **Pronto quando:** aprovar o contrato marca o imóvel como vendido e recusa as outras propostas numa operação só; recusar devolve com motivo.
+**Telas do protótipo:** CorContrato, AdmContratos, AdmVendido, AdmPainel (comissões), SiteCorNegociacoes, SiteAdmContratos e SiteAdmVendido.
 **Decidir antes:** % da comissão do PAUTA.
 
 **9.1 Abrir a etapa** *(`/clear` + modo de planejamento)*
 
 ```text
 Vamos começar a Etapa 9 (contrato e venda) do PAUTA. Leia "Onde paramos" e "Atenção" no ROADMAP.md e os requisitos RF25, RF26, RF32, RNF05 e RNF08 na docs/visao-geral.md. Confira se estou na branch etapa-9-contrato.
+As telas desta etapa no protótipo (docs/prototipo/) são: CorContrato, AdmContratos, AdmVendido, AdmPainel (comissões), SiteCorNegociacoes, SiteAdmContratos e SiteAdmVendido. Construa seguindo o layout delas, com os componentes do passo 1.6; se o protótipo e a Visão geral divergirem, me pergunte.
 Me entregue o plano em passos pequenos, as tabelas e o bucket com as políticas de acesso, os riscos e as suas perguntas. Explique por que aprovar o contrato precisa ser uma função no Postgres e não várias chamadas do Next.js. Não escreva código ainda.
 ```
 
@@ -550,12 +573,14 @@ Depois confira o "Pronto quando" da Etapa 9, item por item. Se estiver tudo cert
 ## Etapa 10 — Avisos
 
 **Pronto quando:** cada evento do fluxo gera aviso na lista do app e no WhatsApp.
+**Telas do protótipo:** CorAvisos, ProAvisos, SiteCorAvisos e SiteProAvisos.
 **Decidir antes:** provedor do WhatsApp.
 
 **10.1 Abrir a etapa** *(`/clear` + modo de planejamento)*
 
 ```text
 Vamos começar a Etapa 10 (avisos) do PAUTA. Leia "Onde paramos" e "Atenção" no ROADMAP.md e o requisito RF29 na docs/visao-geral.md. O provedor do WhatsApp decidido é <provedor>. Confira se estou na branch etapa-10-avisos.
+As telas desta etapa no protótipo (docs/prototipo/) são: CorAvisos, ProAvisos, SiteCorAvisos e SiteProAvisos. Construa seguindo o layout delas, com os componentes do passo 1.6; se o protótipo e a Visão geral divergirem, me pergunte.
 Me entregue o plano em passos pequenos, a tabela de avisos com as políticas de RLS, os riscos e as suas perguntas. Liste todos os eventos que já existem no código e que precisam gerar aviso. Não escreva código ainda.
 ```
 
@@ -591,12 +616,14 @@ Depois confira o "Pronto quando" da Etapa 10, item por item. Se estiver tudo cer
 ## Etapa 11 — Cobrança
 
 **Pronto quando:** assinante com pagamento vencido no Asaas perde o acesso sozinho.
+**Telas do protótipo:** AguardandoAtivacao (passo do pagamento) e as telas de pagamento criadas no passo 0.2.
 **Decidir antes:** preço da mensalidade.
 
 **11.1 Abrir a etapa** *(`/clear` + modo de planejamento)*
 
 ```text
 Vamos começar a Etapa 11 (cobrança) do PAUTA. Leia "Onde paramos" e "Atenção" no ROADMAP.md e os requisitos RF27 e RF28 na docs/visao-geral.md. A mensalidade decidida é <valor>. Confira se estou na branch etapa-11-cobranca.
+As telas desta etapa no protótipo (docs/prototipo/) são: AguardandoAtivacao (passo do pagamento) e as telas de pagamento criadas no passo 0.2. Construa seguindo o layout delas, com os componentes do passo 1.6; se o protótipo e a Visão geral divergirem, me pergunte.
 Me explique o fluxo antes do plano: quando criamos o cliente e a assinatura no Asaas, o que guardamos no nosso banco e como a imobiliária vê e paga as cobranças. Os corretores convidados não pagam: seguem a assinatura da imobiliária. Depois me entregue o plano em passos pequenos, os riscos e as suas perguntas. Não escreva código ainda.
 ```
 
@@ -634,12 +661,14 @@ Depois confira o "Pronto quando" da Etapa 11, item por item. Se estiver tudo cer
 ## Etapa 12 — Exclusividade
 
 **Pronto quando:** sem renovação, o imóvel sai do catálogo sozinho no vencimento.
+**Telas do protótipo:** AdmPainel (exclusividade vencendo), ProImovel (data da exclusividade) e as telas de renovação criadas no passo 0.2.
 **Decidir antes:** antecedência do aviso e prazo da renovação.
 
 **12.1 Abrir a etapa** *(`/clear` + modo de planejamento)*
 
 ```text
 Vamos começar a Etapa 12 (exclusividade) do PAUTA. Leia "Onde paramos" e "Atenção" no ROADMAP.md e os requisitos RF30 e RF31 na docs/visao-geral.md. O aviso sai <n> dias antes, e a renovação é por <prazo>. Confira se estou na branch etapa-12-exclusividade.
+As telas desta etapa no protótipo (docs/prototipo/) são: AdmPainel (exclusividade vencendo), ProImovel (data da exclusividade) e as telas de renovação criadas no passo 0.2. Construa seguindo o layout delas, com os componentes do passo 1.6; se o protótipo e a Visão geral divergirem, me pergunte.
 O vencimento precisa ser conferido todo dia sem ninguém clicar: compare pg_cron no Supabase com Vercel Cron e recomende um. Me diga também o que acontece com um imóvel em negociação que vence. Depois me entregue o plano em passos pequenos. Não escreva código ainda.
 ```
 
@@ -689,7 +718,7 @@ Configure o SMTP próprio (<Resend ou outro>) no Supabase, com os modelos de e-m
 **13.3 PWA**
 
 ```text
-Transforme o PAUTA em PWA (RNF09): manifesto, ícones, cor do tema e instalação na tela inicial do celular, seguindo o guia do Next.js 16. Sem cache offline dos dados por enquanto: explique por quê.
+Transforme o PAUTA em PWA (RNF09): manifesto, ícones (a partir do logo do protótipo), cor do tema (a do protótipo) e instalação na tela inicial do celular, seguindo o guia do Next.js 16. Sem cache offline dos dados por enquanto: explique por quê.
 ```
 
 **13.4 LGPD e termo de assinatura**
