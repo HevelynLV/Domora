@@ -68,7 +68,7 @@ Não mude nada ainda: me mostre as listas para decidirmos.
 **0.2 Completar o protótipo**
 
 ```text
-Das listas, vamos fazer os itens <lista>. Crie as telas que faltam no mesmo estilo das outras (domora.css e site.css), em celular e site, e ligue-as ao roteiro clicável. Troque Domora por PAUTA em todos os textos e títulos, inclusive no título do protótipo.
+Das listas, vamos fazer os itens <lista>. Crie as telas que faltam no mesmo estilo das outras (pauta.css e site.css), em celular e site, e ligue-as ao roteiro clicável. Troque Domora por PAUTA em todos os textos e títulos, inclusive no título do protótipo.
 ```
 
 **0.3 Percorrer o fluxo**
@@ -97,7 +97,7 @@ Depois, leia o guia em node_modules/next/dist/docs/ e me resuma o que mudou no N
 
 ```text
 Traga os documentos do planejamento para o repositório: "PAUTA README" vira README.md, "PAUTA Roadmap" vira ROADMAP.md, "PAUTA - Visão geral da plataforma" vira docs/visao-geral.md, "PAUTA Roadmap de prompts" vira docs/prompts.md, e o CLAUDE.md vai para a raiz. Ajuste os links internos e o README para o que já existe agora. Não mude regras de negócio.
-Traga também o protótipo https://claude.ai/artifact/GBqYuzenozHgGygiGrSS12 para docs/prototipo/: todos os arquivos .dc.html, o domora.css e o site.css (só os arquivos da pasta project/ do protótipo). Assim o Gabriel e as próximas sessões leem as telas sem depender do link. Acrescente ao CLAUDE.md, em "Estrutura importante": "docs/prototipo/: as telas do protótipo; toda tela nova segue o layout da tela correspondente".
+Traga também o protótipo https://claude.ai/artifact/GBqYuzenozHgGygiGrSS12 para docs/prototipo/: todos os arquivos .dc.html, o pauta.css e o site.css (só os arquivos da pasta project/ do protótipo). Assim o Gabriel e as próximas sessões leem as telas sem depender do link. Acrescente ao CLAUDE.md, em "Estrutura importante": "docs/prototipo/: as telas do protótipo; toda tela nova segue o layout da tela correspondente".
 ```
 
 Se o Claude Code não conseguir abrir o link do protótipo, exporte os arquivos pelo próprio protótipo (Compartilhar › Exportar) e coloque em `docs/prototipo/` à mão.
@@ -128,7 +128,7 @@ Se o comando antigo do imobilink servir de base, me diga o que aproveitou e o qu
 
 ```text
 Configure o Playwright com um primeiro teste que abre a página inicial, e o script npm run test:e2e.
-Depois, leve para o Tailwind as cores, fontes (Bricolage Grotesque e Figtree), raios, espaçamentos e componentes básicos (botão, card, badge de status, menu de baixo do celular) do protótipo: docs/prototipo/domora.css (celular) e docs/prototipo/site.css (site). Use os mesmos nomes de cor do protótipo, para cada tela poder ser comparada com o original. Monte uma página de amostra com esses componentes para eu comparar com o protótipo.
+Depois, leve para o Tailwind as cores, fontes (Bricolage Grotesque e Figtree), raios, espaçamentos e componentes básicos (botão, card, badge de status, menu de baixo do celular) do protótipo: docs/prototipo/pauta.css (celular) e docs/prototipo/site.css (site). Use os mesmos nomes de cor do protótipo, para cada tela poder ser comparada com o original. Monte uma página de amostra com esses componentes para eu comparar com o protótipo.
 ```
 
 **1.7 Auditar** *(sessão nova: `/clear`)*
