@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>PAUTA · Novo imóvel: dados</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="./pauta.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&amp;family=Figtree:wght@400;500;600;700;800&amp;display=swap">
+<style>body{margin:0}</style>
+</helmet>
+<div class="app">
+  <div class="top">
+    <a class="voltar" href="ProImoveis.dc.html" aria-label="Voltar"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"></path></svg></a>
+    <div class="stack" style="gap: 0; flex: 1"><span class="tiny muted">Passo 1 de 3</span><span class="t3">Dados do imóvel</span></div>
+  </div>
+  <div class="scroll" style="gap: 14px">
+    <div class="steps"><span class="on"></span><span></span><span></span></div>
+    <div class="field"><label for="titulo">Título do anúncio</label><input id="titulo" value="Casa com vista no Campeche"></div>
+    <div class="grid2">
+      <div class="field"><label for="tipo">Tipo</label><select id="tipo"><option>Casa</option><option>Apartamento</option><option>Cobertura</option><option>Terreno</option><option>Sala comercial</option></select></div>
+      <div class="field"><label for="preco">Preço (R$)</label><input id="preco" inputmode="numeric" value="1.890.000"></div>
+    </div>
+    <div class="field"><label for="end">Endereço</label><input id="end" value="Rua das Gaivotas, 210"><span class="hint">Assinantes ativos veem o endereço para marcar a visita.</span></div>
+    <div class="field"><label for="bairro">Bairro</label><select id="bairro"><option>Campeche</option><option>Lagoa da Conceição</option><option>Jurerê Internacional</option><option>Agronômica</option><option>Centro</option><option>Ribeirão da Ilha</option></select></div>
+    <div class="grid4">
+      <div class="field"><label for="q">Quartos</label><input id="q" inputmode="numeric" value="4"></div>
+      <div class="field"><label for="b">Banheiros</label><input id="b" inputmode="numeric" value="3"></div>
+      <div class="field"><label for="v">Vagas</label><input id="v" inputmode="numeric" value="2"></div>
+      <div class="field"><label for="a">Área m²</label><input id="a" inputmode="numeric" value="220"></div>
+    </div>
+    <div class="field"><label for="desc">Descrição</label><textarea id="desc">Casa térrea a 300 m da praia, com vista para a Ilha do Campeche, quintal com piscina e churrasqueira.</textarea></div>
+  </div>
+  <div class="foot">
+    <a class="btn" href="ProFotos.dc.html">Continuar para as fotos</a>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

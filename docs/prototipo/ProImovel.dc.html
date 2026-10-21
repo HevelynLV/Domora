@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>PAUTA · Imóvel: visitas e propostas</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="./pauta.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&amp;family=Figtree:wght@400;500;600;700;800&amp;display=swap">
+<style>body{margin:0}</style>
+</helmet>
+<div class="app">
+  <div class="scroll" style="padding: 0 0 28px; gap: 0">
+    <div class="foto" style="height: 200px; border-radius: 0; align-items: flex-start; padding: 16px 20px">
+      <a class="voltar" href="ProImoveis.dc.html" aria-label="Voltar" style="position: relative; z-index: 1"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"></path></svg></a>
+      <a class="btn sec sm" href="ProEditar.dc.html" style="position: relative; z-index: 1">Editar</a>
+    </div>
+    <div class="stack" style="padding: 18px 20px 0; gap: 16px">
+      <div class="stack" style="gap: 6px">
+        <span class="{{statusCls}}" style="align-self: flex-start">{{statusTxt}}</span>
+        <h1 class="t2" style="font-size: 24px">Casa com vista no Campeche</h1>
+        <span class="small muted">Rua das Gaivotas, 210 · Campeche · R$ 1.890.000</span>
+        <span class="tiny muted">Exclusividade PAUTA até 13/04/2027</span>
+      </div>
+      <div class="card" style="flex-direction: row; align-items: center; gap: 12px">
+        <div class="stack" style="gap: 2px; flex: 1"><b class="small">Mostrar meu contato aos corretores</b><span class="tiny muted">{{contatoTxt}}</span></div>
+        <button class="{{toggleCls}}" aria-label="Mostrar meu contato" aria-pressed="{{contato}}" onClick="{{trocaContato}}"><span></span></button>
+      </div>
+      <div class="tabs" role="tablist">
+        <button class="{{tabVisCls}}" onClick="{{verVisitas}}" role="tab">Visitas<span class="count">{{nVis}}</span></button>
+        <button class="{{tabPropCls}}" onClick="{{verPropostas}}" role="tab">Propostas<span class="count">{{nProp}}</span></button>
+      </div>
+
+      <sc-if value="{{abaVisitas}}" hint-placeholder-val="{{ true }}">
+        <div class="stack" style="gap: 12px">
+          <sc-for list="{{visitas}}" as="v" hint-placeholder-count="2">
+            <div class="card">
+              <div class="between"><span class="row"><svg class="i s" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"></rect><path d="M3 10h18M8 3v4M16 3v4"></path></svg><b>{{v.quando}}</b></span><span class="{{v.badgeCls}}">{{v.badge}}</span></div>
+              <div class="row"><span class="{{v.avCls}}">{{v.ini}}</span><div class="stack" style="gap: 0"><b class="small">{{v.nome}}</b><span class="tiny muted">{{v.imob}}</span><span class="tiny muted">{{v.contato}}</span></div></div>
+              <sc-if value="{{v.pend}}" hint-placeholder-val="{{ false }}">
+                <div class="row"><button class="btn perigo sm flex1" onClick="{{v.recusar}}">Recusar</button><button class="btn sm flex1" onClick="{{v.confirmar}}">Confirmar</button></div>
+              </sc-if>
+            </div>
+          </sc-for>
+          <sc-if value="{{visitaConfirmada}}" hint-placeholder-val="{{ false }}">
+            <a class="roteiro" href="CorProposta.dc.html"><span><b>Roteiro do protótipo</b>Depois da visita, o corretor envia a proposta</span><svg class="i s" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg></a>
+          </sc-if>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{abaPropostas}}" hint-placeholder-val="{{ false }}">
+        <div class="stack" style="gap: 12px">
+          <p class="p tiny muted">Você pode aceitar mais de uma proposta. Com uma aceita, o imóvel aparece como "em negociação" no catálogo e o corretor pode enviar o contrato assinado.</p>
+          <sc-for list="{{propostas}}" as="p" hint-placeholder-count="2">
+            <div class="card">
+              <div class="between"><span class="price">{{p.valor}}</span><span class="{{p.badgeCls}}">{{p.badge}}</span></div>
+              <span class="small">{{p.cond}}</span>
+              <div class="row"><span class="{{p.avCls}}">{{p.ini}}</span><div class="stack" style="gap: 0"><b class="small">{{p.nome}}</b><span class="tiny muted">{{p.imob}}</span><span class="tiny muted">{{p.contato}}</span></div></div>
+              <sc-if value="{{p.pend}}" hint-placeholder-val="{{ false }}">
+                <div class="row"><button class="btn perigo sm flex1" onClick="{{p.recusar}}">Recusar</button><button class="btn sm flex1" onClick="{{p.aceitar}}">Aceitar</button></div>
+              </sc-if>
+            </div>
+          </sc-for>
+          <sc-if value="{{temAceita}}" hint-placeholder-val="{{ false }}">
+            <a class="roteiro" href="CorAvisos.dc.html"><span><b>Roteiro do protótipo</b>O corretor recebe o aviso e envia o contrato</span><svg class="i s" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg></a>
+          </sc-if>
+        </div>
+      </sc-if>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { aba: 'vis', contato: false, vis: { r: 'pend', t: 'conf' }, prop: { r: 'pend', c: 'pend' } };
+  }
+  setVis(id, s) { this.setState({ vis: { ...this.state.vis, [id]: s } }); }
+  setProp(id, s) { this.setState({ prop: { ...this.state.prop, [id]: s, }, aba: 'prop' }); }
+  renderVals() {
+    const st = this.state;
+    const pessoas = {
+      r: { nome: 'Rafael Souza', imob: 'Maré Imóveis · CRECI 12345-J', contato: '(48) 99654-2201 · rafael@mareimoveis.com.br', ini: 'RS', avCls: 'avatar m' },
+      t: { nome: 'Thiago Lemos', imob: 'Corretor autônomo · CRECI 45678-F', contato: '(48) 99301-5520', ini: 'TL', avCls: 'avatar' },
+      c: { nome: 'Camila Reis', imob: 'Ilha Negócios Imobiliários · CRECI 23456-J', contato: '(48) 99120-7788', ini: 'CR', avCls: 'avatar r' }
+    };
+    const visBadge = { pend: ['Para confirmar', 'badge b-neg'], conf: ['Confirmada', 'badge b-disp'], rec: ['Recusada', 'badge b-repr'] };
+    const propBadge = { pend: ['Nova', 'badge b-neg'], aceita: ['Aceita', 'badge b-disp'], rec: ['Recusada', 'badge b-repr'] };
+    const visitas = [
+      { id: 'r', quando: 'Ter, 14/10 às 10:00' },
+      { id: 't', quando: 'Ter, 14/10 às 15:30' }
+    ].map((v) => ({
+      ...v, ...pessoas[v.id],
+      badge: visBadge[st.vis[v.id]][0], badgeCls: visBadge[st.vis[v.id]][1],
+      pend: st.vis[v.id] === 'pend',
+      confirmar: () => this.setVis(v.id, 'conf'),
+      recusar: () => this.setVis(v.id, 'rec')
+    }));
+    const propostas = [
+      { id: 'r', valor: 'R$ 1.800.000', cond: 'À vista, escritura em até 60 dias.' },
+      { id: 'c', valor: 'R$ 1.720.000', cond: 'Financiamento bancário com entrada de 40%.' }
+    ].map((p) => ({
+      ...p, ...pessoas[p.id],
+      badge: propBadge[st.prop[p.id]][0], badgeCls: propBadge[st.prop[p.id]][1],
+      pend: st.prop[p.id] === 'pend',
+      aceitar: () => this.setProp(p.id, 'aceita'),
+      recusar: () => this.setProp(p.id, 'rec')
+    }));
+    const temAceita = Object.values(st.prop).includes('aceita');
+    const c = st.contato;
+    return {
+      statusTxt: temAceita ? 'Em negociação' : 'Disponível',
+      statusCls: temAceita ? 'badge b-neg' : 'badge b-disp',
+      contato: c,
+      toggleCls: c ? 'toggle on' : 'toggle',
+      contatoTxt: c ? 'Corretores veem seu telefone e e-mail.' : 'Corretores não veem seu contato. Tudo passa pelo app.',
+      trocaContato: () => this.setState({ contato: !c }),
+      abaVisitas: st.aba === 'vis',
+      abaPropostas: st.aba === 'prop',
+      tabVisCls: st.aba === 'vis' ? 'on' : '',
+      tabPropCls: st.aba === 'prop' ? 'on' : '',
+      verVisitas: () => this.setState({ aba: 'vis' }),
+      verPropostas: () => this.setState({ aba: 'prop' }),
+      nVis: visitas.length,
+      nProp: propostas.length,
+      visitas: visitas,
+      propostas: propostas,
+      visitaConfirmada: st.vis.r === 'conf',
+      temAceita: temAceita
+    };
+  }
+}
+</script>
+</body>
+</html>

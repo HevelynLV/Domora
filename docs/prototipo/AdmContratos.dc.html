@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>PAUTA · Conferir contrato</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="./pauta.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&amp;family=Figtree:wght@400;500;600;700;800&amp;display=swap">
+<style>body{margin:0}</style>
+</helmet>
+<div class="app">
+  <div class="top">
+    <a class="voltar" href="AdmPainel.dc.html" aria-label="Voltar ao painel"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"></path></svg></a>
+    <div class="stack" style="gap: 0"><span class="t3">Conferir contrato</span><span class="tiny muted">1 contrato em análise</span></div>
+  </div>
+  <sc-if value="{{conferindo}}" hint-placeholder-val="{{ true }}">
+    <div class="scroll" style="gap: 14px">
+      <div class="card" style="gap: 6px">
+        <div class="between"><b>Casa com vista no Campeche</b><span class="badge b-contr">Contrato em análise</span></div>
+        <span class="small muted">Proprietária: Marina Duarte</span>
+      </div>
+      <div class="card" style="gap: 8px">
+        <p class="over">Proposta aceita</p>
+        <div class="between"><span class="price">R$ 1.800.000</span><span class="tiny muted">à vista</span></div>
+        <div class="row"><span class="avatar m">RS</span><div class="stack" style="gap: 0"><b class="small">Rafael Souza</b><span class="tiny muted">Maré Imóveis · CRECI 12345-J SC</span></div></div>
+      </div>
+      <a class="card" href="#pdf" style="flex-direction: row; align-items: center; gap: 12px">
+        <span class="dot erro"><svg class="i s" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 3H6v18h12V7z"></path><path d="M14 3v4h4"></path></svg></span>
+        <div class="stack" style="gap: 0; flex: 1; min-width: 0"><b class="small">contrato-campeche-assinado.pdf</b><span class="tiny muted">8 páginas · enviado hoje, 11:20</span></div>
+        <span class="link small">Abrir</span>
+      </a>
+      <div class="stack" style="gap: 6px">
+        <p class="over">Confira no PDF</p>
+        <label class="check"><input type="checkbox" checked><span>Assinado por vendedora, compradores e corretor</span></label>
+        <label class="check"><input type="checkbox" checked><span>Valor e imóvel batem com a proposta aceita</span></label>
+        <label class="check"><input type="checkbox"><span>Cláusula da comissão do PAUTA presente</span></label>
+      </div>
+      <div class="alerta atencao"><svg class="i s" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 8v5M12 16h.01"></path></svg><span>Outra proposta em aberto neste imóvel: Camila Reis (Ilha Negócios), R$ 1.720.000, aceita. Ela será recusada se você aprovar.</span></div>
+    </div>
+    <div class="foot" style="flex-direction: row">
+      <button class="btn perigo flex1" onClick="{{abrirRecusa}}">Recusar</button>
+      <button class="btn flex1" onClick="{{abrirAprova}}">Aprovar</button>
+    </div>
+  </sc-if>
+  <sc-if value="{{recusado}}" hint-placeholder-val="{{ false }}">
+    <div class="scroll" style="gap: 20px">
+      <div class="stack" style="gap: 12px; margin-top: 28px">
+        <span class="dot erro" style="width: 56px; height: 56px; border-radius: 16px"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"></path></svg></span>
+        <h1 class="t1">Contrato devolvido</h1>
+        <p class="p muted">Rafael recebeu o motivo e pode reenviar. O imóvel continua em negociação e as outras propostas seguem valendo.</p>
+      </div>
+      <button class="btn sec" onClick="{{voltar}}">Voltar ao contrato</button>
+    </div>
+  </sc-if>
+  <sc-if value="{{sheetAprova}}" hint-placeholder-val="{{ false }}">
+    <div class="sheet-bg">
+      <div class="sheet">
+        <p class="t2">Aprovar e registrar a venda</p>
+        <div class="stack" style="gap: 6px">
+          <div class="row small"><svg class="i s" viewBox="0 0 24 24" style="color: var(--mar)" aria-hidden="true"><path d="m5 12 5 5L20 7"></path></svg>O imóvel vira <b>vendido</b> e sai do catálogo</div>
+          <div class="row small"><svg class="i s" viewBox="0 0 24 24" style="color: var(--mar)" aria-hidden="true"><path d="m5 12 5 5L20 7"></path></svg>1 outra proposta em aberto é recusada</div>
+          <div class="row small"><svg class="i s" viewBox="0 0 24 24" style="color: var(--mar)" aria-hidden="true"><path d="m5 12 5 5L20 7"></path></svg>Tudo numa operação só, com aviso a todos</div>
+        </div>
+        <div class="field"><label for="com">Comissão do PAUTA no contrato (R$)</label><input id="com" placeholder="[% A DEFINIR]"></div>
+        <label class="check"><input type="checkbox"><span>A comissão já foi paga</span></label>
+        <div class="row"><button class="btn sec flex1" onClick="{{fechar}}">Cancelar</button><a class="btn flex1" href="AdmVendido.dc.html">Confirmar venda</a></div>
+      </div>
+    </div>
+  </sc-if>
+  <sc-if value="{{sheetRecusa}}" hint-placeholder-val="{{ false }}">
+    <div class="sheet-bg">
+      <div class="sheet">
+        <p class="t2">Recusar contrato</p>
+        <div class="field"><label for="mot">Motivo (o corretor vai ler)</label><textarea id="mot">Falta a cláusula da comissão do PAUTA. Inclua e envie a versão assinada de novo.</textarea></div>
+        <div class="row"><button class="btn sec flex1" onClick="{{fechar}}">Cancelar</button><button class="btn flex1" style="background: var(--erro); border-color: var(--erro)" onClick="{{recusar}}">Recusar</button></div>
+      </div>
+    </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { fase: 'conf', sheet: '' }; }
+  renderVals() {
+    const st = this.state;
+    return {
+      conferindo: st.fase === 'conf',
+      recusado: st.fase === 'rec',
+      sheetAprova: st.sheet === 'aprova',
+      sheetRecusa: st.sheet === 'recusa',
+      abrirAprova: () => this.setState({ sheet: 'aprova' }),
+      abrirRecusa: () => this.setState({ sheet: 'recusa' }),
+      fechar: () => this.setState({ sheet: '' }),
+      recusar: () => this.setState({ sheet: '', fase: 'rec' }),
+      voltar: () => this.setState({ fase: 'conf' })
+    };
+  }
+}
+</script>
+</body>
+</html>

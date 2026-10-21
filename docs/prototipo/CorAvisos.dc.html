@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>PAUTA · Avisos do corretor</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="./pauta.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&amp;family=Figtree:wght@400;500;600;700;800&amp;display=swap">
+<style>body{margin:0}</style>
+</helmet>
+<div class="app">
+  <div class="top" style="padding-top: 22px; justify-content: space-between">
+    <h1 class="t1">Avisos</h1>
+    <span class="tiny muted">Também no seu WhatsApp</span>
+  </div>
+  <div class="scroll" style="gap: 10px">
+    <p class="over" style="margin-top: 4px">Hoje</p>
+    <a class="aviso novo" href="CorNegociacoes.dc.html">
+      <span class="dot"><svg class="i s" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 5 5L20 7"></path></svg></span>
+      <div class="stack" style="gap: 2px"><b class="small">Proposta aceita</b><span class="small">A proprietária aceitou sua proposta de R$ 1.800.000 na Casa com vista no Campeche. Envie o contrato assinado.</span><span class="tiny muted">10:42 · Toque para enviar o contrato</span></div>
+    </a>
+    <p class="over" style="margin-top: 10px">Esta semana</p>
+    <a class="aviso" href="CorNegociacoes.dc.html">
+      <span class="dot erro"><svg class="i s" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 3H6v18h12V7z"></path><path d="M14 3v4h4M10 12l4 4M14 12l-4 4"></path></svg></span>
+      <div class="stack" style="gap: 2px"><b class="small">Contrato recusado</b><span class="small">Apartamento na Beira-Mar Norte: falta a assinatura do segundo comprador na página 4. Corrija e reenvie.</span><span class="tiny muted">Ter, 14/10</span></div>
+    </a>
+    <a class="aviso novo" href="CorNegociacoes.dc.html">
+      <span class="dot"><svg class="i s" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"></rect><path d="M3 10h18M8 3v4M16 3v4"></path></svg></span>
+      <div class="stack" style="gap: 2px"><b class="small">Visita confirmada</b><span class="small">Ter, 14/10 às 10:00 na Casa com vista no Campeche, Rua das Gaivotas, 210.</span><span class="tiny muted">Seg, 13/10</span></div>
+    </a>
+    <a class="aviso" href="CorCatalogo.dc.html">
+      <span class="dot areia"><svg class="i s" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5V21H3z"></path></svg></span>
+      <div class="stack" style="gap: 2px"><b class="small">Imóvel novo no catálogo</b><span class="small">Casa com vista no Campeche, R$ 1.890.000.</span><span class="tiny muted">Seg, 13/10</span></div>
+    </a>
+    <a class="aviso" href="CorPagamento.dc.html">
+      <span class="dot" style="background: var(--cinza-soft); color: var(--ink2)"><svg class="i s" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="6" width="18" height="13" rx="2"></rect><path d="M3 10h18"></path></svg></span>
+      <div class="stack" style="gap: 2px"><b class="small">Mensalidade paga</b><span class="small">Recebemos o pagamento de outubro. Acesso garantido até 15/11/2026.</span><span class="tiny muted">Sex, 10/10</span></div>
+    </a>
+  </div>
+  <nav class="nav" aria-label="Menu do corretor">
+    <a href="CorCatalogo.dc.html"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"></rect><rect x="14" y="3" width="7" height="7" rx="1.5"></rect><rect x="3" y="14" width="7" height="7" rx="1.5"></rect><rect x="14" y="14" width="7" height="7" rx="1.5"></rect></svg>Catálogo</a>
+    <a href="CorNegociacoes.dc.html"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 3H6v18h12V7z"></path><path d="M14 3v4h4M9 13h6M9 17h6"></path></svg>Negociações</a>
+    <a class="on" href="CorAvisos.dc.html" aria-current="page"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9a6 6 0 1 1 12 0c0 6 2.5 8 2.5 8h-17S6 15 6 9"></path><path d="M10 20.5h4"></path></svg>Avisos</a>
+    <a href="CorConta.dc.html"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"></circle><path d="M4 21c0-4 4-6 8-6s8 2 8 6"></path></svg>Conta</a>
+  </nav>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

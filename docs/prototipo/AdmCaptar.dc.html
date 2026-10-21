@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>PAUTA · Captar imóvel</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="./pauta.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&amp;family=Figtree:wght@400;500;600;700;800&amp;display=swap">
+<style>body{margin:0}</style>
+</helmet>
+<div class="app">
+  <div class="top">
+    <a class="voltar" href="AdmPainel.dc.html" aria-label="Voltar ao painel"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"></path></svg></a>
+    <div class="stack" style="gap: 0"><span class="t3">Captar imóvel</span><span class="tiny muted">Entra direto como disponível</span></div>
+  </div>
+  <sc-if value="{{form}}" hint-placeholder-val="{{ true }}">
+    <div class="scroll" style="gap: 14px">
+      <p class="over">Dono do imóvel</p>
+      <div class="seg">
+        <button class="{{segExist}}" onClick="{{usarExistente}}">Conta existente</button>
+        <button class="{{segNova}}" onClick="{{usarNova}}">Criar conta</button>
+      </div>
+      <sc-if value="{{existente}}" hint-placeholder-val="{{ true }}">
+        <div class="stack" style="gap: 8px">
+          <div class="field"><label for="busca">Buscar proprietário</label><input id="busca" value="Paulo Andrade"></div>
+          <div class="card" style="flex-direction: row; align-items: center; gap: 12px; padding: 12px; border-color: var(--mar)">
+            <span class="avatar m">PA</span>
+            <div class="stack" style="gap: 0; flex: 1"><b class="small">Paulo Andrade</b><span class="tiny muted">(48) 99777-1203 · paulo.andrade@email.com</span></div>
+            <svg class="i s" viewBox="0 0 24 24" style="color: var(--mar)" aria-hidden="true"><path d="m5 12 5 5L20 7"></path></svg>
+          </div>
+        </div>
+      </sc-if>
+      <sc-if value="{{nova}}" hint-placeholder-val="{{ false }}">
+        <div class="stack" style="gap: 12px">
+          <div class="field"><label for="dn">Nome do dono</label><input id="dn" value="Paulo Andrade"></div>
+          <div class="field"><label for="dt">Telefone com DDD</label><input id="dt" type="tel" value="(48) 99777-1203"></div>
+          <div class="field"><label for="de">E-mail</label><input id="de" type="email" value="paulo.andrade@email.com"><span class="hint">O dono recebe um e-mail para criar a senha e passa a usar o app como proprietário.</span></div>
+        </div>
+      </sc-if>
+      <hr class="sep">
+      <p class="over">Imóvel</p>
+      <div class="field"><label for="t">Título</label><input id="t" value="Cobertura em Jurerê Internacional"></div>
+      <div class="grid2">
+        <div class="field"><label for="tp">Tipo</label><select id="tp"><option>Cobertura</option><option>Casa</option><option>Apartamento</option></select></div>
+        <div class="field"><label for="pr">Preço (R$)</label><input id="pr" value="4.200.000"></div>
+      </div>
+      <div class="field"><label for="en">Endereço e bairro</label><input id="en" value="Av. dos Búzios, 1500 · Jurerê Internacional"></div>
+      <div class="grid4">
+        <div class="field"><label for="q">Quartos</label><input id="q" value="4"></div>
+        <div class="field"><label for="b">Banh.</label><input id="b" value="5"></div>
+        <div class="field"><label for="v">Vagas</label><input id="v" value="3"></div>
+        <div class="field"><label for="a">m²</label><input id="a" value="310"></div>
+      </div>
+      <button class="card" style="align-items: center; min-height: 72px; border-style: dashed; border-width: 1.5px; cursor: pointer; font: inherit; color: var(--mar)"><b class="small">Adicionar fotos</b><span class="tiny muted">12 fotos selecionadas</span></button>
+      <div class="alerta atencao"><svg class="i s" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 8v5M12 16h.01"></path></svg><span><b>A definir:</b> como o dono de um imóvel captado aceita o termo de exclusividade (no app, no primeiro acesso, ou em papel).</span></div>
+    </div>
+    <div class="foot">
+      <button class="btn" onClick="{{salvar}}">Publicar no catálogo</button>
+    </div>
+  </sc-if>
+  <sc-if value="{{salvo}}" hint-placeholder-val="{{ false }}">
+    <div class="scroll" style="gap: 20px">
+      <div class="stack" style="gap: 12px; margin-top: 28px">
+        <span class="dot" style="width: 56px; height: 56px; border-radius: 16px"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 5 5L20 7"></path></svg></span>
+        <h1 class="t1">Imóvel no catálogo</h1>
+        <p class="p muted">A Cobertura em Jurerê Internacional está disponível e vinculada à conta de Paulo Andrade, que já pode acompanhar visitas e propostas.</p>
+      </div>
+      <a class="btn sec" href="AdmPainel.dc.html">Voltar ao painel</a>
+    </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { dono: 'exist', salvo: false }; }
+  renderVals() {
+    const ex = this.state.dono === 'exist';
+    return {
+      existente: ex,
+      nova: !ex,
+      segExist: ex ? 'on' : '',
+      segNova: ex ? '' : 'on',
+      usarExistente: () => this.setState({ dono: 'exist' }),
+      usarNova: () => this.setState({ dono: 'nova' }),
+      form: !this.state.salvo,
+      salvo: this.state.salvo,
+      salvar: () => this.setState({ salvo: true })
+    };
+  }
+}
+</script>
+</body>
+</html>

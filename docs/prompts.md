@@ -1,15 +1,17 @@
 # PAUTA — Roadmap de prompts
 
-Última revisão: 19/10/2026
+Última revisão: 20/10/2026
 
-Os prompts para construir o MVP do PAUTA com o Claude Code, da Etapa 0 à Etapa 13. Siga na ordem, de cima para baixo: cada etapa usa as anteriores, e dentro de cada etapa os prompts já estão na sequência certa, do primeiro (abrir a etapa) ao último (fechar e enviar). As etapas e os critérios de "pronto" são os do **PAUTA Roadmap**; as regras do produto são as da **PAUTA - Visão geral da plataforma**.
+Os prompts para construir o MVP do PAUTA com o Claude Code, da Etapa 0 à Etapa 13. Siga na ordem, de cima para baixo: cada etapa usa as anteriores, e dentro de cada etapa os prompts já estão na sequência certa, do primeiro (abrir a etapa) ao último (fechar e enviar). As etapas e os critérios de "pronto" são os do [ROADMAP.md](../ROADMAP.md); as regras do produto são as da [docs/visao-geral.md](visao-geral.md).
 
-No repositório `pauta`, este arquivo vira `docs/prompts.md` (passo 1.2).
+Este arquivo é só o roteiro: ele não guarda em que passo o projeto está. Isso fica em "Onde paramos", no [ROADMAP.md](../ROADMAP.md).
 
 ## Como usar
 
 - **Cole um prompt, teste o resultado, e só então cole o próximo.** Se um passo ficou grande demais, peça para o Claude dividir.
 - **Cada etapa começa com `/clear`** (ou um terminal novo) e no **modo de planejamento**: aperte `Shift+Tab` até aparecer "plan mode". Nele o Claude lê e propõe o plano sem mexer em nada. Só saia do modo de planejamento quando concordar com o plano.
+- **Ao terminar cada passo**, o Claude atualiza "Onde paramos" no `ROADMAP.md` com o passo feito e o próximo (uma linha, não o `/atualizar-roadmap` inteiro). Assim, se alguém parar no meio da etapa, a próxima sessão sabe onde retomar. A regra está no `CLAUDE.md`, por isso não aparece em cada prompt.
+- **Toda etapa termina com auditoria e Roadmap atualizado:** o passo "Auditar" (`/auditar-etapa`) e o passo "Corrigir e fechar" (que roda o `/atualizar-roadmap`). Não pule nenhum dos dois.
 - **A auditoria é sempre numa sessão nova** (`/clear`): quem escreveu o código tende a não ver os próprios erros.
 - **Não repita o CLAUDE.md nos prompts.** O Claude Code lê o `CLAUDE.md` sozinho em toda sessão: regras de negócio, `exigirTipo()`, migrations, explicar antes do código. Por isso os prompts são curtos.
 - **Decisões em aberto travam etapas.** Cada etapa diz o que precisa estar decidido antes. Se o Claude perguntar algo que ainda não foi decidido, decida com a outra pessoa, registre na Visão geral e só depois responda.
@@ -23,7 +25,7 @@ No repositório `pauta`, este arquivo vira `docs/prompts.md` (passo 1.2).
 As decisões não são do Claude, mas ele ajuda a prepará-las. Use este prompt para cada uma, numa conversa à parte:
 
 ```text
-Preciso decidir <a decisão, ex.: quais filtros o catálogo terá> para o PAUTA. Leia a "PAUTA - Visão geral da plataforma".
+Preciso decidir <a decisão, ex.: quais filtros o catálogo terá> para o PAUTA. Leia a docs/visao-geral.md.
 Me dê 2 ou 3 opções, com o impacto de cada uma no código, no custo e no piloto em Florianópolis, e a sua recomendação. Não tome a decisão por mim. Depois que eu decidir, atualize a Visão geral (tire de "Decisões em aberto", registre em "Decisões tomadas" com a data) e o CLAUDE.md.
 ```
 
@@ -57,7 +59,7 @@ Me dê 2 ou 3 opções, com o impacto de cada uma no código, no custo e no pilo
 **0.1 Revisar o protótipo**
 
 ```text
-Leia a "PAUTA - Visão geral da plataforma" e o protótipo https://claude.ai/artifact/GBqYuzenozHgGygiGrSS12, tela por tela.
+Leia a docs/visao-geral.md e o protótipo https://claude.ai/artifact/GBqYuzenozHgGygiGrSS12, tela por tela.
 Me entregue três listas:
 1. Regras e requisitos da Visão geral que não têm tela. Confira em especial: pagamento da mensalidade e assinante com pagamento vencido ou bloqueado (Etapa 11), renovação da exclusividade pelo proprietário (Etapa 12), recuperação de senha, imóvel reprovado com motivo e reenvio, e apagar imóvel pendente
 2. Telas que contradizem a Visão geral
@@ -82,13 +84,13 @@ No fim, liste tudo o que o protótipo revelou que a Visão geral não diz ou diz
 
 ## Etapa 1 — Setup
 
-**Pronto quando:** a página abre em localhost, conecta ao Supabase novo e o código está no repositório `pauta`.
-**Antes (à mão):** repositório `pauta` vazio no GitHub, projeto Supabase PAUTA (São Paulo) criado, Gabriel convidado.
+**Pronto quando:** a página abre em localhost, conecta ao Supabase novo e o código está no repositório `PAUTA`.
+**Antes (à mão):** repositório `PAUTA` vazio no GitHub, projeto Supabase PAUTA (São Paulo) criado, Gabriel convidado.
 
 **1.1 Criar o projeto** *(modo de planejamento)*
 
 ```text
-Vamos começar a Etapa 1 do PAUTA. O repositório HevelynLV/pauta está vazio e eu estou na pasta <caminho>.
+Vamos começar a Etapa 1 do PAUTA. O repositório HevelynLV/PAUTA está vazio e eu estou na pasta <caminho>.
 Me guie para criar o app Next.js 16 com TypeScript, Tailwind, App Router e código em src/, numa branch etapa-1-setup. Explique cada opção do create-next-app antes de eu responder.
 Depois, leia o guia em node_modules/next/dist/docs/ e me resuma o que mudou no Next.js 16 em relação aos tutoriais comuns e que vai afetar o PAUTA (rotas, Server Actions, middleware/proxy, cache).
 ```

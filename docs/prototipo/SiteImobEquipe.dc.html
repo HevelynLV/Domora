@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>PAUTA · Site · Equipe da imobiliária</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="./pauta.css">
+<link rel="stylesheet" href="./site.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&amp;family=Figtree:wght@400;500;600;700;800&amp;display=swap">
+<style>body{margin:0}</style>
+</helmet>
+<div class="site shell">
+  <aside class="side">
+    <a class="logo" href="SiteInicio.dc.html"><span class="logo-mark"><svg class="i s" viewBox="0 0 24 24" style="color: #fff" aria-hidden="true"><path d="M4 11 12 4l8 7"></path><path d="M7 20v-6a5 5 0 0 1 10 0v6"></path></svg></span>PAUTA</a>
+    <div class="who"><span class="avatar m">RS</span><div class="stack" style="gap: 0"><b class="small">Rafael Souza</b><span class="tiny muted">Maré Imóveis</span></div></div>
+    <nav class="snav" aria-label="Menu do corretor">
+      <a href="SiteCorCatalogo.dc.html"><svg class="i s" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"></rect><rect x="14" y="3" width="7" height="7" rx="1.5"></rect><rect x="3" y="14" width="7" height="7" rx="1.5"></rect><rect x="14" y="14" width="7" height="7" rx="1.5"></rect></svg>Catálogo</a>
+      <a href="SiteCorNegociacoes.dc.html"><svg class="i s" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 3H6v18h12V7z"></path><path d="M14 3v4h4M9 13h6M9 17h6"></path></svg>Negociações</a>
+      <a href="SiteCorAvisos.dc.html"><svg class="i s" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9a6 6 0 1 1 12 0c0 6 2.5 8 2.5 8h-17S6 15 6 9"></path><path d="M10 20.5h4"></path></svg>Avisos<span class="n">2</span></a>
+      <a class="on" href="SiteConta.dc.html" aria-current="page"><svg class="i s" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"></circle><path d="M4 21c0-4 4-6 8-6s8 2 8 6"></path></svg>Minha conta</a>
+    </nav>
+    <a class="link small" href="SiteInicio.dc.html" style="margin-top: auto">Sair</a>
+  </aside>
+  <main class="main">
+    <div class="inner">
+      <div class="stack" style="gap: 2px"><span class="small muted">Maré Imóveis · CRECI 12345-J SC</span><h1 class="t1" style="font-size: 34px">Equipe e assinatura</h1></div>
+      <div class="cols">
+        <div class="col-main">
+          <div class="tbox">
+            <table class="tbl">
+              <thead><tr><th>Corretor</th><th>Contato</th><th>Desde</th><th>Status</th></tr></thead>
+              <tbody>
+                <sc-for list="{{pessoas}}" as="p" hint-placeholder-count="3">
+                  <tr><td><div class="row"><span class="{{p.av}}">{{p.ini}}</span><b>{{p.nome}}</b></div></td><td>{{p.contato}}</td><td>{{p.desde}}</td><td><span class="{{p.badgeCls}}">{{p.badge}}</span></td></tr>
+                </sc-for>
+              </tbody>
+            </table>
+          </div>
+          <a class="roteiro" href="SiteConvite.dc.html" style="max-width: 420px"><span><b>Roteiro do protótipo</b>Ver o convite do lado do corretor</span><svg class="i s" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg></a>
+        </div>
+        <div class="col-side fix">
+          <div class="card" style="padding: 22px; gap: 14px">
+            <p class="t2">Convidar corretor</p>
+            <div class="field"><label for="conv">E-mail do corretor</label><input id="conv" type="email" value="joao@mareimoveis.com.br"></div>
+            <button class="btn" onClick="{{convidar}}">Enviar convite</button>
+            <button class="btn sec" onClick="{{copiar}}">{{linkTxt}}</button>
+            <span class="hint">O corretor entra já vinculado e ativo. A imobiliária responde pelos corretores que convida.</span>
+          </div>
+          <div class="card" style="gap: 6px">
+            <div class="between"><b>Assinatura</b><span class="badge b-disp">Ativa</span></div>
+            <span class="small muted">[PREÇO A DEFINIR] por mês · próxima cobrança em 15/11/2026 pelo Asaas (boleto, Pix ou cartão)</span>
+            <a class="link small" href="SiteCorPagamento.dc.html">Ver pagamentos</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1000}}'>
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { convidado: false, copiado: false }; }
+  renderVals() {
+    const st = this.state;
+    const lista = [
+      { nome: 'Rafael Souza', contato: '(48) 99654-2201', desde: 'Responsável', ini: 'RS', av: 'avatar m', badge: 'Ativo', badgeCls: 'badge b-disp' },
+      { nome: 'Camila Reis', contato: '(48) 99120-7788', desde: '02/10/2026', ini: 'CR', av: 'avatar r', badge: 'Ativa', badgeCls: 'badge b-disp' }
+    ];
+    if (st.convidado) lista.push({ nome: 'joao@mareimoveis.com.br', contato: '—', desde: 'Convite enviado agora', ini: 'J', av: 'avatar', badge: 'Convite enviado', badgeCls: 'badge b-pend' });
+    return {
+      pessoas: lista,
+      linkTxt: st.copiado ? 'Link de convite copiado' : 'Copiar link de convite',
+      copiar: () => this.setState({ copiado: true }),
+      convidar: () => this.setState({ convidado: true })
+    };
+  }
+}
+</script>
+</body>
+</html>

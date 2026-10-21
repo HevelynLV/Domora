@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>PAUTA · Meus imóveis</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="./pauta.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&amp;family=Figtree:wght@400;500;600;700;800&amp;display=swap">
+<style>body{margin:0}
+.lk { background: none; border: 0; padding: 0; font: inherit; font-size: 13px; font-weight: 700; cursor: pointer; min-height: 44px; }</style>
+</helmet>
+<div class="app">
+  <div class="top" style="justify-content: space-between; padding-top: 22px">
+    <div class="stack" style="gap: 0"><span class="small muted">Olá, Marina</span><h1 class="t1">Meus imóveis</h1></div>
+    <a class="btn sm" href="ProNovo.dc.html"><svg class="i s" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>Novo</a>
+  </div>
+  <div class="scroll">
+    <div class="alerta atencao">
+      <svg class="i s" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg>
+      <div class="stack" style="gap: 6px"><span><b>A exclusividade do Apartamento na Beira-Mar vence em 20/11/2026.</b> Sem renovação, ele sai do catálogo nesse dia.</span><a class="link" href="ProRenovar.dc.html">Renovar por mais [PRAZO A DEFINIR]</a></div>
+    </div>
+
+    <sc-if value="{{apagado}}" hint-placeholder-val="{{ false }}">
+      <div class="alerta info"><span>A Sala comercial no Centro e as fotos dela foram apagadas.</span></div>
+    </sc-if>
+
+    <a class="card" href="ProImovel.dc.html" style="flex-direction: row; gap: 12px; padding: 12px">
+      <div class="foto" style="width: 88px; height: 88px; flex-shrink: 0; padding: 0"></div>
+      <div class="stack" style="gap: 4px; flex: 1; min-width: 0">
+        <span class="badge b-disp" style="align-self: flex-start">Disponível</span>
+        <b>Casa com vista no Campeche</b>
+        <span class="small muted">R$ 1.890.000 · 4 quartos</span>
+        <span class="tiny" style="color: var(--mar); font-weight: 700">1 visita para confirmar · 2 propostas</span>
+      </div>
+    </a>
+
+    <a class="card" href="ProImovel.dc.html" style="flex-direction: row; gap: 12px; padding: 12px">
+      <div class="foto f3" style="width: 88px; height: 88px; flex-shrink: 0; padding: 0"></div>
+      <div class="stack" style="gap: 4px; flex: 1; min-width: 0">
+        <span class="badge b-neg" style="align-self: flex-start">Em negociação</span>
+        <b>Apartamento na Beira-Mar Norte</b>
+        <span class="small muted">R$ 2.450.000 · 3 quartos</span>
+        <span class="tiny muted">Exclusividade até 20/11/2026</span>
+      </div>
+    </a>
+
+    <div class="card" style="flex-direction: row; gap: 12px; padding: 12px">
+      <div class="foto f2" style="width: 88px; height: 88px; flex-shrink: 0; padding: 0"></div>
+      <div class="stack" style="gap: 4px; flex: 1; min-width: 0">
+        <span class="badge b-contr" style="align-self: flex-start">Contrato em análise</span>
+        <b>Studio no Itacorubi</b>
+        <span class="small muted">R$ 520.000 · 1 quarto</span>
+        <span class="tiny muted">Contrato enviado por Thiago Lemos em 14/10. A equipe PAUTA está conferindo.</span>
+      </div>
+    </div>
+
+    <sc-if value="{{salaVisivel}}" hint-placeholder-val="{{ true }}">
+      <div class="card" style="flex-direction: row; gap: 12px; padding: 12px">
+        <div class="foto f2" style="width: 88px; height: 88px; flex-shrink: 0; padding: 0"></div>
+        <div class="stack" style="gap: 4px; flex: 1; min-width: 0">
+          <span class="badge b-pend" style="align-self: flex-start">Aguardando aprovação</span>
+          <b>Sala comercial no Centro</b>
+          <span class="small muted">R$ 420.000 · 38 m²</span>
+          <div class="row" style="gap: 14px"><a class="link small" href="ProNovo.dc.html">Editar</a><button class="lk" onClick="{{abrirApagar}}" style="color: var(--erro)">Apagar</button></div>
+        </div>
+      </div>
+    </sc-if>
+
+    <div class="card" style="gap: 10px; padding: 12px">
+      <div class="row" style="gap: 12px; align-items: flex-start">
+        <div class="foto f4" style="width: 88px; height: 88px; flex-shrink: 0; padding: 0"></div>
+        <div class="stack" style="gap: 4px; flex: 1; min-width: 0">
+          <span class="badge b-repr" style="align-self: flex-start">Reprovado</span>
+          <b>Terreno no Ribeirão da Ilha</b>
+          <span class="small muted">R$ 680.000 · 450 m²</span>
+        </div>
+      </div>
+      <div class="alerta erro"><span><b>Motivo:</b> faltam fotos do terreno inteiro e a área informada não bate com a matrícula.</span></div>
+      <div class="row"><a class="btn sec sm flex1" href="ProReprovado.dc.html">Editar</a><a class="btn sm flex1" href="ProEnviado.dc.html">Reenviar</a></div>
+    </div>
+
+    <div class="card" style="flex-direction: row; gap: 12px; padding: 12px">
+      <div class="foto" style="width: 88px; height: 88px; flex-shrink: 0; padding: 0"></div>
+      <div class="stack" style="gap: 4px; flex: 1; min-width: 0">
+        <span class="badge b-vend" style="align-self: flex-start">Vendido</span>
+        <b>Casa na Lagoa da Conceição</b>
+        <span class="small muted">Vendida por R$ 1.250.000 em 02/09/2026</span>
+        <span class="tiny muted">Não aparece mais no catálogo.</span>
+      </div>
+    </div>
+  </div>
+  <nav class="nav" aria-label="Menu do proprietário">
+    <a class="on" href="ProImoveis.dc.html" aria-current="page"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5V21h-6v-6H9v6H3z"></path></svg>Imóveis</a>
+    <a href="ProNovo.dc.html"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="4"></rect><path d="M12 8v8M8 12h8"></path></svg>Novo imóvel</a>
+    <a href="ProAvisos.dc.html"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9a6 6 0 1 1 12 0c0 6 2.5 8 2.5 8h-17S6 15 6 9"></path><path d="M10 20.5h4"></path></svg>Avisos</a>
+    <a href="ProConta.dc.html"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"></circle><path d="M4 21c0-4 4-6 8-6s8 2 8 6"></path></svg>Conta</a>
+  </nav>
+  <sc-if value="{{sheet}}" hint-placeholder-val="{{ false }}">
+    <div class="sheet-bg">
+      <div class="sheet">
+        <p class="t2">Apagar imóvel?</p>
+        <p class="p small">A <b>Sala comercial no Centro</b> e as 4 fotos dela serão apagadas. Isso não pode ser desfeito.</p>
+        <span class="hint">Só dá para apagar imóvel aguardando aprovação ou reprovado. Imóvel aprovado fica no catálogo durante a exclusividade.</span>
+        <div class="row"><button class="btn sec flex1" onClick="{{fecharApagar}}">Cancelar</button><button class="btn flex1" style="background: var(--erro); border-color: var(--erro)" onClick="{{apagar}}">Apagar</button></div>
+      </div>
+    </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { sheet: false, apagado: false }; }
+  renderVals() {
+    const st = this.state;
+    return {
+      sheet: st.sheet,
+      apagado: st.apagado,
+      salaVisivel: !st.apagado,
+      abrirApagar: () => this.setState({ sheet: true }),
+      fecharApagar: () => this.setState({ sheet: false }),
+      apagar: () => this.setState({ sheet: false, apagado: true })
+    };
+  }
+}
+</script>
+</body>
+</html>

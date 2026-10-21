@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>PAUTA · Novo imóvel: termo de exclusividade</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="./pauta.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&amp;family=Figtree:wght@400;500;600;700;800&amp;display=swap">
+<style>body{margin:0}
+.btn.off { background: var(--line); border-color: var(--line); color: var(--ink2); cursor: not-allowed; }</style>
+</helmet>
+<div class="app">
+  <div class="top">
+    <a class="voltar" href="ProFotos.dc.html" aria-label="Voltar"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"></path></svg></a>
+    <div class="stack" style="gap: 0; flex: 1"><span class="tiny muted">Passo 3 de 3</span><span class="t3">Exclusividade e contato</span></div>
+  </div>
+  <div class="scroll" style="gap: 16px">
+    <div class="steps"><span class="on"></span><span class="on"></span><span class="on"></span></div>
+    <div class="card" style="gap: 12px">
+      <p class="t2">6 meses de exclusividade</p>
+      <div class="row" style="align-items: flex-start"><svg class="i s" viewBox="0 0 24 24" style="color: var(--mar); margin-top: 2px" aria-hidden="true"><path d="m5 12 5 5L20 7"></path></svg><span class="small">Durante 6 meses, o imóvel só é vendido pelo PAUTA. Nesse prazo você não tira o imóvel de venda.</span></div>
+      <div class="row" style="align-items: flex-start"><svg class="i s" viewBox="0 0 24 24" style="color: var(--mar); margin-top: 2px" aria-hidden="true"><path d="m5 12 5 5L20 7"></path></svg><span class="small">Vários corretores assinantes podem trabalhar o imóvel ao mesmo tempo.</span></div>
+      <div class="row" style="align-items: flex-start"><svg class="i s" viewBox="0 0 24 24" style="color: var(--mar); margin-top: 2px" aria-hidden="true"><path d="m5 12 5 5L20 7"></path></svg><span class="small">Antes do vencimento você recebe um aviso para renovar. Sem renovação, o imóvel sai do catálogo.</span></div>
+    </div>
+    <div class="stack" style="gap: 6px">
+      <span class="lbl">Termo de exclusividade</span>
+      <div style="height: 120px; overflow-y: auto; border: 1px solid var(--line); border-radius: 12px; background: var(--card); padding: 12px 14px; font-size: 13px; color: var(--ink2)">[TEXTO DO TERMO DE EXCLUSIVIDADE A DEFINIR]</div>
+    </div>
+    <div class="card" style="flex-direction: row; align-items: center; gap: 12px">
+      <div class="stack" style="gap: 2px; flex: 1"><b class="small">Mostrar meu contato aos corretores</b><span class="tiny muted">{{contatoTxt}}</span></div>
+      <button class="{{toggleCls}}" aria-label="Mostrar meu contato" aria-pressed="{{contato}}" onClick="{{trocaContato}}"><span></span></button>
+    </div>
+    <label class="check"><input type="checkbox" checked="{{aceito}}" onChange="{{trocaAceito}}"><span>Li e aceito o termo de exclusividade de 6 meses.</span></label>
+  </div>
+  <div class="foot">
+    <sc-if value="{{aceito}}" hint-placeholder-val="{{ true }}">
+      <a class="btn" href="ProEnviado.dc.html">Enviar para aprovação</a>
+    </sc-if>
+    <sc-if value="{{naoAceito}}" hint-placeholder-val="{{ false }}">
+      <span class="btn off" aria-disabled="true">Aceite o termo para enviar</span>
+    </sc-if>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { contato: false, aceito: false }; }
+  renderVals() {
+    const c = this.state.contato;
+    return {
+      contato: c,
+      toggleCls: c ? 'toggle on' : 'toggle',
+      contatoTxt: c ? 'Corretores veem seu telefone e e-mail.' : 'Visitas e propostas passam só pelo app. Você pode mudar depois.',
+      trocaContato: () => this.setState({ contato: !c }),
+      aceito: this.state.aceito,
+      naoAceito: !this.state.aceito,
+      trocaAceito: () => this.setState({ aceito: !this.state.aceito })
+    };
+  }
+}
+</script>
+</body>
+</html>

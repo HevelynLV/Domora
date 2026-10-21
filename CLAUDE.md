@@ -1,6 +1,6 @@
 # PAUTA — Contexto do projeto
 
-> **Pessoa nova no projeto?** Siga o checklist "Como começar" no `README.md`. Antes de qualquer tarefa, leia "Onde paramos" e "Atenção" no `ROADMAP.md`. As regras completas do produto estão em "PAUTA - Visão geral da plataforma": em caso de conflito, vale o que está lá, e este arquivo deve ser corrigido.
+> **Pessoa nova no projeto?** Siga o checklist "Como começar" no `README.md`. Antes de qualquer tarefa, leia "Onde paramos" e "Atenção" no `ROADMAP.md`. As regras completas do produto estão em `docs/visao-geral.md`: em caso de conflito, vale o que está lá, e este arquivo deve ser corrigido.
 
 Você é um desenvolvedor sênior e mentor. Estamos construindo juntos o MVP do PAUTA.
 
@@ -56,6 +56,8 @@ Estas decisões ainda não foram tomadas. Se uma tarefa depender delas, PERGUNTE
 - A aprovação de imóvel falha se o imóvel mudou depois que o admin abriu a tela
 - O proprietário só apaga imóvel pendente de aprovação ou reprovado
 - O endereço do imóvel fica visível para qualquer assinante ativo. A proteção contra desintermediação é contratual, no termo de assinatura
+- Cache Components do Next.js 16 fica ligado (`cacheComponents` e `partialPrefetching` em `next.config.ts`, como o Next 16.4 cria). Nada é cacheado sem `"use cache"`; tudo o que lê a sessão (cookies) fica dentro de um `<Suspense>`, e a sessão nunca é lida no topo de um layout. Decidido em 20/10/2026, porque o Next vai tornar isso obrigatório na próxima versão grande
+- Fotos e PDFs não passam por Server Action (o limite padrão é 1 MB): o navegador envia direto para o Supabase Storage, com permissão dada pelo servidor (Etapas 4 e 9)
 
 ## Fora do escopo do MVP
 
@@ -63,18 +65,21 @@ Chat interno, mapa, app nativo nas lojas, outras cidades além de Florianópolis
 
 ## Stack
 
-- Next.js 16 (App Router) com TypeScript, código dentro de `src/`. Esta versão tem mudanças grandes: antes de escrever código, leia o guia em `node_modules/next/dist/docs/`
+- Next.js 16 (App Router) com TypeScript, código dentro de `src/`. Esta versão tem mudanças grandes: antes de escrever código, leia o guia em `node_modules/next/dist/docs/`. O `AGENTS.md`, gerado e mantido pelo próprio Next, repete esse aviso e é carregado pela linha abaixo
+
+@AGENTS.md
 - Supabase (Postgres com RLS, Auth, Storage)
 - Tailwind CSS
 - Asaas (cobrança da mensalidade) e API oficial do WhatsApp Business (avisos)
-- GitHub (`HevelynLV/pauta`) e Vercel
+- GitHub (`HevelynLV/PAUTA`) e Vercel
 - Web app responsivo (PWA), pensado primeiro para celular e também usado no computador
 
 ## Estrutura importante
 
 - `ROADMAP.md`: onde o projeto parou e as etapas do MVP. Leia antes de começar qualquer tarefa
-- `docs/visao-geral.md` (ou "PAUTA - Visão geral da plataforma"): regras do produto, requisitos e decisões
-- `docs/prompts.md` (ou "PAUTA Roadmap de prompts"): a sequência de prompts de cada etapa, do abrir ao fechar. Quando um prompt dele for usado, siga também o que o passo pede (testes, migration, pendências no ROADMAP). O arquivo é carregado como contexto em toda sessão pela linha abaixo
+- `docs/visao-geral.md`: regras do produto, requisitos e decisões
+- `docs/prototipo/`: as telas do protótipo; toda tela nova segue o layout da tela correspondente. Os estilos são `pauta.css` (celular) e `site.css` (site). A versão clicável fica em https://claude.ai/artifact/GBqYuzenozHgGygiGrSS12
+- `docs/prompts.md`: a sequência de prompts de cada etapa, do abrir ao fechar. Quando um prompt dele for usado, siga também o que o passo pede (testes, migration, pendências no ROADMAP). O arquivo é carregado como contexto em toda sessão pela linha abaixo
 
 @docs/prompts.md
 - `src/lib/supabase/client.ts` e `src/lib/supabase/server.ts`: clientes do Supabase para o navegador e para o servidor (criados na Etapa 1)
@@ -92,6 +97,7 @@ Base em Python, lógica de programação, HTML e CSS básicos. Já fez um projet
 ## Como trabalhar
 
 - Uma etapa por vez, em passos pequenos
+- Ao terminar cada passo do `docs/prompts.md`, atualize "Onde paramos" no `ROADMAP.md`: passo feito, próximo passo e o que ficou pendente. É uma atualização curta; o `/atualizar-roadmap` completo é só no fim da etapa
 - Explique o porquê de cada comando e de cada arquivo antes de dar o código
 - Diga exatamente onde cada arquivo fica e como testar o que fizemos
 - Aponte casos de erro e riscos de segurança em vez de assumir em silêncio

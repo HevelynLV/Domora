@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>PAUTA · Site · Edições para revisar</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="./pauta.css">
+<link rel="stylesheet" href="./site.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&amp;family=Figtree:wght@400;500;600;700;800&amp;display=swap">
+<style>body{margin:0}
+.antes { text-decoration: line-through; color: var(--erro); }
+.depois { color: var(--mar-dark); font-weight: 700; }</style>
+</helmet>
+<div class="site shell">
+  <aside class="side">
+    <a class="logo" href="SiteInicio.dc.html"><span class="logo-mark"><svg class="i s" viewBox="0 0 24 24" style="color: #fff" aria-hidden="true"><path d="M4 11 12 4l8 7"></path><path d="M7 20v-6a5 5 0 0 1 10 0v6"></path></svg></span>PAUTA</a>
+    <div class="who"><span class="avatar" style="background: var(--ink); color: #fff">P</span><div class="stack" style="gap: 0"><b class="small">Equipe PAUTA</b><span class="tiny muted">Admin</span></div></div>
+    <nav class="snav" aria-label="Menu do admin">
+      <a href="SiteAdmPainel.dc.html"><svg class="i s" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="9" rx="1.5"></rect><rect x="14" y="3" width="7" height="5" rx="1.5"></rect><rect x="14" y="12" width="7" height="9" rx="1.5"></rect><rect x="3" y="16" width="7" height="5" rx="1.5"></rect></svg>Painel</a>
+      <a href="SiteAdmAprovar.dc.html"><svg class="i s" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5V21h-6v-6H9v6H3z"></path></svg>Aprovar imóveis<span class="n">2</span></a>
+      <a href="SiteAdmCaptar.dc.html"><svg class="i s" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="4"></rect><path d="M12 8v8M8 12h8"></path></svg>Captar imóvel</a>
+      <a href="SiteAdmAssinantes.dc.html"><svg class="i s" viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3.5"></circle><path d="M2.5 20c0-3.5 3-5.5 6.5-5.5s6.5 2 6.5 5.5"></path><path d="M16 4.5a3.5 3.5 0 0 1 0 7M18 14.8c2 .6 3.5 2.3 3.5 5.2"></path></svg>Assinantes<span class="n">2</span></a>
+      <a class="on" href="SiteAdmEdicoes.dc.html" aria-current="page"><svg class="i s" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16z"></path></svg>Edições</a>
+      <a href="SiteAdmContratos.dc.html"><svg class="i s" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 3H6v18h12V7z"></path><path d="M14 3v4h4M9 13l2 2 4-4"></path></svg>Contratos<span class="n">1</span></a>
+    </nav>
+    <a class="link small" href="SiteInicio.dc.html" style="margin-top: auto">Sair</a>
+  </aside>
+  <main class="main">
+    <div class="inner">
+      <div class="head"><div class="stack" style="gap: 2px"><h1 class="t1" style="font-size: 34px">Edições para revisar</h1><span class="muted">{{pendentes}} pendentes · edições de imóvel disponível valem na hora, sem nova aprovação</span></div></div>
+      <div class="tbox">
+        <table class="tbl" style="min-width: 900px">
+          <thead><tr><th>Imóvel</th><th>Campo</th><th>Antes</th><th>Depois</th><th>Quem e quando</th><th style="text-align: right">Revisão</th></tr></thead>
+          <tbody>
+            <sc-for list="{{edicoes}}" as="e" hint-placeholder-count="3">
+              <tr>
+                <td><b class="small">{{e.imovel}}</b></td>
+                <td><span class="over">{{e.campo}}</span></td>
+                <td><span class="small antes">{{e.antes}}</span></td>
+                <td><span class="small depois">{{e.depois}}</span></td>
+                <td><span class="tiny muted">{{e.quem}}</span></td>
+                <td><div class="acts"><sc-if value="{{e.pend}}" hint-placeholder-val="{{ true }}"><button class="btn sec sm" onClick="{{e.revisar}}">Marcar revisada</button></sc-if><sc-if value="{{e.ok}}" hint-placeholder-val="{{ false }}"><span class="badge b-disp">Revisada</span></sc-if></div></td>
+              </tr>
+            </sc-for>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { ok: {} }; }
+  renderVals() {
+    const dados = [
+      { id: 1, imovel: 'Apartamento na Beira-Mar Norte', campo: 'Preço', antes: 'R$ 2.590.000', depois: 'R$ 2.450.000', quem: 'Marina Duarte · hoje, 08:40' },
+      { id: 2, imovel: 'Apartamento na Beira-Mar Norte', campo: 'Fotos', antes: '8 fotos', depois: '9 fotos (nova: varanda)', quem: 'Marina Duarte · hoje, 08:41' },
+      { id: 3, imovel: 'Casa no Ribeirão da Ilha', campo: 'Descrição', antes: 'Casa com 3 quartos perto do trapiche.', depois: 'Casa com 3 quartos a 200 m do trapiche, com deck e vista para a baía.', quem: 'Roberto Klein · ontem, 17:12' }
+    ];
+    const ok = this.state.ok;
+    return {
+      pendentes: dados.filter((d) => !ok[d.id]).length,
+      edicoes: dados.map((d) => ({ ...d, pend: !ok[d.id], ok: !!ok[d.id], revisar: () => this.setState({ ok: { ...ok, [d.id]: true } }) }))
+    };
+  }
+}
+</script>
+</body>
+</html>

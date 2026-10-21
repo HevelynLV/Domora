@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>PAUTA · Site · Imóvel para o corretor</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="./pauta.css">
+<link rel="stylesheet" href="./site.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&amp;family=Figtree:wght@400;500;600;700;800&amp;display=swap">
+<style>body{margin:0}
+.gal { display: grid; grid-template-columns: 2fr 1fr 1fr; grid-template-rows: 190px 190px; gap: 8px; }
+.gal .foto:first-child { grid-row: span 2; }
+.chips.wrapc { flex-wrap: wrap; overflow: visible; }</style>
+</helmet>
+<div class="site shell">
+  <aside class="side">
+    <a class="logo" href="SiteInicio.dc.html"><span class="logo-mark"><svg class="i s" viewBox="0 0 24 24" style="color: #fff" aria-hidden="true"><path d="M4 11 12 4l8 7"></path><path d="M7 20v-6a5 5 0 0 1 10 0v6"></path></svg></span>PAUTA</a>
+    <div class="who"><span class="avatar m">RS</span><div class="stack" style="gap: 0"><b class="small">Rafael Souza</b><span class="tiny muted">Maré Imóveis</span></div></div>
+    <nav class="snav" aria-label="Menu do corretor">
+      <a class="on" href="SiteCorCatalogo.dc.html"><svg class="i s" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"></rect><rect x="14" y="3" width="7" height="7" rx="1.5"></rect><rect x="3" y="14" width="7" height="7" rx="1.5"></rect><rect x="14" y="14" width="7" height="7" rx="1.5"></rect></svg>Catálogo</a>
+      <a href="SiteCorNegociacoes.dc.html"><svg class="i s" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 3H6v18h12V7z"></path><path d="M14 3v4h4M9 13h6M9 17h6"></path></svg>Negociações</a>
+      <a href="SiteCorAvisos.dc.html"><svg class="i s" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9a6 6 0 1 1 12 0c0 6 2.5 8 2.5 8h-17S6 15 6 9"></path><path d="M10 20.5h4"></path></svg>Avisos<span class="n">2</span></a>
+      <a href="SiteConta.dc.html"><svg class="i s" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"></circle><path d="M4 21c0-4 4-6 8-6s8 2 8 6"></path></svg>Minha conta</a>
+    </nav>
+    <a class="link small" href="SiteInicio.dc.html" style="margin-top: auto">Sair</a>
+  </aside>
+  <main class="main">
+    <div class="inner">
+      <div class="crumb"><a href="SiteCorCatalogo.dc.html">Catálogo</a><span>/</span><span>Casa com vista no Campeche</span></div>
+      <div class="gal"><div class="foto">Fachada e jardim</div><div class="foto f3">Sala</div><div class="foto f4">Piscina</div><div class="foto f2">Suíte</div><div class="foto" style="justify-content: center; align-items: center">Ver as 4 fotos</div></div>
+      <div class="cols">
+        <div class="col-main">
+          <div class="stack" style="gap: 8px">
+            <div class="row"><span class="badge b-disp">Disponível</span><span class="tiny" style="font-weight: 700; color: var(--mar-dark); border: 1px solid var(--line); border-radius: 999px; padding: 2px 10px">Exclusivo PAUTA</span></div>
+            <h1 class="t1" style="font-size: 34px">Casa com vista no Campeche</h1>
+            <span class="muted">Rua das Gaivotas, 210 · Campeche · Florianópolis</span>
+          </div>
+          <div class="card" style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px">
+            <div class="stack" style="gap: 0"><b style="font-size: 20px">4</b><span class="tiny muted">quartos</span></div>
+            <div class="stack" style="gap: 0"><b style="font-size: 20px">3</b><span class="tiny muted">banheiros</span></div>
+            <div class="stack" style="gap: 0"><b style="font-size: 20px">2</b><span class="tiny muted">vagas</span></div>
+            <div class="stack" style="gap: 0"><b style="font-size: 20px">220 m²</b><span class="tiny muted">área</span></div>
+          </div>
+          <div class="stack" style="gap: 6px"><p class="t2">Descrição</p><p class="p">Casa térrea a 300 m da praia, com vista para a Ilha do Campeche, quintal com piscina e churrasqueira.</p></div>
+          <p class="p small muted">Outros corretores podem estar trabalhando este imóvel ao mesmo tempo.</p>
+        </div>
+        <div class="col-side fix">
+          <div class="card" style="padding: 22px; gap: 14px">
+            <span class="price" style="font-size: 28px">R$ 1.890.000</span>
+            <button class="btn" onClick="{{abrirProposta}}">Enviar proposta</button>
+            <button class="btn sec" onClick="{{abrirVisita}}">Pedir visita</button>
+            <hr class="sep">
+            <div class="row" style="align-items: flex-start"><span class="dot" style="background: var(--cinza-soft); color: var(--ink2)"><svg class="i s" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"></rect><path d="M8 11V8a4 4 0 0 1 8 0v3"></path></svg></span><div class="stack" style="gap: 2px"><b class="small">Contato da proprietária não divulgado</b><span class="tiny muted">Visitas e propostas passam pelo PAUTA. A proprietária vê seu nome, imobiliária e contato.</span></div></div>
+          </div>
+          <sc-if value="{{temAviso}}" hint-placeholder-val="{{ false }}">
+            <div class="alerta info"><svg class="i s" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 5 5L20 7"></path></svg><span>{{aviso}}</span></div>
+            <a class="roteiro" href="SiteProImovel.dc.html"><span><b>Roteiro do protótipo</b>Ver a proprietária respondendo</span><svg class="i s" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg></a>
+          </sc-if>
+        </div>
+      </div>
+    </div>
+  </main>
+  <sc-if value="{{modalVisita}}" hint-placeholder-val="{{ false }}">
+    <div class="modal-bg">
+      <div class="modal" role="dialog" aria-label="Pedir visita">
+        <div class="between"><p class="t2">Pedir visita</p><button class="voltar" aria-label="Fechar" onClick="{{fechar}}"><svg class="i s" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"></path></svg></button></div>
+        <p class="p small muted">Sugira um horário. A proprietária confirma ou recusa e você recebe o aviso.</p>
+        <div class="stack" style="gap: 8px"><span class="lbl">Dia</span><div class="chips wrapc"><sc-for list="{{dias}}" as="d" hint-placeholder-count="5"><button class="{{d.cls}}" onClick="{{d.pick}}">{{d.nome}}</button></sc-for></div></div>
+        <div class="stack" style="gap: 8px"><span class="lbl">Horário</span><div class="chips wrapc"><sc-for list="{{horas}}" as="h" hint-placeholder-count="6"><button class="{{h.cls}}" onClick="{{h.pick}}">{{h.h}}</button></sc-for></div></div>
+        <div class="field"><label for="msg">Recado (opcional)</label><textarea id="msg">Vou com um casal de clientes interessados.</textarea></div>
+        <div class="row" style="justify-content: flex-end"><button class="btn sec" onClick="{{fechar}}">Cancelar</button><button class="btn" onClick="{{enviarVisita}}">Pedir visita para {{resumo}}</button></div>
+      </div>
+    </div>
+  </sc-if>
+  <sc-if value="{{modalProposta}}" hint-placeholder-val="{{ false }}">
+    <div class="modal-bg">
+      <div class="modal" role="dialog" aria-label="Enviar proposta">
+        <div class="between"><p class="t2">Enviar proposta</p><button class="voltar" aria-label="Fechar" onClick="{{fechar}}"><svg class="i s" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"></path></svg></button></div>
+        <div class="fgrid">
+          <div class="field"><label for="valor">Valor (R$)</label><input id="valor" value="1.800.000" style="font-weight: 700"></div>
+          <div class="field"><label for="forma">Pagamento</label><select id="forma"><option>À vista</option><option>Financiamento bancário</option><option>Permuta + complemento</option></select></div>
+        </div>
+        <div class="field"><label for="cond">Condições</label><textarea id="cond">Escritura em até 60 dias. Cliente com recursos próprios.</textarea></div>
+        <div class="field"><label for="cli">Nome do comprador (opcional)</label><input id="cli" value="Lucas e Beatriz Prado"></div>
+        <div class="row" style="justify-content: flex-end"><button class="btn sec" onClick="{{fechar}}">Cancelar</button><button class="btn" onClick="{{enviarProposta}}">Enviar proposta</button></div>
+      </div>
+    </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1200}}'>
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { modal: '', dia: 'Ter, 14/10', hora: '10:00', aviso: '' }; }
+  renderVals() {
+    const st = this.state;
+    const resumo = st.dia + ' às ' + st.hora;
+    return {
+      modalVisita: st.modal === 'visita',
+      modalProposta: st.modal === 'proposta',
+      abrirVisita: () => this.setState({ modal: 'visita' }),
+      abrirProposta: () => this.setState({ modal: 'proposta' }),
+      fechar: () => this.setState({ modal: '' }),
+      dias: ['Ter, 14/10', 'Qua, 15/10', 'Qui, 16/10', 'Sex, 17/10', 'Sáb, 18/10'].map((d) => ({ nome: d, cls: st.dia === d ? 'chip on' : 'chip', pick: () => this.setState({ dia: d }) })),
+      horas: ['09:00', '10:00', '11:00', '14:00', '15:30', '17:00'].map((h) => ({ h: h, cls: st.hora === h ? 'chip on' : 'chip', pick: () => this.setState({ hora: h }) })),
+      resumo: resumo,
+      enviarVisita: () => this.setState({ modal: '', aviso: 'Pedido de visita enviado para ' + resumo + '. Aguardando a proprietária.' }),
+      enviarProposta: () => this.setState({ modal: '', aviso: 'Proposta de R$ 1.800.000 enviada. Avisamos quando a proprietária responder.' }),
+      temAviso: st.aviso !== '',
+      aviso: st.aviso
+    };
+  }
+}
+</script>
+</body>
+</html>

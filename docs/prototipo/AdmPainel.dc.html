@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>PAUTA · Painel do admin</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="./pauta.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&amp;family=Figtree:wght@400;500;600;700;800&amp;display=swap">
+<style>body{margin:0}
+.tile { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 14px; display: flex; flex-direction: column; gap: 6px; text-decoration: none; color: inherit; min-height: 116px; }
+.tile:hover { border-color: var(--mar); }
+.tile b { font-family: 'Bricolage Grotesque', sans-serif; font-size: 32px; line-height: 1; }</style>
+</helmet>
+<div class="app">
+  <div class="top" style="padding-top: 22px; justify-content: space-between">
+    <div class="stack" style="gap: 0"><span class="small muted">Equipe PAUTA</span><h1 class="t1">Painel</h1></div>
+    <div class="row"><a class="link small" href="Main.dc.html">Sair</a><a class="btn sm" href="AdmCaptar.dc.html"><svg class="i s" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>Captar imóvel</a></div>
+  </div>
+  <div class="scroll">
+    <p class="over">Para fazer</p>
+    <div class="grid2">
+      <a class="tile" href="AdmAprovar.dc.html"><span class="dot"><svg class="i s" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5V21H3z"></path></svg></span><b>2</b><span class="small">Imóveis para aprovar</span></a>
+      <a class="tile" href="AdmAssinantes.dc.html"><span class="dot areia"><svg class="i s" viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3.5"></circle><path d="M2.5 20c0-3.5 3-5.5 6.5-5.5s6.5 2 6.5 5.5"></path></svg></span><b>2</b><span class="small">Assinantes para ativar</span></a>
+      <a class="tile" href="AdmContratos.dc.html"><span class="dot roxo"><svg class="i s" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 3H6v18h12V7z"></path><path d="M14 3v4h4M9 13l2 2 4-4"></path></svg></span><b>1</b><span class="small">Contrato para conferir</span></a>
+      <a class="tile" href="AdmEdicoes.dc.html"><span class="dot" style="background: var(--cinza-soft); color: var(--ink2)"><svg class="i s" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16z"></path></svg></span><b>3</b><span class="small">Edições para revisar</span></a>
+    </div>
+    <p class="over" style="margin-top: 8px">Exclusividade vencendo</p>
+    <div class="card" style="gap: 6px">
+      <div class="between"><b>Apartamento na Beira-Mar Norte</b><span class="badge b-neg">Vence 20/11</span></div>
+      <span class="small muted">Marina Duarte · aviso enviado em 15/10 · ainda não renovou</span>
+    </div>
+    <p class="over" style="margin-top: 8px">Comissões do PAUTA</p>
+    <div class="card" style="gap: 6px">
+      <div class="between"><b>Casa no Ribeirão da Ilha</b><span class="badge b-neg">A receber</span></div>
+      <span class="small muted">Vendida em 30/09 · Thiago Lemos · R$ [VALOR DO CONTRATO]</span>
+      <button class="link small" style="align-self: flex-start; background: none; border: 0; padding: 0; min-height: 44px; font: inherit; font-weight: 700; color: var(--mar); cursor: pointer">Marcar como paga</button>
+    </div>
+  </div>
+  <nav class="nav" aria-label="Menu do admin">
+    <a class="on" href="AdmPainel.dc.html" aria-current="page"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="9" rx="1.5"></rect><rect x="14" y="3" width="7" height="5" rx="1.5"></rect><rect x="14" y="12" width="7" height="9" rx="1.5"></rect><rect x="3" y="16" width="7" height="5" rx="1.5"></rect></svg>Painel</a>
+    <a href="AdmAprovar.dc.html"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5V21h-6v-6H9v6H3z"></path></svg>Imóveis</a>
+    <a href="AdmAssinantes.dc.html"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3.5"></circle><path d="M2.5 20c0-3.5 3-5.5 6.5-5.5s6.5 2 6.5 5.5"></path><path d="M16 4.5a3.5 3.5 0 0 1 0 7M18 14.8c2 .6 3.5 2.3 3.5 5.2"></path></svg>Assinantes</a>
+    <a href="AdmContratos.dc.html"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 3H6v18h12V7z"></path><path d="M14 3v4h4M9 13l2 2 4-4"></path></svg>Contratos</a>
+  </nav>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

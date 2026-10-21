@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>PAUTA · Site · Imóvel da proprietária</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="./pauta.css">
+<link rel="stylesheet" href="./site.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&amp;family=Figtree:wght@400;500;600;700;800&amp;display=swap">
+<style>body{margin:0}</style>
+</helmet>
+<div class="site shell">
+  <aside class="side">
+    <a class="logo" href="SiteInicio.dc.html"><span class="logo-mark"><svg class="i s" viewBox="0 0 24 24" style="color: #fff" aria-hidden="true"><path d="M4 11 12 4l8 7"></path><path d="M7 20v-6a5 5 0 0 1 10 0v6"></path></svg></span>PAUTA</a>
+    <div class="who"><span class="avatar">MD</span><div class="stack" style="gap: 0"><b class="small">Marina Duarte</b><span class="tiny muted">Proprietária</span></div></div>
+    <nav class="snav" aria-label="Menu do proprietário">
+      <a class="on" href="SiteProImoveis.dc.html"><svg class="i s" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5V21h-6v-6H9v6H3z"></path></svg>Meus imóveis</a>
+      <a href="SiteProNovo.dc.html"><svg class="i s" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="4"></rect><path d="M12 8v8M8 12h8"></path></svg>Novo imóvel</a>
+      <a href="SiteProAvisos.dc.html"><svg class="i s" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9a6 6 0 1 1 12 0c0 6 2.5 8 2.5 8h-17S6 15 6 9"></path><path d="M10 20.5h4"></path></svg>Avisos<span class="n">3</span></a>
+      <a href="SiteConta.dc.html"><svg class="i s" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"></circle><path d="M4 21c0-4 4-6 8-6s8 2 8 6"></path></svg>Minha conta</a>
+    </nav>
+    <a class="link small" href="SiteInicio.dc.html" style="margin-top: auto">Sair</a>
+  </aside>
+  <main class="main">
+    <div class="inner">
+      <div class="crumb"><a href="SiteProImoveis.dc.html">Meus imóveis</a><span>/</span><span>Casa com vista no Campeche</span></div>
+      <div class="card" style="flex-direction: row; flex-wrap: wrap; gap: 24px; padding: 20px">
+        <div class="foto" style="flex: 1 1 260px; min-height: 180px"><span>4 fotos</span></div>
+        <div class="stack" style="flex: 999 1 360px; gap: 8px; min-width: 0">
+          <div class="between" style="flex-wrap: wrap"><span class="{{statusCls}}">{{statusTxt}}</span><a class="btn sec sm" href="SiteProEditar.dc.html">Editar imóvel</a></div>
+          <h1 class="t1">Casa com vista no Campeche</h1>
+          <span class="muted">Rua das Gaivotas, 210 · Campeche · <b style="color: var(--ink)">R$ 1.890.000</b></span>
+          <span class="small muted">Exclusividade PAUTA até 13/04/2027 · Edições valem na hora e ficam registradas para a equipe PAUTA</span>
+          <div class="row" style="margin-top: 6px; padding-top: 12px; border-top: 1px solid var(--line)">
+            <div class="stack" style="gap: 0; flex: 1"><b class="small">Mostrar meu contato aos corretores</b><span class="tiny muted">{{contatoTxt}}</span></div>
+            <button class="{{toggleCls}}" aria-label="Mostrar meu contato" aria-pressed="{{contato}}" onClick="{{trocaContato}}"><span></span></button>
+          </div>
+        </div>
+      </div>
+      <div class="cols">
+        <section class="col-main" style="flex: 1 1 420px">
+          <div class="between"><h2 class="t2">Pedidos de visita</h2><span class="tiny muted">O corretor sugere, você confirma</span></div>
+          <sc-for list="{{visitas}}" as="v" hint-placeholder-count="2">
+            <div class="card">
+              <div class="between"><span class="row"><svg class="i s" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"></rect><path d="M3 10h18M8 3v4M16 3v4"></path></svg><b>{{v.quando}}</b></span><span class="{{v.badgeCls}}">{{v.badge}}</span></div>
+              <div class="row"><span class="{{v.avCls}}">{{v.ini}}</span><div class="stack" style="gap: 0"><b class="small">{{v.nome}}</b><span class="tiny muted">{{v.imob}} · {{v.contato}}</span></div></div>
+              <sc-if value="{{v.pend}}" hint-placeholder-val="{{ false }}">
+                <div class="row"><button class="btn perigo sm flex1" onClick="{{v.recusar}}">Recusar</button><button class="btn sm flex1" onClick="{{v.confirmar}}">Confirmar visita</button></div>
+              </sc-if>
+            </div>
+          </sc-for>
+          <sc-if value="{{visitaConfirmada}}" hint-placeholder-val="{{ false }}">
+            <a class="roteiro" href="SiteCorImovel.dc.html"><span><b>Roteiro do protótipo</b>Depois da visita, o corretor envia a proposta</span><svg class="i s" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg></a>
+          </sc-if>
+        </section>
+        <section class="col-main" style="flex: 1 1 420px">
+          <div class="between"><h2 class="t2">Propostas</h2><span class="tiny muted">Você pode aceitar mais de uma</span></div>
+          <sc-for list="{{propostas}}" as="p" hint-placeholder-count="2">
+            <div class="card">
+              <div class="between"><span class="price">{{p.valor}}</span><span class="{{p.badgeCls}}">{{p.badge}}</span></div>
+              <span class="small">{{p.cond}}</span>
+              <div class="row"><span class="{{p.avCls}}">{{p.ini}}</span><div class="stack" style="gap: 0"><b class="small">{{p.nome}}</b><span class="tiny muted">{{p.imob}} · {{p.contato}}</span></div></div>
+              <sc-if value="{{p.pend}}" hint-placeholder-val="{{ false }}">
+                <div class="row"><button class="btn perigo sm flex1" onClick="{{p.recusar}}">Recusar</button><button class="btn sm flex1" onClick="{{p.aceitar}}">Aceitar proposta</button></div>
+              </sc-if>
+            </div>
+          </sc-for>
+          <sc-if value="{{temAceita}}" hint-placeholder-val="{{ false }}">
+            <a class="roteiro" href="SiteCorNegociacoes.dc.html"><span><b>Roteiro do protótipo</b>O corretor envia o contrato assinado</span><svg class="i s" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg></a>
+          </sc-if>
+        </section>
+      </div>
+    </div>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1200}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { contato: false, vis: { r: 'pend', t: 'conf' }, prop: { r: 'pend', c: 'pend' } };
+  }
+  renderVals() {
+    const st = this.state;
+    const pessoas = {
+      r: { nome: 'Rafael Souza', imob: 'Maré Imóveis', contato: '(48) 99654-2201', ini: 'RS', avCls: 'avatar m' },
+      t: { nome: 'Thiago Lemos', imob: 'Corretor autônomo', contato: '(48) 99301-5520', ini: 'TL', avCls: 'avatar' },
+      c: { nome: 'Camila Reis', imob: 'Ilha Negócios Imobiliários', contato: '(48) 99120-7788', ini: 'CR', avCls: 'avatar r' }
+    };
+    const vb = { pend: ['Para confirmar', 'badge b-neg'], conf: ['Confirmada', 'badge b-disp'], rec: ['Recusada', 'badge b-repr'] };
+    const pb = { pend: ['Nova', 'badge b-neg'], aceita: ['Aceita', 'badge b-disp'], rec: ['Recusada', 'badge b-repr'] };
+    const visitas = [{ id: 'r', quando: 'Ter, 14/10 às 10:00' }, { id: 't', quando: 'Ter, 14/10 às 15:30' }].map((v) => ({
+      ...v, ...pessoas[v.id], badge: vb[st.vis[v.id]][0], badgeCls: vb[st.vis[v.id]][1], pend: st.vis[v.id] === 'pend',
+      confirmar: () => this.setState({ vis: { ...st.vis, [v.id]: 'conf' } }),
+      recusar: () => this.setState({ vis: { ...st.vis, [v.id]: 'rec' } })
+    }));
+    const propostas = [
+      { id: 'r', valor: 'R$ 1.800.000', cond: 'À vista, escritura em até 60 dias.' },
+      { id: 'c', valor: 'R$ 1.720.000', cond: 'Financiamento bancário com entrada de 40%.' }
+    ].map((p) => ({
+      ...p, ...pessoas[p.id], badge: pb[st.prop[p.id]][0], badgeCls: pb[st.prop[p.id]][1], pend: st.prop[p.id] === 'pend',
+      aceitar: () => this.setState({ prop: { ...st.prop, [p.id]: 'aceita' } }),
+      recusar: () => this.setState({ prop: { ...st.prop, [p.id]: 'rec' } })
+    }));
+    const temAceita = Object.values(st.prop).includes('aceita');
+    return {
+      statusTxt: temAceita ? 'Em negociação' : 'Disponível',
+      statusCls: temAceita ? 'badge b-neg' : 'badge b-disp',
+      contato: st.contato,
+      toggleCls: st.contato ? 'toggle on' : 'toggle',
+      contatoTxt: st.contato ? 'Corretores veem seu telefone e e-mail.' : 'Corretores não veem seu contato. Tudo passa pelo site.',
+      trocaContato: () => this.setState({ contato: !st.contato }),
+      visitas: visitas, propostas: propostas,
+      visitaConfirmada: st.vis.r === 'conf',
+      temAceita: temAceita
+    };
+  }
+}
+</script>
+</body>
+</html>

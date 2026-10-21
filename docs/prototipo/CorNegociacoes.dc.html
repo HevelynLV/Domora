@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>PAUTA · Minhas negociações</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="./pauta.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&amp;family=Figtree:wght@400;500;600;700;800&amp;display=swap">
+<style>body{margin:0}</style>
+</helmet>
+<div class="app">
+  <div class="top" style="padding-top: 22px; flex-direction: column; align-items: stretch; gap: 12px">
+    <h1 class="t1">Negociações</h1>
+    <div class="tabs" role="tablist">
+      <button class="{{tabPropCls}}" onClick="{{verPropostas}}" role="tab">Propostas<span class="count">4</span></button>
+      <button class="{{tabVisCls}}" onClick="{{verVisitas}}" role="tab">Visitas<span class="count">2</span></button>
+    </div>
+  </div>
+  <div class="scroll" style="gap: 12px; padding-top: 10px">
+    <sc-if value="{{abaPropostas}}" hint-placeholder-val="{{ true }}">
+      <div class="stack" style="gap: 12px">
+        <div class="card">
+          <div class="between"><b>Casa com vista no Campeche</b><span class="badge b-disp">Aceita</span></div>
+          <span class="small muted">Sua proposta: <b style="color: var(--ink)">R$ 1.800.000</b> · à vista</span>
+          <span class="tiny muted">Aceita pela proprietária em 15/10. Colha as assinaturas fora do app e envie o PDF.</span>
+          <a class="btn sm" href="CorContrato.dc.html"><svg class="i s" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16V4M6 10l6-6 6 6M4 20h16"></path></svg>Enviar contrato assinado</a>
+        </div>
+        <div class="card">
+          <div class="between"><b>Apartamento na Beira-Mar Norte</b><span class="badge b-repr">Contrato recusado</span></div>
+          <span class="small muted">Sua proposta: <b style="color: var(--ink)">R$ 2.300.000</b> · financiamento</span>
+          <div class="alerta erro"><span><b>Motivo do admin:</b> falta a assinatura do segundo comprador na página 4.</span></div>
+          <a class="btn sec sm" href="CorContrato.dc.html">Reenviar contrato</a>
+        </div>
+        <div class="card">
+          <div class="between"><b>Cobertura em Jurerê</b><span class="badge b-pend">Aguardando resposta</span></div>
+          <span class="small muted">Sua proposta: <b style="color: var(--ink)">R$ 3.900.000</b> · permuta + complemento</span>
+        </div>
+        <div class="card">
+          <div class="between"><b>Apartamento na Lagoa</b><span class="badge b-repr">Recusada</span></div>
+          <span class="small muted">Sua proposta: <b style="color: var(--ink)">R$ 900.000</b> · à vista</span>
+        </div>
+      </div>
+    </sc-if>
+    <sc-if value="{{abaVisitas}}" hint-placeholder-val="{{ false }}">
+      <div class="stack" style="gap: 12px">
+        <div class="card">
+          <div class="between"><b>Casa com vista no Campeche</b><span class="badge b-disp">Confirmada</span></div>
+          <span class="row small"><svg class="i s" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"></rect><path d="M3 10h18M8 3v4M16 3v4"></path></svg>Ter, 14/10 às 10:00</span>
+          <span class="tiny muted">Rua das Gaivotas, 210 · Campeche</span>
+          <a class="btn sec sm" href="CorProposta.dc.html">Enviar proposta</a>
+        </div>
+        <div class="card">
+          <div class="between"><b>Cobertura em Jurerê</b><span class="badge b-neg">Aguardando</span></div>
+          <span class="row small"><svg class="i s" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"></rect><path d="M3 10h18M8 3v4M16 3v4"></path></svg>Ter, 21/10 às 14:00</span>
+          <span class="tiny muted">Esperando a confirmação do proprietário</span>
+        </div>
+      </div>
+    </sc-if>
+  </div>
+  <nav class="nav" aria-label="Menu do corretor">
+    <a href="CorCatalogo.dc.html"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"></rect><rect x="14" y="3" width="7" height="7" rx="1.5"></rect><rect x="3" y="14" width="7" height="7" rx="1.5"></rect><rect x="14" y="14" width="7" height="7" rx="1.5"></rect></svg>Catálogo</a>
+    <a class="on" href="CorNegociacoes.dc.html" aria-current="page"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 3H6v18h12V7z"></path><path d="M14 3v4h4M9 13h6M9 17h6"></path></svg>Negociações</a>
+    <a href="CorAvisos.dc.html"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9a6 6 0 1 1 12 0c0 6 2.5 8 2.5 8h-17S6 15 6 9"></path><path d="M10 20.5h4"></path></svg>Avisos<span class="pill">2</span></a>
+    <a href="CorConta.dc.html"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"></circle><path d="M4 21c0-4 4-6 8-6s8 2 8 6"></path></svg>Conta</a>
+  </nav>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { aba: 'prop' }; }
+  renderVals() {
+    const a = this.state.aba;
+    return {
+      abaPropostas: a === 'prop',
+      abaVisitas: a === 'vis',
+      tabPropCls: a === 'prop' ? 'on' : '',
+      tabVisCls: a === 'vis' ? 'on' : '',
+      verPropostas: () => this.setState({ aba: 'prop' }),
+      verVisitas: () => this.setState({ aba: 'vis' })
+    };
+  }
+}
+</script>
+</body>
+</html>

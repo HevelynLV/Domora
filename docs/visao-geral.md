@@ -130,7 +130,7 @@ Ficam para depois do MVP: chat interno, mapa, app nativo nas lojas e outras cida
 
 ## Etapas do MVP
 
-O projeto recomeça do zero num repositório `pauta` e num projeto Supabase novos; o `imobilink` fica arquivado para consulta. Antes de programar, um protótipo do design das telas. Cada etapa entrega uma fatia do fluxo funcionando, com banco, tela e teste. O acompanhamento fica no Roadmap.
+O projeto recomeça do zero num repositório `PAUTA` e num projeto Supabase novos; o `imobilink` fica arquivado para consulta. Antes de programar, um protótipo do design das telas. Cada etapa entrega uma fatia do fluxo funcionando, com banco, tela e teste. O acompanhamento fica no Roadmap.
 
 | Etapa | O que entrega | Pronto quando | Decidir antes |
 | --- | --- | --- | --- |

@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>PAUTA · Acesso suspenso</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="./pauta.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&amp;family=Figtree:wght@400;500;600;700;800&amp;display=swap">
+<style>body{margin:0}</style>
+</helmet>
+<div class="app">
+  <div class="top" style="justify-content: space-between">
+    <span class="logo"><span class="logo-mark"><svg class="i s" viewBox="0 0 24 24" style="color: #fff" aria-hidden="true"><path d="M4 11 12 4l8 7"></path><path d="M7 20v-6a5 5 0 0 1 10 0v6"></path></svg></span><span>PAUTA</span></span>
+    <a class="link small" href="Main.dc.html">Sair</a>
+  </div>
+  <div class="scroll" style="gap: 20px">
+    <div class="stack" style="gap: 8px">
+      <p class="over">Protótipo · motivo da suspensão</p>
+      <div class="seg" role="group" aria-label="Motivo da suspensão">
+        <button class="{{cVenc}}" onClick="{{selVenc}}">Pagamento vencido</button>
+        <button class="{{cBloq}}" onClick="{{selBloq}}">Bloqueio do admin</button>
+      </div>
+    </div>
+    <div class="stack" style="gap: 12px">
+      <span class="dot erro" style="width: 56px; height: 56px; border-radius: 16px"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"></rect><path d="M8 11V7a4 4 0 0 1 8 0v4"></path></svg></span>
+      <h1 class="t1">Seu acesso ao catálogo está suspenso</h1>
+      <sc-if value="{{venc}}" hint-placeholder-val="{{ true }}">
+        <p class="p muted">A mensalidade da Casa Sul Imóveis venceu em 05/10/2026. Enquanto ela não for paga, você e os corretores da imobiliária não veem o catálogo.</p>
+      </sc-if>
+      <sc-if value="{{bloq}}" hint-placeholder-val="{{ false }}">
+        <p class="p muted">A equipe PAUTA bloqueou o acesso da Casa Sul Imóveis. Você e os corretores da imobiliária não veem o catálogo até o desbloqueio.</p>
+      </sc-if>
+    </div>
+    <sc-if value="{{venc}}" hint-placeholder-val="{{ true }}">
+      <div class="card" style="gap: 10px">
+        <div class="between"><b>Outubro/2026</b><span class="badge b-repr">Vencida</span></div>
+        <span class="small muted">Venceu em 05/10/2026 · [PREÇO A DEFINIR]</span>
+        <a class="btn" href="CorPagamento.dc.html">Pagar mensalidade</a>
+        <span class="hint">O acesso volta sozinho assim que o Asaas confirmar o pagamento.</span>
+      </div>
+    </sc-if>
+    <sc-if value="{{bloq}}" hint-placeholder-val="{{ false }}">
+      <div class="card" style="gap: 6px">
+        <b>Fale com a equipe PAUTA</b>
+        <span class="small muted">Para entender o motivo do bloqueio: [CONTATO DA EQUIPE A DEFINIR]</span>
+      </div>
+    </sc-if>
+    <div class="alerta atencao"><span>Corretor convidado? Quem resolve é o responsável pela imobiliária.</span></div>
+    <div class="alerta atencao"><span><b>A definir:</b> o que acontece com as visitas e propostas em andamento enquanto o acesso está suspenso.</span></div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { motivo: 'venc' }; }
+  renderVals() {
+    const v = this.state.motivo === 'venc';
+    return {
+      venc: v, bloq: !v,
+      cVenc: v ? 'on' : '', cBloq: v ? '' : 'on',
+      selVenc: () => this.setState({ motivo: 'venc' }),
+      selBloq: () => this.setState({ motivo: 'bloq' })
+    };
+  }
+}
+</script>
+</body>
+</html>

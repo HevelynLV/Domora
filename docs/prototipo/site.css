@@ -1,0 +1,76 @@
+/* PAUTA — estilos da versão site. Usa as cores e componentes de pauta.css. */
+.site { background: var(--bg); color: var(--ink); font-family: 'Figtree', system-ui, sans-serif; font-size: 15px; line-height: 1.5; min-height: 900px; position: relative; }
+.site *, .site *::before, .site *::after { box-sizing: border-box; }
+.wrap { width: 100%; max-width: 1200px; margin: 0 auto; padding: 0 32px; }
+
+/* Cabeçalho público */
+.pub-head { background: var(--card); border-bottom: 1px solid var(--line); }
+.pub-head .wrap { display: flex; align-items: center; gap: 28px; min-height: 72px; flex-wrap: wrap; padding-top: 10px; padding-bottom: 10px; }
+.pub-head nav { display: flex; gap: 22px; flex: 1; flex-wrap: wrap; }
+.pub-head nav a { color: var(--ink2); text-decoration: none; font-weight: 600; font-size: 14px; }
+.pub-head nav a:hover { color: var(--ink); }
+.pub-foot { border-top: 1px solid var(--line); background: var(--card); padding: 28px 0; font-size: 13px; color: var(--ink2); }
+
+/* Áreas logadas: menu lateral + conteúdo */
+.shell { display: flex; flex-wrap: wrap; min-height: 900px; align-items: stretch; }
+.side { flex: 1 1 240px; max-width: 100%; background: var(--card); border-right: 1px solid var(--line); padding: 24px 16px; display: flex; flex-direction: column; gap: 22px; }
+@media (min-width: 900px) { .side { flex: 0 0 248px; } }
+.side .who { display: flex; gap: 10px; align-items: center; padding: 12px; border-radius: 14px; background: var(--bg); }
+.snav { display: flex; flex-direction: column; gap: 4px; }
+.snav a { display: flex; align-items: center; gap: 12px; min-height: 44px; padding: 0 12px; border-radius: 10px; color: var(--ink2); text-decoration: none; font-weight: 600; font-size: 14px; }
+.snav a:hover { background: var(--bg); color: var(--ink); }
+.snav a.on { background: var(--mar-soft); color: var(--mar-dark); }
+.snav .n { margin-left: auto; min-width: 22px; height: 22px; border-radius: 11px; background: var(--erro); color: #fff; font-size: 11px; display: flex; align-items: center; justify-content: center; padding: 0 6px; }
+.main { flex: 999 1 560px; min-width: 0; padding: 32px 40px 56px; display: flex; flex-direction: column; gap: 24px; }
+.inner { width: 100%; max-width: 1140px; display: flex; flex-direction: column; gap: 24px; }
+.head { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+.crumb { font-size: 13px; color: var(--ink2); display: flex; gap: 6px; align-items: center; }
+.crumb a { color: var(--ink2); text-decoration: none; }
+.crumb a:hover { color: var(--mar); }
+
+/* Grades e colunas */
+.pgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 20px; }
+.cols { display: flex; flex-wrap: wrap; gap: 24px; align-items: flex-start; }
+.col-main { flex: 999 1 520px; min-width: 0; display: flex; flex-direction: column; gap: 20px; }
+.col-side { flex: 1 1 320px; min-width: 0; display: flex; flex-direction: column; gap: 16px; }
+.col-filter { flex: 1 1 240px; min-width: 0; display: flex; flex-direction: column; gap: 18px; }
+@media (min-width: 900px) { .col-filter { flex: 0 0 250px; } .col-side.fix { flex: 0 0 360px; } }
+.fgrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; }
+.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; }
+.stat { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 18px; display: flex; flex-direction: column; gap: 6px; color: inherit; text-decoration: none; }
+a.stat:hover { border-color: var(--mar); }
+.stat b { font-family: 'Bricolage Grotesque', sans-serif; font-size: 36px; line-height: 1; }
+
+/* Tabelas */
+.tbox { background: var(--card); border: 1px solid var(--line); border-radius: 16px; overflow-x: auto; }
+.tbl { width: 100%; border-collapse: collapse; min-width: 640px; font-size: 14px; }
+.tbl th { text-align: left; font-size: 12px; text-transform: uppercase; letter-spacing: .06em; color: var(--ink2); font-weight: 700; padding: 12px 16px; border-bottom: 1px solid var(--line); background: #FAFBFA; }
+.tbl td { padding: 14px 16px; border-bottom: 1px solid var(--line); vertical-align: middle; }
+.tbl tr:last-child td { border-bottom: 0; }
+.tbl .acts { display: flex; gap: 8px; justify-content: flex-end; }
+
+/* Cartão de imóvel */
+.pcard { background: var(--card); border: 1px solid var(--line); border-radius: 18px; overflow: hidden; display: flex; flex-direction: column; color: inherit; text-decoration: none; }
+a.pcard:hover { border-color: var(--mar); box-shadow: 0 6px 20px rgba(16,32,30,.08); }
+.pcard .foto { height: 180px; border-radius: 0; align-items: flex-start; }
+.pcard .body { padding: 14px 16px 16px; display: flex; flex-direction: column; gap: 4px; }
+
+/* Modal */
+.modal-bg { position: absolute; inset: 0; background: rgba(16,32,30,.45); display: flex; align-items: flex-start; justify-content: center; padding: 120px 16px; z-index: 10; }
+.modal { width: 100%; max-width: 520px; background: var(--card); border-radius: 20px; padding: 28px; display: flex; flex-direction: column; gap: 16px; box-shadow: 0 20px 60px rgba(16,32,30,.25); }
+
+/* Landing */
+.hero { display: flex; flex-wrap: wrap; gap: 48px; align-items: center; padding: 64px 0 72px; }
+.hero > div { flex: 1 1 420px; min-width: 0; }
+.display { font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; letter-spacing: -0.03em; line-height: 1.02; font-size: clamp(40px, 5.4vw, 68px); margin: 0; }
+.lead { font-size: 19px; color: var(--ink2); margin: 0; max-width: 560px; }
+.band { padding: 72px 0; }
+.band.alt { background: var(--card); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+.h2 { font-family: 'Bricolage Grotesque', sans-serif; font-weight: 700; letter-spacing: -0.02em; font-size: clamp(28px, 3.2vw, 40px); line-height: 1.1; margin: 0; }
+.steps6 { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 18px; counter-reset: p; }
+.steps6 div { display: flex; flex-direction: column; gap: 8px; padding-top: 16px; border-top: 2px solid var(--ink); }
+.steps6 div::before { counter-increment: p; content: counter(p, decimal-leading-zero); font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: 22px; color: var(--mar); }
+.split { display: flex; flex-wrap: wrap; min-height: 900px; }
+.split > .art { flex: 1 1 420px; background: var(--mar); color: #fff; padding: 48px; display: flex; flex-direction: column; justify-content: space-between; gap: 32px; }
+.split > .form { flex: 1 1 440px; display: flex; align-items: center; justify-content: center; padding: 48px 24px; }
+.split .box { width: 100%; max-width: 440px; display: flex; flex-direction: column; gap: 18px; }

@@ -3,11 +3,11 @@
 ## Onde paramos
 
 Última atualização: 20/10/2026 · por Hevelyn
-Etapa atual: 1. Setup (Etapa 0, protótipo, concluída; nenhum código escrito ainda)
+Etapa atual: 1. Setup, na branch `etapa-1-setup` (passos 1.1 e 1.2 feitos; próximo: 1.3)
 
 O que aconteceu (replanejamento de 13 e 14/10/2026 e troca de nome em 16/10/2026):
 - O projeto antigo se chamava **Captador** (repositório `HevelynLV/imobilink`, pasta local `capimoveis`). Ele chegou até a Etapa 3 (login e perfis), mas o modelo de negócio mudou tanto que vamos recomeçar do zero
-- No replanejamento, o app passou a se chamar Domora e, em 16/10/2026, **PAUTA**. O produto inteiro foi redefinido: ideia, diferencial, usuários, 32 requisitos funcionais, 16 não funcionais e 14 etapas. Tudo está em "PAUTA - Visão geral da plataforma", que é a fonte da verdade do projeto
+- No replanejamento, o app passou a se chamar Domora e, em 16/10/2026, **PAUTA**. O produto inteiro foi redefinido: ideia, diferencial, usuários, 32 requisitos funcionais, 16 não funcionais e 14 etapas. Tudo está em `docs/visao-geral.md`, que é a fonte da verdade do projeto
 - As mudanças que mais pesam em relação ao Captador: não existe mais reserva (vários corretores trabalham o mesmo imóvel ao mesmo tempo); a exclusividade é de 6 meses, com aviso e renovação; o proprietário confirma as visitas, aceita várias propostas e vê os dados do corretor; o contrato é assinado fora do app e o admin confere o PDF; a receita é mensalidade (Asaas) mais uma % da comissão; os avisos saem por WhatsApp; corretores entram por convite da imobiliária; corretor autônomo pode assinar; o piloto é em Florianópolis
 
 Etapa 0 (concluída em 20/10/2026):
@@ -15,17 +15,20 @@ Etapa 0 (concluída em 20/10/2026):
 - Passos 0.1 a 0.3 feitos: revisão contra a Visão geral, 15 telas novas (pagamento da mensalidade, acesso suspenso, renovar exclusividade, recuperar senha, editar imóvel disponível, editar e reenviar reprovado, minha conta), confirmação de apagar, status "contrato em análise" e "vendido", "Equipe" só para o responsável da imobiliária, Domora trocado por PAUTA (o `domora.css` virou `pauta.css`) e o roteiro com as datas em ordem
 - O que o protótipo revelou e ainda não está decidido ficou em "Pendências e decisões em aberto", abaixo. As telas mostram esses pontos como [A DEFINIR]
 
+Etapa 1 (em andamento):
+- 1.1 feito: app Next.js 16.4.2 com TypeScript, Tailwind 4, ESLint, App Router e código em `src/` (pacote `pauta`). Cache Components ficou ligado, como o Next 16.4 cria (decisão no CLAUDE.md). `npm run lint` e `npm run build` passam
+- 1.2 feito: os documentos saíram de `PAUTA-docs/` e foram para `README.md`, `ROADMAP.md`, `CLAUDE.md`, `docs/visao-geral.md` e `docs/prompts.md`. As 63 telas do protótipo, o `pauta.css` e o `site.css` estão em `docs/prototipo/`. O CLAUDE.md carrega o `AGENTS.md` do Next e tem a regra de atualizar este "Onde paramos" a cada passo. O `.gitattributes` fixa a quebra de linha (LF) para Windows e Mac
+
 Próximo passo exato:
-- **Etapa 1, setup**, seguindo o "PAUTA Roadmap de prompts" a partir do passo 1.1. Antes, fazer o que falta de "Antes da Etapa 1" logo abaixo
-- O repositório `HevelynLV/PAUTA` já existe e não está vazio (tem a pasta `PAUTA-docs/`). No passo 1.1, criar o app Next.js sem apagar os documentos; no passo 1.2, eles vão para a raiz e para `docs/`
-- O nome do pacote no npm precisa ser em minúsculas (`pauta`), mesmo com o repositório chamado `PAUTA`
+- **Passo 1.3** do `docs/prompts.md`: conectar ao Supabase (bibliotecas, `src/lib/supabase/client.ts` e `server.ts`, `.env.local` e página de teste). O projeto Supabase PAUTA já foi criado
 
 Antes da Etapa 1 (fazer à mão, cada pessoa pelo próprio painel):
 - [ ] Avisar o Gabriel do replanejamento e da troca do nome para PAUTA, e combinar o arquivamento
 - [ ] Fechar sem aceitar o Pull Request da Etapa 3 no `imobilink`
 - [ ] Arquivar o repositório `HevelynLV/imobilink` (GitHub → Settings → General → Danger Zone → Archive this repository). Ele fica só leitura e serve de consulta
 - [x] Criar o repositório no GitHub: existe como `HevelynLV/PAUTA`, já com os documentos do planejamento
-- [ ] Criar um projeto novo no Supabase (região São Paulo), com o nome PAUTA, e convidar o Gabriel
+- [x] Criar um projeto novo no Supabase (região São Paulo), com o nome PAUTA
+- [ ] Convidar o Gabriel para o projeto Supabase do PAUTA
 - [ ] Depois que o projeto novo estiver funcionando: pausar o projeto antigo do Supabase (`gaxvhygqwcvfgpudywmi`)
 
 Pendências e decisões em aberto (cada uma precisa estar resolvida antes da etapa indicada). Os itens marcados com **(banco)** mudam tabelas ou status: como a Etapa 2 modela o banco do MVP inteiro, vale decidi-los antes do passo 2.1, mesmo que a etapa deles venha depois. Ao decidir, registrar em "Decisões tomadas" na Visão geral (com a data) e no CLAUDE.md, e tirar daqui.
@@ -78,6 +81,7 @@ Pendências e decisões em aberto (cada uma precisa estar resolvida antes da eta
   - **(banco)** O que acontece com as propostas aceitas se a exclusividade vencer com o imóvel em negociação
 - Etapa 13:
   - Termo de assinatura do corretor e da imobiliária, com a cláusula contra desintermediação e a responsabilidade da imobiliária pelos corretores convidados (o protótipo pede o aceite já no cadastro)
+  - Rever o `npm audit`: na Etapa 1 havia 5 avisos "high" no pacote `braces`, que vem só das ferramentas de lint (não vai para o app no ar). A correção sugerida (`npm audit fix --force`) voltaria o `eslint-config-next` para a versão 14 e não foi aplicada
 
 Lições do Captador (problemas já encontrados no projeto antigo; tratar desde o início no PAUTA):
 - Etapa 1: o Next.js 16 tem mudanças grandes em relação ao que os tutoriais mostram. Antes de escrever código, ler o guia em `node_modules/next/dist/docs/` (o arquivo `AGENTS.md` gerado pelo Next avisa isso)
@@ -93,9 +97,11 @@ Lições do Captador (problemas já encontrados no projeto antigo; tratar desde 
 - LGPD: planejar a exclusão e a anonimização de usuários e imóveis antes do piloto
 
 Atenção (algo que a próxima pessoa precisa saber):
-- Primeira vez no projeto? Veja o "PAUTA README" e a "PAUTA - Visão geral da plataforma"
-- O nome do app agora é **PAUTA** (antes, Domora). Repositório e projeto Supabase devem ser criados já com o nome novo
-- O repositório `HevelynLV/PAUTA` já existe, mas ainda não há banco do PAUTA. Não use o `imobilink` nem o projeto Supabase antigo para trabalho novo
+- Primeira vez no projeto? Veja o `README.md` e a `docs/visao-geral.md`
+- O nome do app agora é **PAUTA** (antes, Domora)
+- Os documentos saíram de `PAUTA-docs/` e agora ficam na raiz (`README.md`, `ROADMAP.md`, `CLAUDE.md`) e em `docs/`. O protótipo está em `docs/prototipo/`
+- O app Next.js existe a partir da branch `etapa-1-setup`: depois de baixar, rode `npm install`
+- O projeto Supabase do PAUTA já existe, mas ainda não tem tabelas. Não use o `imobilink` nem o projeto Supabase antigo para trabalho novo
 - O protótipo mudou na Etapa 0 (63 telas). O arquivo de estilo agora se chama `pauta.css` (antes, `domora.css`); o Roadmap de prompts já usa o nome novo nos passos 1.2 e 1.6
 - Há várias decisões novas em "Pendências e decisões em aberto". As marcadas com **(banco)** precisam ser decididas antes do passo 2.1
 
@@ -106,7 +112,7 @@ Nenhuma ainda. O projeto Supabase do PAUTA será criado na Etapa 1. Toda migrati
 ## Etapas do MVP
 
 - [x] 0. Protótipo do design — Pronto quando: o fluxo inteiro pode ser clicado, do cadastro do imóvel até o vendido
-- [ ] 1. Setup — Pronto quando: a página abre em localhost, conecta ao Supabase novo e o código está no repositório `pauta`
+- [ ] 1. Setup — Pronto quando: a página abre em localhost, conecta ao Supabase novo e o código está no repositório `PAUTA`
 - [ ] 2. Banco de dados — Pronto quando: o `testar_rls.sql` passa e um assinante bloqueado não vê nenhum imóvel
 - [ ] 3. Login e perfis — Pronto quando: cada tipo de usuário só abre a própria área
 - [ ] 4. Imóvel — Pronto quando: imóvel do proprietário, com fotos e termo aceito, aparece como pendente; imóvel captado pelo admin entra disponível e vinculado ao dono
