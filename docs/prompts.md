@@ -45,7 +45,7 @@ Me dê 2 ou 3 opções, com o impacto de cada uma no código, no custo e no pilo
 ## Etapa 0 — Protótipo do design
 
 **Pronto quando:** o fluxo inteiro pode ser clicado, do cadastro do imóvel até o "vendido".
-**Situação:** o protótipo já existe: **"PAUTA — Protótipo"** no Claude (https://claude.ai/artifact/GBqYuzenozHgGygiGrSS12), com 48 telas (24 de celular e 24 de site) e o roteiro clicável do fluxo inteiro. Falta revisar e completar.
+**Situação:** o protótipo já existe: **"PAUTA — Protótipo"** no Claude (https://claude.ai/artifact/GBqYuzenozHgGygiGrSS12), com 63 telas (36 de celular e 27 de site) e o roteiro clicável do fluxo inteiro. Falta revisar e completar.
 
 **Telas que já existem**, pelo nome do arquivo (as de site têm o prefixo `Site`):
 

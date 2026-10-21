@@ -4,7 +4,7 @@ description: Atualiza o ROADMAP.md (e o README, se preciso) antes do push, para 
 
 Antes de eu dar `git push`, atualize o `ROADMAP.md` para a próxima pessoa. Durante a etapa, "Onde paramos" já é atualizado a cada passo (regra do `CLAUDE.md`); este comando é a atualização completa, no fim da etapa ou antes de qualquer push.
 
-1. Rode `git pull` para pegar a versão mais recente do `ROADMAP.md`. Se houver conflito, pare e me avise.
+1. Rode `git fetch origin` e confira se a outra pessoa mudou algo: `git log HEAD..origin/main --oneline` (e, se esta branch já foi enviada, `git log HEAD..@{u} --oneline`). Se aparecer algum commit, pare e me avise antes de mexer no `ROADMAP.md`: primeiro é preciso trazer essas mudanças para a branch (`git merge origin/main` ou `git pull`). Não use só `git pull` numa branch que ainda não foi enviada: ele falha e não traz o que mudou na `main`.
 2. Veja o que mudou: `git status`, `git log` (commits desde o último push, ou `git log main..HEAD` se a branch ainda não foi enviada) e o `git diff` correspondente.
 3. Pergunte meu nome, se não souber (no projeto trabalham Hevelyn e Gabriel), e atualize **"Onde paramos"**:
    - data de hoje e meu nome

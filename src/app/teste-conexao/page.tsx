@@ -1,11 +1,16 @@
+import { notFound } from "next/navigation";
 import { connection } from "next/server";
 import { Suspense } from "react";
 
-import { criarCliente } from "@/lib/supabase/server";
+import { criarClienteServidor } from "@/lib/supabase/server";
 
 // Página só para conferir a conexão com o Supabase na Etapa 1.
 // Não depende de nenhuma tabela. Sai do app antes do deploy (Etapa 13).
 export default function TesteConexao() {
+  // Só existe em desenvolvimento: num deploy (inclusive de pré-visualização na Vercel)
+  // a página responde 404, porque mostra detalhes da conexão e mensagens de erro do Supabase.
+  if (process.env.NODE_ENV === "production") notFound();
+
   return (
     <main className="mx-auto flex w-full max-w-xl flex-col gap-4 p-6">
       <h1 className="text-2xl font-bold">Teste de conexão com o Supabase</h1>
@@ -63,7 +68,7 @@ async function Resultado() {
 
     // 2. O cliente do servidor monta e lê a sessão pelos cookies?
     try {
-      const supabase = await criarCliente();
+      const supabase = await criarClienteServidor();
       const { data, error } = await supabase.auth.getClaims();
       checagens.push({
         nome: "Cliente do servidor (src/lib/supabase/server.ts)",

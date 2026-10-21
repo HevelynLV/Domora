@@ -5,6 +5,11 @@ import { usePathname } from "next/navigation";
 
 // Menu de baixo do celular (.nav em docs/prototipo/pauta.css).
 // No computador, as áreas usam o menu lateral do site.css (Etapa 3).
+//
+// ATENÇÃO (Cache Components): este menu usa usePathname(). Num layout que fica
+// acima de uma rota com parte variável (ex.: /proprietario/imoveis/[id]), ele só
+// funciona dentro de um <Suspense>; sem isso, o npm run build falha. Veja
+// node_modules/next/dist/docs/01-app/03-api-reference/04-functions/use-pathname.md
 
 export type ItemMenu = {
   href: string;
@@ -53,10 +58,17 @@ const icones = {
 export function MenuInferior({ itens, rotulo }: { itens: ItemMenu[]; rotulo: string }) {
   const caminho = usePathname();
 
+  // Acende o item do endereço atual e também das páginas dentro dele
+  // (/imoveis/123 acende "Imóveis"). Se dois itens servirem, vale o mais específico.
+  const servem = itens.filter(
+    (item) => caminho === item.href || caminho.startsWith(`${item.href}/`),
+  );
+  const hrefAtivo = servem.sort((a, b) => b.href.length - a.href.length)[0]?.href;
+
   return (
-    <nav aria-label={rotulo} className="flex shrink-0 border-t border-line bg-card px-1.5 pb-4 pt-1.5">
+    <nav aria-label={rotulo} className="flex shrink-0 border-t border-line bg-card px-1.5 pt-1.5 pb-[max(1rem,env(safe-area-inset-bottom))]">
       {itens.map((item) => {
-        const ativo = caminho === item.href;
+        const ativo = item.href === hrefAtivo;
         return (
           <Link
             key={item.href}

@@ -22,7 +22,8 @@ export default defineConfig({
   },
   projects: [
     // O PAUTA é pensado primeiro para o celular (RNF09).
-    { name: "celular", use: { ...devices["Pixel 7"] } },
+    // Largura de 390 px, a mesma das telas de celular do protótipo.
+    { name: "celular", use: { ...devices["Pixel 7"], viewport: { width: 390, height: 844 } } },
     { name: "computador", use: { ...devices["Desktop Chrome"] } },
   ],
   webServer: {

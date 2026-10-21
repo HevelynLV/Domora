@@ -6,13 +6,13 @@ import { cookies } from "next/headers";
 // Cliente do Supabase para o servidor: Server Components, Server Actions e
 // Route Handlers. A sessão do usuário vem dos cookies da requisição.
 //
-// Crie um cliente novo a cada requisição (chame criarCliente() dentro da
+// Crie um cliente novo a cada requisição (chame criarClienteServidor() dentro da
 // função que precisa dele). Reaproveitar um cliente entre requisições pode
 // misturar a sessão de um usuário com a de outro.
 //
 // O "server-only" acima faz o build falhar se este arquivo for importado
 // num componente do navegador.
-export async function criarCliente() {
+export async function criarClienteServidor() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const chavePublica = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
 

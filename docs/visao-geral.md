@@ -29,7 +29,7 @@ O PAUTA reúne num só catálogo imóveis conferidos, captados por nós ou pelos
 
 ## Nome do app
 
-O nome usado em toda a documentação é **PAUTA** (antes, Domora e, antes disso, Captador). O repositório novo no GitHub vai se chamar `pauta`; o antigo, `imobilink`, fica arquivado para consulta.
+O nome usado em toda a documentação é **PAUTA** (antes, Domora e, antes disso, Captador). O repositório novo no GitHub é o `HevelynLV/PAUTA`; o antigo, `imobilink`, fica arquivado para consulta.
 
 ## Usuários e perfis
 
@@ -158,7 +158,7 @@ O projeto recomeça do zero num repositório `PAUTA` e num projeto Supabase novo
 
 ## Decisões tomadas em 16/10/2026
 
-- O nome do app passa a ser **PAUTA** (antes, Domora). O repositório novo no GitHub vai se chamar `pauta`.
+- O nome do app passa a ser **PAUTA** (antes, Domora). O repositório novo no GitHub se chama `PAUTA` (`HevelynLV/PAUTA`).
 
 ## Decisões tomadas na revisão de 13/10/2026
 

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { notFound } from "next/navigation";
 
 import { Botao, classesBotao } from "@/components/ui/Botao";
 import { Cartao } from "@/components/ui/Cartao";
@@ -31,6 +32,10 @@ const cores = [
 const status: Status[] = ["disponivel", "negociacao", "pendente", "reprovado", "contrato", "vendido"];
 
 export default function Amostra() {
+  // Só existe em desenvolvimento: num deploy (inclusive de pré-visualização na Vercel)
+  // a página responde 404, para ninguém de fora abrir.
+  if (process.env.NODE_ENV === "production") notFound();
+
   return (
     <main className="mx-auto flex w-full max-w-[390px] flex-1 flex-col bg-bg">
       <div className="flex flex-1 flex-col gap-4 px-5 pb-7 pt-[22px]">
