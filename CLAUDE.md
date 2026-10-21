@@ -44,7 +44,6 @@ Estas decisões ainda não foram tomadas. Se uma tarefa depender delas, PERGUNTE
 - Provedor da API oficial do WhatsApp e custo por mensagem
 - Quais filtros o catálogo terá
 - Texto do termo de exclusividade e do termo de assinatura das imobiliárias
-- Como as migrations são aplicadas (à mão pelo SQL Editor, como no projeto antigo, ou pelo `supabase db push`): decidir na Etapa 1, antes da primeira migration
 
 ## Decisões tomadas
 
@@ -56,6 +55,7 @@ Estas decisões ainda não foram tomadas. Se uma tarefa depender delas, PERGUNTE
 - A aprovação de imóvel falha se o imóvel mudou depois que o admin abriu a tela
 - O proprietário só apaga imóvel pendente de aprovação ou reprovado
 - O endereço do imóvel fica visível para qualquer assinante ativo. A proteção contra desintermediação é contratual, no termo de assinatura
+- Migrations aplicadas com a Supabase CLI: criar com `npx supabase migration new <nome>` e aplicar com `npx supabase db push`, sempre depois de `git pull`. Nunca rodar `npx supabase config push` (o `supabase/config.toml` é só para uso local) nem `npx supabase db reset --linked`. A senha do banco é digitada pela pessoa no terminal, nunca escrita em arquivo nem colada no chat. Decidido em 20/10/2026
 - Cache Components do Next.js 16 fica ligado (`cacheComponents` e `partialPrefetching` em `next.config.ts`, como o Next 16.4 cria). Nada é cacheado sem `"use cache"`; tudo o que lê a sessão (cookies) fica dentro de um `<Suspense>`, e a sessão nunca é lida no topo de um layout. Decidido em 20/10/2026, porque o Next vai tornar isso obrigatório na próxima versão grande
 - Fotos e PDFs não passam por Server Action (o limite padrão é 1 MB): o navegador envia direto para o Supabase Storage, com permissão dada pelo servidor (Etapas 4 e 9)
 

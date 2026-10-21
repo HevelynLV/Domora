@@ -20,7 +20,7 @@ Checklist para quem chega no projeto. Faça na ordem, uma vez por computador.
 ### 1. Acessos
 
 - [ ] Convite como colaborador no GitHub, no repositório `HevelynLV/PAUTA` *(a partir da Etapa 1)*. Quem já está no projeto envia em Settings → Collaborators. Aceite pelo e-mail ou em github.com/notifications
-- [ ] Convite no Supabase *(a partir da Etapa 1)*: quem já está no projeto envia em **Organization → Members → Invite**. Aceite pelo e-mail e confira que o projeto do PAUTA aparece no seu painel. O ID do projeto entra aqui quando ele for criado
+- [ ] Convite no Supabase *(a partir da Etapa 1)*: quem já está no projeto envia em **Organization → Members → Invite**. Aceite pelo e-mail e confira que o projeto do PAUTA aparece no seu painel. O ID do projeto é `zqvwyjcdjfkovtiwdryo`
 
 > **O banco é compartilhado.** Todos usam o mesmo projeto do Supabase. O que uma pessoa aplica no banco vale para a outra na hora. Combine antes de mexer no banco.
 
@@ -84,13 +84,32 @@ Confira: `node -v`, `git --version` e `claude --version` respondem sem erro.
 
 ### 5. Banco de dados *(a partir da Etapa 2)*
 
-- [ ] Abra a seção **"Migrations aplicadas no banco"** do Roadmap e compare com a pasta `supabase/migrations/`: todo arquivo da pasta tem que estar na lista. Se faltar algum, **não aplique sozinho**: avise a outra pessoa antes (o banco é de todos)
+As migrations são aplicadas pelo terminal, com a Supabase CLI (`npx supabase`, já instalada pelo `npm install`). A CLI guarda no banco quais migrations já rodaram, então nenhuma roda duas vezes. Decidido em 20/10/2026.
 
-Regras do banco:
+**Preparação (uma vez por computador):**
+- [ ] Entrar na sua conta do Supabase pelo terminal (abre o navegador para você autorizar):
+  ```bash
+  npx supabase login
+  ```
+- [ ] Ligar a pasta do projeto ao banco do PAUTA. O comando pede a **senha do banco** (Project Settings → Database → Database password; se ninguém souber, quem é dono do projeto pode redefinir ali). Digite no terminal: a senha não vai para nenhum arquivo do repositório e não deve ser colada no chat
+  ```bash
+  npx supabase link --project-ref zqvwyjcdjfkovtiwdryo
+  ```
+- [ ] Conferir que funcionou: a lista abaixo aparece sem erro (vazia enquanto não houver migration)
+  ```bash
+  npx supabase migration list
+  ```
+
+**Regras do banco:**
 - Toda mudança no banco vira um arquivo novo em `supabase/migrations/`, nunca só no painel. Correção é sempre uma migration NOVA, nunca edição de uma que já rodou
-- O jeito de aplicar as migrations (à mão pelo SQL Editor ou pelo `supabase db push`) será decidido na Etapa 1 e registrado aqui
-- Depois de aplicar, rode o `supabase/testes/testar_rls.sql` inteiro: toda linha tem que mostrar "✅ passou". Só então siga para o próximo passo
-- Migration nova entra no "Atenção" e na lista "Migrations aplicadas no banco" do Roadmap
+- **Sempre `git pull` antes** de criar ou aplicar uma migration. Se o banco tiver uma migration que você não tem, o `db push` dá erro de propósito: faça o `git pull` e tente de novo
+- Criar uma migration: `npx supabase migration new <nome>` (ex.: `npx supabase migration new perfis`). A CLI cria o arquivo com data e hora no nome, o que garante a ordem
+- Aplicar no banco: `npx supabase db push`. Antes de confirmar, ele mostra quais migrations vai aplicar: leia a lista
+- Ver o que já foi aplicado: `npx supabase migration list` (coluna Local = repositório, Remote = banco)
+- Depois de aplicar, rode o `supabase/testes/testar_rls.sql` inteiro no SQL Editor do painel: toda linha tem que mostrar "✅ passou". Só então siga para o próximo passo
+- Migration nova entra no "Atenção" e na lista "Migrations aplicadas no banco" do Roadmap, para avisar a outra pessoa
+- **Nunca rode `npx supabase config push`.** O `supabase/config.toml` serve só para rodar o Supabase no próprio computador; esse comando copiaria essa configuração por cima da do projeto compartilhado (Site URL, login, e-mails)
+- **Nunca rode `npx supabase db reset --linked`**: ele apaga e recria o banco compartilhado inteiro. E `npx supabase db push --include-all` (aplica migrations mais antigas que a última aplicada) só com a outra pessoa sabendo
 
 ### 6. Configuração do Supabase (só conferir) *(a partir da Etapa 3)*
 

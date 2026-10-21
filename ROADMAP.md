@@ -3,7 +3,7 @@
 ## Onde paramos
 
 Última atualização: 20/10/2026 · por Hevelyn
-Etapa atual: 1. Setup, na branch `etapa-1-setup` (passos 1.1 a 1.3 feitos; próximo: 1.4)
+Etapa atual: 1. Setup, na branch `etapa-1-setup` (passos 1.1 a 1.4 feitos; próximo: 1.5)
 
 O que aconteceu (replanejamento de 13 e 14/10/2026 e troca de nome em 16/10/2026):
 - O projeto antigo se chamava **Captador** (repositório `HevelynLV/imobilink`, pasta local `capimoveis`). Ele chegou até a Etapa 3 (login e perfis), mas o modelo de negócio mudou tanto que vamos recomeçar do zero
@@ -21,8 +21,10 @@ Etapa 1 (em andamento):
 
 - 1.3 feito: `@supabase/supabase-js`, `@supabase/ssr` e `server-only` instalados; `src/lib/supabase/client.ts` (navegador) e `src/lib/supabase/server.ts` (servidor, lê a sessão pelos cookies e não pode ser importado no navegador); `.env.example` no repositório como modelo. A página http://localhost:3000/teste-conexao mostra as três checagens com ✅ (variáveis, endereço e chave, cliente do servidor). `.claude/launch.json` sobe o `npm run dev` pelo painel do Claude Code
 
+- 1.4 feito: decidido usar `npx supabase db push` (Supabase CLI como dependência do projeto, pasta `supabase/` criada com `supabase init`). Registrado no README (passo 5), no CLAUDE.md e na Visão geral. Falta a preparação de cada computador (`supabase login` e `supabase link`), que cada pessoa faz no próprio terminal porque pede a senha do banco
+
 Próximo passo exato:
-- **Passo 1.4** do `docs/prompts.md`: decidir como aplicar as migrations (SQL Editor ou `supabase db push`) e registrar no README, no CLAUDE.md e na Visão geral
+- **Passo 1.5** do `docs/prompts.md`: criar os comandos `/auditar-etapa` e `/atualizar-roadmap`
 
 Antes da Etapa 1 (fazer à mão, cada pessoa pelo próprio painel):
 - [ ] Avisar o Gabriel do replanejamento e da troca do nome para PAUTA, e combinar o arquivamento
@@ -35,8 +37,6 @@ Antes da Etapa 1 (fazer à mão, cada pessoa pelo próprio painel):
 
 Pendências e decisões em aberto (cada uma precisa estar resolvida antes da etapa indicada). Os itens marcados com **(banco)** mudam tabelas ou status: como a Etapa 2 modela o banco do MVP inteiro, vale decidi-los antes do passo 2.1, mesmo que a etapa deles venha depois. Ao decidir, registrar em "Decisões tomadas" na Visão geral (com a data) e no CLAUDE.md, e tirar daqui.
 
-- Etapa 1:
-  - Como aplicar as migrations: à mão pelo SQL Editor ou pelo `supabase db push` (decidir no passo 1.4)
 - Etapa 2 (banco):
   - **(banco)** Assinante bloqueado pelo admin e assinante com pagamento vencido são o mesmo status ou dois diferentes? Se o admin desbloqueia um vencido, ele volta sem pagar?
   - **(banco)** Bloquear uma imobiliária corta o acesso dos corretores dela na hora? (o protótipo e o prompt 5.2 dizem que sim; a Visão geral não diz)
@@ -87,7 +87,7 @@ Pendências e decisões em aberto (cada uma precisa estar resolvida antes da eta
 
 Lições do Captador (problemas já encontrados no projeto antigo; tratar desde o início no PAUTA):
 - Etapa 1: o Next.js 16 tem mudanças grandes em relação ao que os tutoriais mostram. Antes de escrever código, ler o guia em `node_modules/next/dist/docs/` (o arquivo `AGENTS.md` gerado pelo Next avisa isso)
-- Etapa 1: no Captador, as migrations eram aplicadas à mão pelo SQL Editor, e o histórico de migrations do Supabase ficava vazio. No projeto novo dá para decidir, desde o início, se continua assim ou se passa a usar `supabase db push`. Decidir antes da primeira migration
+- Etapa 1: no Captador, as migrations eram aplicadas à mão pelo SQL Editor, e o histórico de migrations do Supabase ficava vazio. No projeto novo dá para decidir, desde o início, se continua assim ou se passa a usar `supabase db push`. Decidir antes da primeira migration **Resolvido em 20/10/2026: `npx supabase db push`** (README, passo 5)
 - Etapa 2: o roteiro de teste do RLS deixava um schema `teste_rls` no banco, e alguns testes dependiam uns dos outros. Fazer cada teste independente e limpar o que criar
 - Etapa 2: o CRECI é único e fica com quem cadastra primeiro, então alguém pode registrar o CRECI de uma imobiliária real e travar o cadastro dela. Por isso existe o RF16 (o admin exclui a imobiliária pendente e libera o CRECI). Planejar o `on delete` entre perfis e imobiliárias para isso funcionar
 - Etapa 3: aceitar telefone digitado com 0 na frente (`0 11 9...`) e reconhecer erros do cadastro pelo código do Supabase, não pelo texto da mensagem
@@ -103,6 +103,7 @@ Atenção (algo que a próxima pessoa precisa saber):
 - O nome do app agora é **PAUTA** (antes, Domora)
 - Os documentos saíram de `PAUTA-docs/` e agora ficam na raiz (`README.md`, `ROADMAP.md`, `CLAUDE.md`) e em `docs/`. O protótipo está em `docs/prototipo/`
 - O app Next.js existe a partir da branch `etapa-1-setup`: depois de baixar, rode `npm install`
+- Migrations agora são aplicadas com `npx supabase db push`: antes da Etapa 2, cada pessoa faz a preparação do README (passo 5: `supabase login` e `supabase link`). Nunca rode `npx supabase config push`
 - O projeto Supabase do PAUTA já existe, mas ainda não tem tabelas. Não use o `imobilink` nem o projeto Supabase antigo para trabalho novo
 - O protótipo mudou na Etapa 0 (63 telas). O arquivo de estilo agora se chama `pauta.css` (antes, `domora.css`); o Roadmap de prompts já usa o nome novo nos passos 1.2 e 1.6
 - Há várias decisões novas em "Pendências e decisões em aberto". As marcadas com **(banco)** precisam ser decididas antes do passo 2.1

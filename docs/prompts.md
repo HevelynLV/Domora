@@ -31,7 +31,7 @@ Me dê 2 ou 3 opções, com o impacto de cada uma no código, no custo e no pilo
 
 | Decisão | Trava a etapa |
 | --- | --- |
-| Como aplicar as migrations (SQL Editor ou `supabase db push`) | 1 (decidida no passo 1.4) |
+| ~~Como aplicar as migrations~~: decidido em 20/10/2026, `supabase db push` | 1 |
 | Texto do termo de exclusividade | 4 |
 | Filtros do catálogo | 6 |
 | % da comissão do PAUTA | 9 |
