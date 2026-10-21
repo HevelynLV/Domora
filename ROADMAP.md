@@ -3,7 +3,7 @@
 ## Onde paramos
 
 Última atualização: 20/10/2026 · por Hevelyn
-Etapa atual: 1. Setup, na branch `etapa-1-setup` (passos 1.1 a 1.5 feitos; próximo: 1.6)
+Etapa atual: 1. Setup, na branch `etapa-1-setup` (passos 1.1 a 1.6 feitos; próximo: 1.7, auditoria numa sessão nova)
 
 O que aconteceu (replanejamento de 13 e 14/10/2026 e troca de nome em 16/10/2026):
 - O projeto antigo se chamava **Captador** (repositório `HevelynLV/imobilink`, pasta local `capimoveis`). Ele chegou até a Etapa 3 (login e perfis), mas o modelo de negócio mudou tanto que vamos recomeçar do zero
@@ -25,8 +25,10 @@ Etapa 1 (em andamento):
 
 - 1.5 feito: `.claude/commands/auditar-etapa.md` e `atualizar-roadmap.md`, a partir dos do `imobilink`. Aproveitados: skill de code review do Superpowers, pedir evidência, tabela por gravidade, não corrigir, conferir variável, pacote e migration novos. Mudou: regras de negócio do PAUTA no lugar da reserva, checagens de `exigirTipo()`, RLS, testes do que deve ser barrado e cuidados do Next 16; migration conferida pelo `npx supabase migration list`
 
+- 1.6 feito: Playwright 1.64 com `npm run test:e2e` (testes em `e2e/`, rodam em tela de celular e de computador, um de cada vez porque o banco é compartilhado, e carregam o `.env.local`). 4 testes passando: a página inicial abre e o app conecta ao Supabase. Cores, fontes (Figtree e Bricolage Grotesque), tamanhos de texto e raios do `pauta.css` estão no `src/app/globals.css` com os mesmos nomes do protótipo; componentes `Botao`, `Cartao`, `SeloStatus` e `MenuInferior` em `src/components/ui/`. Amostra em http://localhost:3000/amostra, conferida no navegador em tamanho de celular
+
 Próximo passo exato:
-- **Passo 1.6** do `docs/prompts.md`: Playwright com o primeiro teste e o `npm run test:e2e`; cores, fontes e componentes do protótipo no Tailwind, com uma página de amostra
+- **Passo 1.7**: `/auditar-etapa 1` numa sessão nova do Claude Code (`/clear` ou outro terminal), para quem revisa não ser quem escreveu
 
 Antes da Etapa 1 (fazer à mão, cada pessoa pelo próprio painel):
 - [ ] Avisar o Gabriel do replanejamento e da troca do nome para PAUTA, e combinar o arquivamento
@@ -85,6 +87,7 @@ Pendências e decisões em aberto (cada uma precisa estar resolvida antes da eta
   - **(banco)** O que acontece com as propostas aceitas se a exclusividade vencer com o imóvel em negociação
 - Etapa 13:
   - Termo de assinatura do corretor e da imobiliária, com a cláusula contra desintermediação e a responsabilidade da imobiliária pelos corretores convidados (o protótipo pede o aceite já no cadastro)
+  - Tirar do app as páginas de teste da Etapa 1: `src/app/teste-conexao/` e `src/app/amostra/`
   - Rever o `npm audit`: na Etapa 1 havia 5 avisos "high" no pacote `braces`, que vem só das ferramentas de lint (não vai para o app no ar). A correção sugerida (`npm audit fix --force`) voltaria o `eslint-config-next` para a versão 14 e não foi aplicada
 
 Lições do Captador (problemas já encontrados no projeto antigo; tratar desde o início no PAUTA):
@@ -99,6 +102,7 @@ Lições do Captador (problemas já encontrados no projeto antigo; tratar desde 
 - Etapa 13: SMTP próprio (ex.: Resend), modelos de e-mail em português, religar a confirmação de e-mail, ligar "Secure password change" e conferir que o cadastro não revela se um e-mail já tem conta. Com a confirmação ligada, o perfil nasce antes de o e-mail ser confirmado: planejar a limpeza de contas nunca confirmadas
 - Etapa 13: trocar o Site URL do Supabase pelo endereço da Vercel e cadastrar as Redirect URLs de produção
 - LGPD: planejar a exclusão e a anonimização de usuários e imóveis antes do piloto
+- Etapa 1 (PAUTA): o `npm run dev` guarda um cache em disco (`.next/dev`). Depois de mudar o `globals.css`, ele continuou servindo o CSS antigo mesmo reiniciado. Se uma mudança não aparecer no navegador: pare o `npm run dev`, apague a pasta `.next/dev` e rode de novo
 
 Atenção (algo que a próxima pessoa precisa saber):
 - Primeira vez no projeto? Veja o `README.md` e a `docs/visao-geral.md`

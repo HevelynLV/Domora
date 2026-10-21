@@ -136,7 +136,7 @@ O admin nunca é criado pelo cadastro do app.
 - [ ] `npm run dev` e abra http://localhost:3000: a tela de login aparece
 - [ ] Em outro terminal, `npm run test:e2e`: todos os testes passam. Para ver o relatório: `npx playwright show-report`
 
-Se algo falhar, confira primeiro o `.env.local` (passo 4) e reinicie o `npm run dev`.
+Se algo falhar, confira primeiro o `.env.local` (passo 4) e reinicie o `npm run dev`. Se uma mudança no código ou no CSS não aparecer no navegador, pare o `npm run dev`, apague a pasta `.next/dev` (é só cache) e rode de novo.
 
 ## Fluxo de cada etapa
 
