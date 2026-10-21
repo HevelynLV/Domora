@@ -71,7 +71,7 @@ Confira: `node -v`, `git --version` e `claude --version` respondem sem erro.
 
   | Variável | O que é | Onde pegar no painel do Supabase |
   |---|---|---|
-  | `NEXT_PUBLIC_SUPABASE_URL` | Endereço do projeto | **Project Settings → Data API → Project URL** (ou botão **Connect** no topo do painel) |
+  | `NEXT_PUBLIC_SUPABASE_URL` | Endereço do projeto, só `https://<id>.supabase.co`, sem barra e sem `/rest/v1/` no fim | **Project Settings → Data API → Project URL** (ou botão **Connect** no topo do painel). Cuidado: o painel também mostra o endereço da API REST, que termina em `/rest/v1/`; esse não serve |
   | `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Chave pública do app; pode ir para o navegador porque o RLS protege os dados | **Project Settings → API Keys → Publishable key** |
   | `SITE_URL` | Endereço do site, usado nos links dos e-mails de cadastro e de recuperação de senha. Sem barra no fim | Não vem do painel: em desenvolvimento é sempre `http://localhost:3000` |
   | `SUPABASE_SECRET_KEY` | Chave secreta, **só para os testes automáticos** | **Project Settings → API Keys → Secret keys → Add new secret key**, com o nome `testes-e2e-<seu nome>`. Copie o valor (`sb_secret_...`) |
@@ -80,6 +80,7 @@ Confira: `node -v`, `git --version` e `claude --version` respondem sem erro.
 
 - [ ] As variáveis do Asaas e do WhatsApp entram aqui nas Etapas 10 e 11
 - [ ] Sempre que criar ou mudar o `.env.local`, pare e rode de novo o `npm run dev`. O Next.js só lê esse arquivo quando o servidor inicia
+- [ ] Confira a conexão: rode `npm run dev` e abra http://localhost:3000/teste-conexao. As três linhas precisam aparecer com ✅ (essa página de teste existe até a Etapa 13)
 
 ### 5. Banco de dados *(a partir da Etapa 2)*
 

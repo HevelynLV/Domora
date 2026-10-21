@@ -3,7 +3,7 @@
 ## Onde paramos
 
 Última atualização: 20/10/2026 · por Hevelyn
-Etapa atual: 1. Setup, na branch `etapa-1-setup` (passos 1.1 e 1.2 feitos; próximo: 1.3)
+Etapa atual: 1. Setup, na branch `etapa-1-setup` (passos 1.1 a 1.3 feitos; próximo: 1.4)
 
 O que aconteceu (replanejamento de 13 e 14/10/2026 e troca de nome em 16/10/2026):
 - O projeto antigo se chamava **Captador** (repositório `HevelynLV/imobilink`, pasta local `capimoveis`). Ele chegou até a Etapa 3 (login e perfis), mas o modelo de negócio mudou tanto que vamos recomeçar do zero
@@ -19,8 +19,10 @@ Etapa 1 (em andamento):
 - 1.1 feito: app Next.js 16.4.2 com TypeScript, Tailwind 4, ESLint, App Router e código em `src/` (pacote `pauta`). Cache Components ficou ligado, como o Next 16.4 cria (decisão no CLAUDE.md). `npm run lint` e `npm run build` passam
 - 1.2 feito: os documentos saíram de `PAUTA-docs/` e foram para `README.md`, `ROADMAP.md`, `CLAUDE.md`, `docs/visao-geral.md` e `docs/prompts.md`. As 63 telas do protótipo, o `pauta.css` e o `site.css` estão em `docs/prototipo/`. O CLAUDE.md carrega o `AGENTS.md` do Next e tem a regra de atualizar este "Onde paramos" a cada passo. O `.gitattributes` fixa a quebra de linha (LF) para Windows e Mac
 
+- 1.3 feito: `@supabase/supabase-js`, `@supabase/ssr` e `server-only` instalados; `src/lib/supabase/client.ts` (navegador) e `src/lib/supabase/server.ts` (servidor, lê a sessão pelos cookies e não pode ser importado no navegador); `.env.example` no repositório como modelo. A página http://localhost:3000/teste-conexao mostra as três checagens com ✅ (variáveis, endereço e chave, cliente do servidor). `.claude/launch.json` sobe o `npm run dev` pelo painel do Claude Code
+
 Próximo passo exato:
-- **Passo 1.3** do `docs/prompts.md`: conectar ao Supabase (bibliotecas, `src/lib/supabase/client.ts` e `server.ts`, `.env.local` e página de teste). O projeto Supabase PAUTA já foi criado
+- **Passo 1.4** do `docs/prompts.md`: decidir como aplicar as migrations (SQL Editor ou `supabase db push`) e registrar no README, no CLAUDE.md e na Visão geral
 
 Antes da Etapa 1 (fazer à mão, cada pessoa pelo próprio painel):
 - [ ] Avisar o Gabriel do replanejamento e da troca do nome para PAUTA, e combinar o arquivamento
