@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>PAUTA · Site · Catálogo</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="./pauta.css">
+<link rel="stylesheet" href="./site.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&amp;family=Figtree:wght@400;500;600;700;800&amp;display=swap">
+<style>body{margin:0}
+.chips.wrapc { flex-wrap: wrap; overflow: visible; }</style>
+</helmet>
+<div class="site shell">
+  <aside class="side">
+    <a class="logo" href="SiteInicio.dc.html"><span class="logo-mark"><svg class="i s" viewBox="0 0 24 24" style="color: #fff" aria-hidden="true"><path d="M4 11 12 4l8 7"></path><path d="M7 20v-6a5 5 0 0 1 10 0v6"></path></svg></span>PAUTA</a>
+    <div class="who"><span class="avatar m">RS</span><div class="stack" style="gap: 0"><b class="small">Rafael Souza</b><span class="tiny muted">Maré Imóveis</span></div></div>
+    <nav class="snav" aria-label="Menu do corretor">
+      <a class="on" href="SiteCorCatalogo.dc.html" aria-current="page"><svg class="i s" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"></rect><rect x="14" y="3" width="7" height="7" rx="1.5"></rect><rect x="3" y="14" width="7" height="7" rx="1.5"></rect><rect x="14" y="14" width="7" height="7" rx="1.5"></rect></svg>Catálogo</a>
+      <a href="SiteCorNegociacoes.dc.html"><svg class="i s" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 3H6v18h12V7z"></path><path d="M14 3v4h4M9 13h6M9 17h6"></path></svg>Negociações</a>
+      <a href="SiteCorAvisos.dc.html"><svg class="i s" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9a6 6 0 1 1 12 0c0 6 2.5 8 2.5 8h-17S6 15 6 9"></path><path d="M10 20.5h4"></path></svg>Avisos<span class="n">2</span></a>
+      <a href="SiteConta.dc.html"><svg class="i s" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"></circle><path d="M4 21c0-4 4-6 8-6s8 2 8 6"></path></svg>Minha conta</a>
+    </nav>
+    <a class="link small" href="SiteInicio.dc.html" style="margin-top: auto">Sair</a>
+  </aside>
+  <main class="main">
+    <div class="inner">
+      <div class="head">
+        <div class="stack" style="gap: 2px"><h1 class="t1" style="font-size: 34px">Catálogo</h1><span class="small muted">{{total}} imóveis exclusivos em Florianópolis</span></div>
+        <div class="field" style="flex: 0 1 360px"><label for="busca" style="position: absolute; width: 1px; height: 1px; overflow: hidden">Buscar</label><input id="busca" placeholder="Buscar por bairro ou título"></div>
+      </div>
+      <div class="cols">
+        <div class="col-filter">
+          <div class="card" style="gap: 18px">
+            <div class="between"><p class="t3">Filtros</p><span class="tiny muted">sugestão · a definir</span></div>
+            <div class="stack" style="gap: 8px"><span class="lbl">Tipo</span><div class="chips wrapc"><sc-for list="{{tipos}}" as="t" hint-placeholder-count="5"><button class="{{t.cls}}" onClick="{{t.pick}}">{{t.nome}}</button></sc-for></div></div>
+            <div class="stack" style="gap: 8px"><span class="lbl">Status</span><div class="chips wrapc"><sc-for list="{{status}}" as="s" hint-placeholder-count="3"><button class="{{s.cls}}" onClick="{{s.pick}}">{{s.nome}}</button></sc-for></div></div>
+            <div class="field"><label for="bairro">Bairro</label><select id="bairro"><option>Todos os bairros</option><option>Campeche</option><option>Lagoa da Conceição</option><option>Jurerê Internacional</option><option>Agronômica</option><option>Ribeirão da Ilha</option></select></div>
+            <div class="grid2"><div class="field"><label for="pmin">Preço mín.</label><input id="pmin" placeholder="R$"></div><div class="field"><label for="pmax">Preço máx.</label><input id="pmax" placeholder="R$"></div></div>
+            <div class="field"><label for="qt">Quartos</label><select id="qt"><option>Qualquer</option><option>1+</option><option>2+</option><option>3+</option><option>4+</option></select></div>
+          </div>
+        </div>
+        <div class="col-main">
+          <div class="pgrid">
+            <sc-for list="{{imoveis}}" as="m" hint-placeholder-count="5">
+              <a class="pcard" href="SiteCorImovel.dc.html">
+                <div class="{{m.foto}}"><span class="{{m.badgeCls}}">{{m.badge}}</span><span>{{m.nFotos}}</span></div>
+                <div class="body">
+                  <div class="between"><span class="price" style="font-size: 20px">{{m.preco}}</span></div>
+                  <b>{{m.titulo}}</b>
+                  <span class="small muted">{{m.bairro}}</span>
+                  <div class="spec" style="margin-top: 4px"><span>{{m.q}}</span><span>{{m.v}}</span><span>{{m.a}}</span></div>
+                </div>
+              </a>
+            </sc-for>
+          </div>
+          <sc-if value="{{vazio}}" hint-placeholder-val="{{ false }}"><p class="p muted" style="text-align: center; padding: 48px 0">Nenhum imóvel com esses filtros.</p></sc-if>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1200}}'>
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { tipo: 'Todos', status: 'Todos' }; }
+  renderVals() {
+    const dados = [
+      { titulo: 'Casa com vista no Campeche', tipo: 'Casa', bairro: 'Campeche', preco: 'R$ 1.890.000', q: '4 quartos', v: '2 vagas', a: '220 m²', neg: false, foto: 'foto', nFotos: '4 fotos' },
+      { titulo: 'Apartamento na Beira-Mar Norte', tipo: 'Apartamento', bairro: 'Agronômica', preco: 'R$ 2.450.000', q: '3 quartos', v: '2 vagas', a: '142 m²', neg: true, foto: 'foto f3', nFotos: '9 fotos' },
+      { titulo: 'Cobertura em Jurerê Internacional', tipo: 'Cobertura', bairro: 'Jurerê Internacional', preco: 'R$ 4.200.000', q: '4 quartos', v: '3 vagas', a: '310 m²', neg: false, foto: 'foto f2', nFotos: '12 fotos' },
+      { titulo: 'Apartamento na Lagoa da Conceição', tipo: 'Apartamento', bairro: 'Lagoa da Conceição', preco: 'R$ 980.000', q: '2 quartos', v: '1 vaga', a: '78 m²', neg: false, foto: 'foto f4', nFotos: '7 fotos' },
+      { titulo: 'Casa no Ribeirão da Ilha', tipo: 'Casa', bairro: 'Ribeirão da Ilha', preco: 'R$ 1.150.000', q: '3 quartos', v: '2 vagas', a: '180 m²', neg: true, foto: 'foto f2', nFotos: '6 fotos' }
+    ];
+    const st = this.state;
+    const lista = dados.filter((d) =>
+      (st.tipo === 'Todos' || d.tipo === st.tipo) &&
+      (st.status === 'Todos' || (st.status === 'Em negociação') === d.neg)
+    ).map((d) => ({ ...d, badge: d.neg ? 'Em negociação' : 'Disponível', badgeCls: d.neg ? 'badge b-neg' : 'badge b-disp' }));
+    return {
+      total: lista.length, vazio: lista.length === 0, imoveis: lista,
+      tipos: ['Todos', 'Casa', 'Apartamento', 'Cobertura', 'Terreno'].map((n) => ({ nome: n, cls: st.tipo === n ? 'chip on' : 'chip', pick: () => this.setState({ tipo: n }) })),
+      status: ['Todos', 'Disponível', 'Em negociação'].map((n) => ({ nome: n, cls: st.status === n ? 'chip on' : 'chip', pick: () => this.setState({ status: n }) }))
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>PAUTA · Site · Assinantes</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="./pauta.css">
+<link rel="stylesheet" href="./site.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&amp;family=Figtree:wght@400;500;600;700;800&amp;display=swap">
+<style>body{margin:0}</style>
+</helmet>
+<div class="site shell">
+  <aside class="side">
+    <a class="logo" href="SiteInicio.dc.html"><span class="logo-mark"><svg class="i s" viewBox="0 0 24 24" style="color: #fff" aria-hidden="true"><path d="M4 11 12 4l8 7"></path><path d="M7 20v-6a5 5 0 0 1 10 0v6"></path></svg></span>PAUTA</a>
+    <div class="who"><span class="avatar" style="background: var(--ink); color: #fff">P</span><div class="stack" style="gap: 0"><b class="small">Equipe PAUTA</b><span class="tiny muted">Admin</span></div></div>
+    <nav class="snav" aria-label="Menu do admin">
+      <a href="SiteAdmPainel.dc.html"><svg class="i s" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="9" rx="1.5"></rect><rect x="14" y="3" width="7" height="5" rx="1.5"></rect><rect x="14" y="12" width="7" height="9" rx="1.5"></rect><rect x="3" y="16" width="7" height="5" rx="1.5"></rect></svg>Painel</a>
+      <a href="SiteAdmAprovar.dc.html"><svg class="i s" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5V21h-6v-6H9v6H3z"></path></svg>Aprovar imóveis<span class="n">2</span></a>
+      <a href="SiteAdmCaptar.dc.html"><svg class="i s" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="4"></rect><path d="M12 8v8M8 12h8"></path></svg>Captar imóvel</a>
+      <a class="on" href="SiteAdmAssinantes.dc.html" aria-current="page"><svg class="i s" viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3.5"></circle><path d="M2.5 20c0-3.5 3-5.5 6.5-5.5s6.5 2 6.5 5.5"></path><path d="M16 4.5a3.5 3.5 0 0 1 0 7M18 14.8c2 .6 3.5 2.3 3.5 5.2"></path></svg>Assinantes</a>
+      <a href="SiteAdmEdicoes.dc.html"><svg class="i s" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16z"></path></svg>Edições<span class="n">3</span></a>
+      <a href="SiteAdmContratos.dc.html"><svg class="i s" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 3H6v18h12V7z"></path><path d="M14 3v4h4M9 13l2 2 4-4"></path></svg>Contratos<span class="n">1</span></a>
+    </nav>
+    <a class="link small" href="SiteInicio.dc.html" style="margin-top: auto">Sair</a>
+  </aside>
+  <main class="main">
+    <div class="inner">
+      <div class="head"><h1 class="t1" style="font-size: 34px">Assinantes</h1><span class="small muted">Confira o CRECI à mão antes de ativar</span></div>
+      <div class="chips" style="flex-wrap: wrap" role="group" aria-label="Filtrar assinantes">
+        <sc-for list="{{filtros}}" as="f" hint-placeholder-count="4"><button class="{{f.cls}}" onClick="{{f.pick}}">{{f.nome}}</button></sc-for>
+      </div>
+      <div class="tbox">
+        <table class="tbl" style="min-width: 860px">
+          <thead><tr><th>Assinante</th><th>CRECI</th><th>Responsável e contato</th><th>Status</th><th style="text-align: right">Ações</th></tr></thead>
+          <tbody>
+            <sc-for list="{{lista}}" as="a" hint-placeholder-count="4">
+              <tr>
+                <td><b>{{a.nome}}</b><br><span class="tiny muted">{{a.tipo}}</span></td>
+                <td>{{a.creci}}<br><a class="link tiny" href="#creci">Conferir no CRECI-SC</a></td>
+                <td><span class="small">{{a.info}}</span></td>
+                <td><span class="{{a.badgeCls}}">{{a.badge}}</span></td>
+                <td><div class="acts">
+                  <sc-if value="{{a.pend}}" hint-placeholder-val="{{ false }}"><button class="btn perigo sm" onClick="{{a.excluir}}">Excluir</button><button class="btn sm" onClick="{{a.ativar}}">Ativar</button></sc-if>
+                  <sc-if value="{{a.ativo}}" hint-placeholder-val="{{ false }}"><button class="btn perigo sm" onClick="{{a.bloquear}}">Bloquear</button></sc-if>
+                  <sc-if value="{{a.bloq}}" hint-placeholder-val="{{ false }}"><button class="btn sec sm" onClick="{{a.ativar}}">Desbloquear</button></sc-if>
+                </div></td>
+              </tr>
+            </sc-for>
+          </tbody>
+        </table>
+      </div>
+      <sc-if value="{{vazio}}" hint-placeholder-val="{{ false }}"><p class="p muted" style="text-align: center">Nada aqui.</p></sc-if>
+      <p class="p tiny muted">Excluir apaga o cadastro pendente com o usuário e libera o CRECI para outra conta. Assinante com mensalidade vencida perde o acesso sozinho.</p>
+    </div>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1000}}'>
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { filtro: 'todos', st: { mare: 'pend', thiago: 'pend', ilha: 'ativo', sul: 'bloq' } }; }
+  muda(id, s) { this.setState({ st: { ...this.state.st, [id]: s } }); }
+  renderVals() {
+    const S = this.state.st;
+    const base = [
+      { id: 'mare', nome: 'Maré Imóveis', tipo: 'Imobiliária', creci: '12345-J SC', info: 'Rafael Souza · (48) 99654-2201 · cadastro em 15/10' },
+      { id: 'thiago', nome: 'Thiago Lemos', tipo: 'Corretor autônomo', creci: '45678-F SC', info: '(48) 99301-5520 · cadastro em 14/10' },
+      { id: 'ilha', nome: 'Ilha Negócios Imobiliários', tipo: 'Imobiliária · 3 corretores', creci: '23456-J SC', info: 'Mensalidade em dia' },
+      { id: 'sul', nome: 'Casa Sul Imóveis', tipo: 'Imobiliária', creci: '34567-J SC', info: 'Pagamento vencido desde 05/10' }
+    ];
+    const rot = { pend: ['Pendente', 'badge b-neg'], ativo: ['Ativa', 'badge b-disp'], bloq: ['Bloqueada', 'badge b-repr'], excl: ['Excluída', 'badge b-pend'] };
+    const f = this.state.filtro;
+    const lista = base.filter((a) => f === 'todos' || S[a.id] === f).map((a) => ({
+      ...a, badge: rot[S[a.id]][0], badgeCls: rot[S[a.id]][1],
+      pend: S[a.id] === 'pend', ativo: S[a.id] === 'ativo', bloq: S[a.id] === 'bloq',
+      ativar: () => this.muda(a.id, 'ativo'), bloquear: () => this.muda(a.id, 'bloq'), excluir: () => this.muda(a.id, 'excl')
+    }));
+    const conta = (s) => Object.values(S).filter((x) => x === s).length;
+    return {
+      lista: lista, vazio: lista.length === 0,
+      filtros: [['todos', 'Todos'], ['pend', 'Pendentes (' + conta('pend') + ')'], ['ativo', 'Ativos'], ['bloq', 'Bloqueados']].map((x) => ({ nome: x[1], cls: f === x[0] ? 'chip on' : 'chip', pick: () => this.setState({ filtro: x[0] }) }))
+    };
+  }
+}
+</script>
+</body>
+</html>

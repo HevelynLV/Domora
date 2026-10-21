@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>PAUTA · Aguardando ativação</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="./pauta.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&amp;family=Figtree:wght@400;500;600;700;800&amp;display=swap">
+<style>body{margin:0}</style>
+</helmet>
+<div class="app">
+  <div class="top" style="justify-content: space-between">
+    <span class="logo"><span class="logo-mark"><svg class="i s" viewBox="0 0 24 24" style="color: #fff" aria-hidden="true"><path d="M4 11 12 4l8 7"></path><path d="M7 20v-6a5 5 0 0 1 10 0v6"></path></svg></span><span>PAUTA</span></span>
+    <a class="link small" href="Main.dc.html">Sair</a>
+  </div>
+  <div class="scroll" style="gap: 22px">
+    <div class="stack" style="gap: 12px; margin-top: 20px">
+      <span class="dot areia" style="width: 56px; height: 56px; border-radius: 16px"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg></span>
+      <h1 class="t1">Cadastro recebido, Rafael</h1>
+      <p class="p muted">A Maré Imóveis está com a assinatura <b style="color: var(--ink)">pendente</b>. Avisamos no seu WhatsApp assim que liberarmos o catálogo.</p>
+    </div>
+    <div class="card" style="gap: 16px">
+      <div class="row" style="align-items: flex-start"><span class="dot" style="width: 28px; height: 28px; border-radius: 50%"><svg class="i s" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 5 5L20 7"></path></svg></span><div class="stack" style="gap: 0"><b>Conta criada</b><span class="small muted">15/10/2026</span></div></div>
+      <div class="row" style="align-items: flex-start"><span class="dot areia" style="width: 28px; height: 28px; border-radius: 50%"><svg class="i s" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"></circle></svg></span><div class="stack" style="gap: 0"><b>Conferência do CRECI 12345-J SC</b><span class="small muted">Feita à mão pela equipe PAUTA</span></div></div>
+      <div class="row" style="align-items: flex-start"><span class="dot" style="width: 28px; height: 28px; border-radius: 50%; background: var(--cinza-soft); color: var(--ink2)"><svg class="i s" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="6" width="18" height="13" rx="2"></rect><path d="M3 10h18"></path></svg></span><div class="stack" style="gap: 0"><b>Pagamento da mensalidade</b><span class="small muted">Boleto, Pix ou cartão · [PREÇO A DEFINIR] · [ORDEM A DEFINIR: antes ou depois da ativação]</span></div></div>
+      <div class="row" style="align-items: flex-start"><span class="dot" style="width: 28px; height: 28px; border-radius: 50%; background: var(--cinza-soft); color: var(--ink2)"><svg class="i s" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"></rect><rect x="14" y="3" width="7" height="7" rx="1.5"></rect><rect x="3" y="14" width="7" height="7" rx="1.5"></rect><rect x="14" y="14" width="7" height="7" rx="1.5"></rect></svg></span><div class="stack" style="gap: 0"><b>Acesso ao catálogo</b><span class="small muted">E você já pode convidar seus corretores</span></div></div>
+    </div>
+    <a class="roteiro" href="AdmAssinantes.dc.html"><span><b>Roteiro do protótipo</b>Ver o admin ativando a assinatura</span><svg class="i s" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg></a>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

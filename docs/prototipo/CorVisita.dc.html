@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>PAUTA · Pedir visita</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="./pauta.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&amp;family=Figtree:wght@400;500;600;700;800&amp;display=swap">
+<style>body{margin:0}
+.dia { min-width: 64px; min-height: 72px; border-radius: 14px; border: 1px solid var(--line); background: var(--card); display: flex; flex-direction: column; align-items: center; justify-content: center; font: inherit; color: var(--ink); cursor: pointer; flex-shrink: 0; }
+.dia b { font-size: 20px; font-family: 'Bricolage Grotesque', sans-serif; }
+.dia span { font-size: 12px; color: var(--ink2); }
+.dia.on { background: var(--ink); border-color: var(--ink); color: #fff; }
+.dia.on span { color: #C9D4D1; }</style>
+</helmet>
+<div class="app">
+  <div class="top">
+    <a class="voltar" href="CorImovel.dc.html" aria-label="Voltar"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"></path></svg></a>
+    <div class="stack" style="gap: 0"><span class="t3">Pedir visita</span><span class="tiny muted">Casa com vista no Campeche</span></div>
+  </div>
+  <sc-if value="{{form}}" hint-placeholder-val="{{ true }}">
+    <div class="scroll" style="gap: 18px">
+      <p class="p small muted">Sugira um horário. A proprietária confirma ou recusa pelo app e você recebe o aviso.</p>
+      <div class="stack" style="gap: 8px">
+        <span class="lbl">Dia</span>
+        <div class="chips" style="gap: 8px">
+          <sc-for list="{{dias}}" as="d" hint-placeholder-count="5">
+            <button class="{{d.cls}}" onClick="{{d.pick}}"><span>{{d.sem}}</span><b>{{d.num}}</b><span>out</span></button>
+          </sc-for>
+        </div>
+      </div>
+      <div class="stack" style="gap: 8px">
+        <span class="lbl">Horário</span>
+        <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px">
+          <sc-for list="{{horas}}" as="h" hint-placeholder-count="6">
+            <button class="{{h.cls}}" onClick="{{h.pick}}" style="justify-content: center">{{h.h}}</button>
+          </sc-for>
+        </div>
+      </div>
+      <div class="field"><label for="msg">Recado para a proprietária (opcional)</label><textarea id="msg">Vou com um casal de clientes interessados.</textarea></div>
+    </div>
+    <div class="foot">
+      <button class="btn" onClick="{{enviar}}">Pedir visita para {{resumo}}</button>
+    </div>
+  </sc-if>
+  <sc-if value="{{enviado}}" hint-placeholder-val="{{ false }}">
+    <div class="scroll" style="gap: 20px">
+      <div class="stack" style="gap: 12px; margin-top: 28px">
+        <span class="dot" style="width: 56px; height: 56px; border-radius: 16px"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 5 5L20 7"></path></svg></span>
+        <h1 class="t1">Pedido enviado</h1>
+        <p class="p muted">Sua visita para {{resumo}} está aguardando a confirmação da proprietária.</p>
+      </div>
+      <a class="btn sec" href="CorNegociacoes.dc.html">Ver minhas negociações</a>
+      <a class="roteiro" href="ProImovel.dc.html"><span><b>Roteiro do protótipo</b>Ver a proprietária confirmando a visita</span><svg class="i s" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg></a>
+    </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { dia: 1, hora: '10:00', enviado: false }; }
+  renderVals() {
+    const st = this.state;
+    const dias = [['ter', 14], ['qua', 15], ['qui', 16], ['sex', 17], ['sáb', 18]];
+    const horas = ['09:00', '10:00', '11:00', '14:00', '15:30', '17:00'];
+    const d = dias.find((x) => x[1] === [14, 15, 16, 17, 18][st.dia - 1]) || dias[0];
+    return {
+      form: !st.enviado,
+      enviado: st.enviado,
+      dias: dias.map((x, i) => ({ sem: x[0], num: x[1], cls: st.dia === i + 1 ? 'dia on' : 'dia', pick: () => this.setState({ dia: i + 1 }) })),
+      horas: horas.map((h) => ({ h: h, cls: st.hora === h ? 'chip on' : 'chip', pick: () => this.setState({ hora: h }) })),
+      resumo: d[0] + ', ' + d[1] + '/10 às ' + st.hora,
+      enviar: () => this.setState({ enviado: true })
+    };
+  }
+}
+</script>
+</body>
+</html>

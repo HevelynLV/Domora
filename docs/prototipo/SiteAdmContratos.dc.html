@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>PAUTA · Site · Conferir contrato</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="./pauta.css">
+<link rel="stylesheet" href="./site.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&amp;family=Figtree:wght@400;500;600;700;800&amp;display=swap">
+<style>body{margin:0}
+.pdf { background: #fff; border: 1px solid var(--line); border-radius: 16px; min-height: 520px; padding: 40px 48px; display: flex; flex-direction: column; gap: 12px; }
+.pdf i { display: block; height: 10px; border-radius: 5px; background: var(--cinza-soft); }</style>
+</helmet>
+<div class="site shell">
+  <aside class="side">
+    <a class="logo" href="SiteInicio.dc.html"><span class="logo-mark"><svg class="i s" viewBox="0 0 24 24" style="color: #fff" aria-hidden="true"><path d="M4 11 12 4l8 7"></path><path d="M7 20v-6a5 5 0 0 1 10 0v6"></path></svg></span>PAUTA</a>
+    <div class="who"><span class="avatar" style="background: var(--ink); color: #fff">P</span><div class="stack" style="gap: 0"><b class="small">Equipe PAUTA</b><span class="tiny muted">Admin</span></div></div>
+    <nav class="snav" aria-label="Menu do admin">
+      <a href="SiteAdmPainel.dc.html"><svg class="i s" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="9" rx="1.5"></rect><rect x="14" y="3" width="7" height="5" rx="1.5"></rect><rect x="14" y="12" width="7" height="9" rx="1.5"></rect><rect x="3" y="16" width="7" height="5" rx="1.5"></rect></svg>Painel</a>
+      <a href="SiteAdmAprovar.dc.html"><svg class="i s" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5V21h-6v-6H9v6H3z"></path></svg>Aprovar imóveis<span class="n">2</span></a>
+      <a href="SiteAdmCaptar.dc.html"><svg class="i s" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="4"></rect><path d="M12 8v8M8 12h8"></path></svg>Captar imóvel</a>
+      <a href="SiteAdmAssinantes.dc.html"><svg class="i s" viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3.5"></circle><path d="M2.5 20c0-3.5 3-5.5 6.5-5.5s6.5 2 6.5 5.5"></path><path d="M16 4.5a3.5 3.5 0 0 1 0 7M18 14.8c2 .6 3.5 2.3 3.5 5.2"></path></svg>Assinantes<span class="n">2</span></a>
+      <a href="SiteAdmEdicoes.dc.html"><svg class="i s" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16z"></path></svg>Edições<span class="n">3</span></a>
+      <a class="on" href="SiteAdmContratos.dc.html" aria-current="page"><svg class="i s" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 3H6v18h12V7z"></path><path d="M14 3v4h4M9 13l2 2 4-4"></path></svg>Contratos<span class="n">1</span></a>
+    </nav>
+    <a class="link small" href="SiteInicio.dc.html" style="margin-top: auto">Sair</a>
+  </aside>
+  <main class="main">
+    <div class="inner">
+      <div class="head"><div class="stack" style="gap: 2px"><h1 class="t1" style="font-size: 34px">Conferir contrato</h1><span class="muted">Casa com vista no Campeche · enviado hoje, 11:20</span></div><span class="badge b-contr">Contrato em análise</span></div>
+      <sc-if value="{{recusado}}" hint-placeholder-val="{{ false }}">
+        <div class="alerta erro" style="align-items: center"><svg class="i s" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"></path></svg><span style="flex: 1">Contrato devolvido. Rafael recebeu o motivo e pode reenviar. O imóvel segue em negociação e as outras propostas continuam valendo.</span><button class="btn sec sm" onClick="{{desfazer}}">Voltar ao contrato</button></div>
+      </sc-if>
+      <div class="cols">
+        <div class="col-main">
+          <div class="between"><span class="small"><b>contrato-campeche-assinado.pdf</b> · 8 páginas</span><a class="link small" href="#baixar">Abrir em nova aba</a></div>
+          <div class="pdf" aria-label="Pré-visualização do PDF">
+            <b style="text-align: center">CONTRATO PARTICULAR DE PROMESSA DE COMPRA E VENDA</b>
+            <i style="width: 92%"></i><i style="width: 88%"></i><i style="width: 95%"></i><i style="width: 70%"></i>
+            <span class="tiny muted" style="margin-top: 12px">Página 1 de 8 · pré-visualização</span>
+            <i style="width: 90%"></i><i style="width: 84%"></i><i style="width: 93%"></i><i style="width: 60%"></i>
+          </div>
+        </div>
+        <div class="col-side fix">
+          <div class="card" style="gap: 8px">
+            <p class="over">Proposta aceita</p>
+            <div class="between"><span class="price">R$ 1.800.000</span><span class="tiny muted">à vista</span></div>
+            <div class="row"><span class="avatar m">RS</span><div class="stack" style="gap: 0"><b class="small">Rafael Souza</b><span class="tiny muted">Maré Imóveis · CRECI 12345-J SC</span></div></div>
+            <span class="tiny muted">Proprietária: Marina Duarte</span>
+          </div>
+          <div class="card" style="gap: 8px">
+            <p class="over">Confira no PDF</p>
+            <label class="check"><input type="checkbox" checked><span>Assinado por vendedora, compradores e corretor</span></label>
+            <label class="check"><input type="checkbox" checked><span>Valor e imóvel batem com a proposta aceita</span></label>
+            <label class="check"><input type="checkbox"><span>Cláusula da comissão do PAUTA presente</span></label>
+          </div>
+          <div class="alerta atencao"><svg class="i s" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 8v5M12 16h.01"></path></svg><span>Outra proposta aceita neste imóvel: Camila Reis (Ilha Negócios), R$ 1.720.000. Ela será recusada se você aprovar.</span></div>
+          <div class="row"><button class="btn perigo flex1" onClick="{{abrirRecusa}}">Recusar</button><button class="btn flex1" onClick="{{abrirAprova}}">Aprovar</button></div>
+        </div>
+      </div>
+    </div>
+  </main>
+  <sc-if value="{{modalAprova}}" hint-placeholder-val="{{ false }}">
+    <div class="modal-bg">
+      <div class="modal" role="dialog" aria-label="Aprovar e registrar a venda">
+        <p class="t2">Aprovar e registrar a venda</p>
+        <div class="stack" style="gap: 6px">
+          <div class="row small"><svg class="i s" viewBox="0 0 24 24" style="color: var(--mar)" aria-hidden="true"><path d="m5 12 5 5L20 7"></path></svg>O imóvel vira <b>vendido</b> e sai do catálogo</div>
+          <div class="row small"><svg class="i s" viewBox="0 0 24 24" style="color: var(--mar)" aria-hidden="true"><path d="m5 12 5 5L20 7"></path></svg>1 outra proposta em aberto é recusada</div>
+          <div class="row small"><svg class="i s" viewBox="0 0 24 24" style="color: var(--mar)" aria-hidden="true"><path d="m5 12 5 5L20 7"></path></svg>Tudo numa operação só, com aviso a todos</div>
+        </div>
+        <div class="field"><label for="com">Comissão do PAUTA que consta no contrato (R$)</label><input id="com" placeholder="[% A DEFINIR]"></div>
+        <label class="check"><input type="checkbox"><span>A comissão já foi paga</span></label>
+        <div class="row" style="justify-content: flex-end"><button class="btn sec" onClick="{{fechar}}">Cancelar</button><a class="btn" href="SiteAdmVendido.dc.html">Confirmar venda</a></div>
+      </div>
+    </div>
+  </sc-if>
+  <sc-if value="{{modalRecusa}}" hint-placeholder-val="{{ false }}">
+    <div class="modal-bg">
+      <div class="modal" role="dialog" aria-label="Recusar contrato">
+        <p class="t2">Recusar contrato</p>
+        <div class="field"><label for="mot">Motivo (o corretor vai ler)</label><textarea id="mot">Falta a cláusula da comissão do PAUTA. Inclua e envie a versão assinada de novo.</textarea></div>
+        <div class="row" style="justify-content: flex-end"><button class="btn sec" onClick="{{fechar}}">Cancelar</button><button class="btn" style="background: var(--erro); border-color: var(--erro)" onClick="{{recusar}}">Recusar contrato</button></div>
+      </div>
+    </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1100}}'>
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { modal: '', recusado: false }; }
+  renderVals() {
+    const st = this.state;
+    return {
+      modalAprova: st.modal === 'aprova', modalRecusa: st.modal === 'recusa',
+      abrirAprova: () => this.setState({ modal: 'aprova' }),
+      abrirRecusa: () => this.setState({ modal: 'recusa' }),
+      fechar: () => this.setState({ modal: '' }),
+      recusar: () => this.setState({ modal: '', recusado: true }),
+      desfazer: () => this.setState({ recusado: false }),
+      recusado: st.recusado
+    };
+  }
+}
+</script>
+</body>
+</html>

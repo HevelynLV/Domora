@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>PAUTA · Edições para revisar</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="./pauta.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&amp;family=Figtree:wght@400;500;600;700;800&amp;display=swap">
+<style>body{margin:0}
+.antes { text-decoration: line-through; color: var(--erro); }
+.depois { color: var(--mar-dark); font-weight: 700; }</style>
+</helmet>
+<div class="app">
+  <div class="top">
+    <a class="voltar" href="AdmPainel.dc.html" aria-label="Voltar ao painel"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"></path></svg></a>
+    <div class="stack" style="gap: 0"><span class="t3">Edições para revisar</span><span class="tiny muted">{{pendentes}} pendentes · valem na hora, sem nova aprovação</span></div>
+  </div>
+  <div class="scroll" style="gap: 12px">
+    <sc-for list="{{edicoes}}" as="e" hint-placeholder-count="3">
+      <div class="card">
+        <div class="between"><b class="small">{{e.imovel}}</b><span class="{{e.badgeCls}}">{{e.badge}}</span></div>
+        <span class="over">{{e.campo}}</span>
+        <div class="stack" style="gap: 2px">
+          <span class="small antes">{{e.antes}}</span>
+          <span class="small depois">{{e.depois}}</span>
+        </div>
+        <span class="tiny muted">{{e.quem}}</span>
+        <sc-if value="{{e.pend}}" hint-placeholder-val="{{ true }}">
+          <button class="btn sec sm" onClick="{{e.revisar}}">Marcar como revisada</button>
+        </sc-if>
+      </div>
+    </sc-for>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { ok: {} }; }
+  renderVals() {
+    const dados = [
+      { id: 1, imovel: 'Apartamento na Beira-Mar Norte', campo: 'Preço', antes: 'R$ 2.590.000', depois: 'R$ 2.450.000', quem: 'Marina Duarte · hoje, 08:40' },
+      { id: 2, imovel: 'Apartamento na Beira-Mar Norte', campo: 'Fotos', antes: '8 fotos', depois: '9 fotos (1 nova: varanda)', quem: 'Marina Duarte · hoje, 08:41' },
+      { id: 3, imovel: 'Casa no Ribeirão da Ilha', campo: 'Descrição', antes: 'Casa com 3 quartos perto do trapiche.', depois: 'Casa com 3 quartos a 200 m do trapiche, com deck e vista para a baía.', quem: 'Roberto Klein · ontem, 17:12' }
+    ];
+    const ok = this.state.ok;
+    return {
+      pendentes: dados.filter((d) => !ok[d.id]).length,
+      edicoes: dados.map((d) => ({
+        ...d,
+        pend: !ok[d.id],
+        badge: ok[d.id] ? 'Revisada' : 'Nova',
+        badgeCls: ok[d.id] ? 'badge b-disp' : 'badge b-neg',
+        revisar: () => this.setState({ ok: { ...ok, [d.id]: true } })
+      }))
+    };
+  }
+}
+</script>
+</body>
+</html>

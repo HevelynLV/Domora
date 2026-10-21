@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>PAUTA · Minha conta (proprietário)</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="./pauta.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&amp;family=Figtree:wght@400;500;600;700;800&amp;display=swap">
+<style>body{margin:0}</style>
+</helmet>
+<div class="app">
+  <div class="top" style="padding-top: 22px">
+    <h1 class="t1">Minha conta</h1>
+  </div>
+  <div class="scroll">
+    <div class="card" style="flex-direction: row; align-items: center; gap: 12px">
+      <span class="avatar">MD</span>
+      <div class="stack" style="gap: 0"><b>Marina Duarte</b><span class="tiny muted">Proprietária · 4 imóveis</span></div>
+    </div>
+    <div class="stack" style="gap: 14px">
+      <div class="field"><label for="nome">Nome completo</label><input id="nome" value="Marina Duarte"></div>
+      <div class="field"><label for="email">E-mail</label><input id="email" type="email" value="marina@email.com"></div>
+      <div class="field"><label for="tel">Telefone com DDD</label><input id="tel" type="tel" value="(48) 99812-4410"><span class="hint">Os avisos chegam por WhatsApp neste número.</span></div>
+      <button class="btn sec" onClick="{{salvar}}">Salvar dados</button>
+      <sc-if value="{{salvo}}" hint-placeholder-val="{{ false }}">
+        <div class="alerta info"><span>Dados salvos.</span></div>
+      </sc-if>
+    </div>
+    <div class="card" style="gap: 4px">
+      <b class="small">Seu contato para os corretores</b>
+      <span class="tiny muted">Você escolhe em cada imóvel se mostra seu telefone e e-mail. Hoje: oculto em todos.</span>
+      <a class="link small" href="ProImoveis.dc.html">Ver meus imóveis</a>
+    </div>
+    <a class="link small" href="RecuperarSenha.dc.html">Trocar senha</a>
+    <a class="btn perigo" href="Main.dc.html">Sair</a>
+  </div>
+  <nav class="nav" aria-label="Menu do proprietário">
+    <a href="ProImoveis.dc.html"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5V21h-6v-6H9v6H3z"></path></svg>Imóveis</a>
+    <a href="ProNovo.dc.html"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="4"></rect><path d="M12 8v8M8 12h8"></path></svg>Novo imóvel</a>
+    <a href="ProAvisos.dc.html"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9a6 6 0 1 1 12 0c0 6 2.5 8 2.5 8h-17S6 15 6 9"></path><path d="M10 20.5h4"></path></svg>Avisos</a>
+    <a class="on" href="ProConta.dc.html" aria-current="page"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"></circle><path d="M4 21c0-4 4-6 8-6s8 2 8 6"></path></svg>Conta</a>
+  </nav>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { salvo: false }; }
+  renderVals() {
+    return { salvo: this.state.salvo, salvar: () => this.setState({ salvo: true }) };
+  }
+}
+</script>
+</body>
+</html>

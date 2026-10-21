@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>PAUTA · Renovar exclusividade</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="./pauta.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&amp;family=Figtree:wght@400;500;600;700;800&amp;display=swap">
+<style>body{margin:0}
+.btn.off { background: var(--line); border-color: var(--line); color: var(--ink2); cursor: not-allowed; }</style>
+</helmet>
+<div class="app">
+  <div class="top">
+    <a class="voltar" href="ProImoveis.dc.html" aria-label="Voltar"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"></path></svg></a>
+    <span class="t3">Renovar exclusividade</span>
+  </div>
+  <sc-if value="{{form}}" hint-placeholder-val="{{ true }}">
+    <div class="scroll" style="gap: 16px">
+      <div class="card" style="flex-direction: row; gap: 12px; padding: 12px">
+        <div class="foto f3" style="width: 72px; height: 72px; flex-shrink: 0; padding: 0"></div>
+        <div class="stack" style="gap: 4px; flex: 1; min-width: 0">
+          <span class="badge b-neg" style="align-self: flex-start">Em negociação</span>
+          <b>Apartamento na Beira-Mar Norte</b>
+          <span class="tiny muted">Exclusividade até 20/11/2026</span>
+        </div>
+      </div>
+      <div class="card" style="gap: 10px">
+        <p class="t2">Renovar por mais [PRAZO A DEFINIR]</p>
+        <div class="row" style="align-items: flex-start"><svg class="i s" viewBox="0 0 24 24" style="color: var(--mar); margin-top: 2px" aria-hidden="true"><path d="m5 12 5 5L20 7"></path></svg><span class="small">A exclusividade passa a valer até [NOVA DATA A DEFINIR].</span></div>
+        <div class="row" style="align-items: flex-start"><svg class="i s" viewBox="0 0 24 24" style="color: var(--mar); margin-top: 2px" aria-hidden="true"><path d="m5 12 5 5L20 7"></path></svg><span class="small">O imóvel continua no catálogo, sem passar de novo pela aprovação.</span></div>
+        <div class="row" style="align-items: flex-start"><svg class="i s" viewBox="0 0 24 24" style="color: var(--mar); margin-top: 2px" aria-hidden="true"><path d="m5 12 5 5L20 7"></path></svg><span class="small">Durante o novo prazo, você não tira o imóvel de venda.</span></div>
+      </div>
+      <div class="stack" style="gap: 6px">
+        <span class="lbl">Termo de exclusividade</span>
+        <div style="height: 110px; overflow-y: auto; border: 1px solid var(--line); border-radius: 12px; background: var(--card); padding: 12px 14px; font-size: 13px; color: var(--ink2)">[TEXTO DO TERMO DE EXCLUSIVIDADE A DEFINIR]</div>
+      </div>
+      <label class="check"><input type="checkbox" checked="{{aceito}}" onChange="{{trocaAceito}}"><span>Li e aceito renovar a exclusividade do imóvel com o PAUTA.</span></label>
+      <span class="hint">Se você não renovar, o imóvel sai do catálogo sozinho em 20/11/2026.</span>
+      <div class="alerta atencao"><span><b>A definir:</b> o que acontece com as propostas aceitas se a exclusividade vencer com o imóvel em negociação.</span></div>
+    </div>
+    <div class="foot">
+      <sc-if value="{{aceito}}" hint-placeholder-val="{{ false }}">
+        <button class="btn" onClick="{{renovar}}">Renovar exclusividade</button>
+      </sc-if>
+      <sc-if value="{{naoAceito}}" hint-placeholder-val="{{ true }}">
+        <span class="btn off" aria-disabled="true">Aceite o termo para renovar</span>
+      </sc-if>
+    </div>
+  </sc-if>
+  <sc-if value="{{feito}}" hint-placeholder-val="{{ false }}">
+    <div class="scroll" style="gap: 20px">
+      <div class="stack" style="gap: 12px; margin-top: 28px">
+        <span class="dot" style="width: 56px; height: 56px; border-radius: 16px"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 5 5L20 7"></path></svg></span>
+        <h1 class="t1">Exclusividade renovada</h1>
+        <p class="p muted">O Apartamento na Beira-Mar Norte continua no catálogo até [NOVA DATA A DEFINIR]. A equipe PAUTA foi avisada.</p>
+      </div>
+      <a class="btn sec" href="ProImoveis.dc.html">Voltar para meus imóveis</a>
+    </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { aceito: false, feito: false }; }
+  renderVals() {
+    const st = this.state;
+    return {
+      form: !st.feito, feito: st.feito,
+      aceito: st.aceito, naoAceito: !st.aceito,
+      trocaAceito: () => this.setState({ aceito: !st.aceito }),
+      renovar: () => this.setState({ feito: true })
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>PAUTA · Site · Novo imóvel</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="./pauta.css">
+<link rel="stylesheet" href="./site.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&amp;family=Figtree:wght@400;500;600;700;800&amp;display=swap">
+<style>body{margin:0}
+.stepper { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.stepper button { display: flex; align-items: center; gap: 10px; padding: 12px 14px; min-height: 56px; border-radius: 14px; border: 1px solid var(--line); background: var(--card); font: inherit; font-weight: 700; font-size: 14px; color: var(--ink2); cursor: pointer; text-align: left; }
+.stepper button span { width: 28px; height: 28px; border-radius: 50%; background: var(--cinza-soft); display: flex; align-items: center; justify-content: center; font-size: 13px; flex-shrink: 0; }
+.stepper button.on { border: 2px solid var(--mar); color: var(--ink); }
+.stepper button.on span, .stepper button.ok span { background: var(--mar); color: #fff; }
+.ftile { display: flex; flex-direction: column; gap: 8px; }
+.ftile .foto { height: 130px; }
+.ord { width: 44px; height: 44px; border-radius: 10px; border: 1px solid var(--line); background: var(--card); color: var(--ink); display: flex; align-items: center; justify-content: center; cursor: pointer; }
+.ord:disabled { opacity: .35; cursor: default; }
+.btn.off { background: var(--line); border-color: var(--line); color: var(--ink2); cursor: not-allowed; }</style>
+</helmet>
+<div class="site shell">
+  <aside class="side">
+    <a class="logo" href="SiteInicio.dc.html"><span class="logo-mark"><svg class="i s" viewBox="0 0 24 24" style="color: #fff" aria-hidden="true"><path d="M4 11 12 4l8 7"></path><path d="M7 20v-6a5 5 0 0 1 10 0v6"></path></svg></span>PAUTA</a>
+    <div class="who"><span class="avatar">MD</span><div class="stack" style="gap: 0"><b class="small">Marina Duarte</b><span class="tiny muted">Proprietária</span></div></div>
+    <nav class="snav" aria-label="Menu do proprietário">
+      <a href="SiteProImoveis.dc.html"><svg class="i s" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5V21h-6v-6H9v6H3z"></path></svg>Meus imóveis</a>
+      <a class="on" href="SiteProNovo.dc.html" aria-current="page"><svg class="i s" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="4"></rect><path d="M12 8v8M8 12h8"></path></svg>Novo imóvel</a>
+      <a href="SiteProAvisos.dc.html"><svg class="i s" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9a6 6 0 1 1 12 0c0 6 2.5 8 2.5 8h-17S6 15 6 9"></path><path d="M10 20.5h4"></path></svg>Avisos<span class="n">3</span></a>
+      <a href="SiteConta.dc.html"><svg class="i s" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"></circle><path d="M4 21c0-4 4-6 8-6s8 2 8 6"></path></svg>Minha conta</a>
+    </nav>
+    <a class="link small" href="SiteInicio.dc.html" style="margin-top: auto">Sair</a>
+  </aside>
+  <main class="main">
+    <div class="inner">
+      <div class="stack" style="gap: 4px"><div class="crumb"><a href="SiteProImoveis.dc.html">Meus imóveis</a><span>/</span><span>Novo imóvel</span></div><h1 class="t1" style="font-size: 34px">Cadastrar imóvel</h1></div>
+      <sc-if value="{{editando}}" hint-placeholder-val="{{ true }}">
+        <div class="stack" style="gap: 24px">
+          <div class="stepper">
+            <button class="{{s1}}" onClick="{{ir1}}"><span>1</span>Dados do imóvel</button>
+            <button class="{{s2}}" onClick="{{ir2}}"><span>2</span>Fotos</button>
+            <button class="{{s3}}" onClick="{{ir3}}"><span>3</span>Exclusividade e contato</button>
+          </div>
+          <div class="cols">
+            <div class="col-main">
+              <sc-if value="{{p1}}" hint-placeholder-val="{{ true }}">
+                <div class="card" style="padding: 24px; gap: 16px">
+                  <div class="field"><label for="titulo">Título do anúncio</label><input id="titulo" value="Casa com vista no Campeche"></div>
+                  <div class="fgrid">
+                    <div class="field"><label for="tipo">Tipo</label><select id="tipo"><option>Casa</option><option>Apartamento</option><option>Cobertura</option><option>Terreno</option><option>Sala comercial</option></select></div>
+                    <div class="field"><label for="preco">Preço (R$)</label><input id="preco" value="1.890.000"></div>
+                  </div>
+                  <div class="fgrid">
+                    <div class="field"><label for="end">Endereço</label><input id="end" value="Rua das Gaivotas, 210"></div>
+                    <div class="field"><label for="bairro">Bairro</label><select id="bairro"><option>Campeche</option><option>Lagoa da Conceição</option><option>Jurerê Internacional</option><option>Agronômica</option><option>Centro</option><option>Ribeirão da Ilha</option></select></div>
+                  </div>
+                  <div class="grid4" style="gap: 16px">
+                    <div class="field"><label for="q">Quartos</label><input id="q" value="4"></div>
+                    <div class="field"><label for="b">Banheiros</label><input id="b" value="3"></div>
+                    <div class="field"><label for="v">Vagas</label><input id="v" value="2"></div>
+                    <div class="field"><label for="a">Área (m²)</label><input id="a" value="220"></div>
+                  </div>
+                  <div class="field"><label for="desc">Descrição</label><textarea id="desc">Casa térrea a 300 m da praia, com vista para a Ilha do Campeche, quintal com piscina e churrasqueira.</textarea></div>
+                  <button class="btn" onClick="{{ir2}}" style="align-self: flex-end">Continuar para as fotos</button>
+                </div>
+              </sc-if>
+              <sc-if value="{{p2}}" hint-placeholder-val="{{ false }}">
+                <div class="card" style="padding: 24px; gap: 16px">
+                  <button class="card" style="align-items: center; justify-content: center; min-height: 110px; border-style: dashed; border-width: 1.5px; cursor: pointer; font: inherit; color: var(--mar)"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16V4M6 10l6-6 6 6M4 20h16"></path></svg><b>Arraste as fotos aqui ou clique para escolher</b><span class="tiny muted">JPG ou PNG, até 10 MB cada</span></button>
+                  <p class="p small muted">A primeira foto é a capa no catálogo. Use as setas para mudar a ordem.</p>
+                  <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 14px">
+                    <sc-for list="{{fotos}}" as="f" hint-placeholder-count="4">
+                      <div class="ftile">
+                        <div class="{{f.cls}}"><span class="badge b-disp">{{f.capa}}</span></div>
+                        <div class="between"><span class="tiny"><b>{{f.nome}}</b></span><div class="row" style="gap: 4px"><button class="ord" aria-label="Mover para a esquerda" onClick="{{f.up}}" disabled="{{f.first}}"><svg class="i s" viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"></path></svg></button><button class="ord" aria-label="Mover para a direita" onClick="{{f.down}}" disabled="{{f.last}}"><svg class="i s" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg></button></div></div>
+                      </div>
+                    </sc-for>
+                  </div>
+                  <div class="row" style="justify-content: flex-end"><button class="btn sec" onClick="{{ir1}}">Voltar</button><button class="btn" onClick="{{ir3}}">Continuar para o termo</button></div>
+                </div>
+              </sc-if>
+              <sc-if value="{{p3}}" hint-placeholder-val="{{ false }}">
+                <div class="card" style="padding: 24px; gap: 16px">
+                  <p class="t2">6 meses de exclusividade</p>
+                  <p class="p small muted">Durante 6 meses, o imóvel só é vendido pelo PAUTA e você não tira o imóvel de venda. Vários corretores assinantes podem trabalhar o imóvel ao mesmo tempo. Antes do vencimento você recebe um aviso para renovar; sem renovação, ele sai do catálogo.</p>
+                  <div style="height: 150px; overflow-y: auto; border: 1px solid var(--line); border-radius: 12px; padding: 14px; font-size: 13px; color: var(--ink2); background: var(--bg)">[TEXTO DO TERMO DE EXCLUSIVIDADE A DEFINIR]</div>
+                  <div class="card" style="flex-direction: row; align-items: center; gap: 12px; background: var(--bg)">
+                    <div class="stack" style="gap: 2px; flex: 1"><b class="small">Mostrar meu contato aos corretores</b><span class="tiny muted">{{contatoTxt}}</span></div>
+                    <button class="{{toggleCls}}" aria-label="Mostrar meu contato" aria-pressed="{{contato}}" onClick="{{trocaContato}}"><span></span></button>
+                  </div>
+                  <label class="check"><input type="checkbox" checked="{{aceito}}" onChange="{{trocaAceito}}"><span>Li e aceito o termo de exclusividade de 6 meses.</span></label>
+                  <div class="row" style="justify-content: flex-end"><button class="btn sec" onClick="{{ir2}}">Voltar</button>
+                    <sc-if value="{{aceito}}" hint-placeholder-val="{{ false }}"><button class="btn" onClick="{{enviar}}">Enviar para aprovação</button></sc-if>
+                    <sc-if value="{{naoAceito}}" hint-placeholder-val="{{ true }}"><span class="btn off" aria-disabled="true">Aceite o termo para enviar</span></sc-if>
+                  </div>
+                </div>
+              </sc-if>
+            </div>
+            <div class="col-side fix">
+              <p class="over">Como vai aparecer no catálogo</p>
+              <div class="pcard"><div class="foto"><span class="badge b-disp">Disponível</span></div><div class="body"><span class="price" style="font-size: 20px">R$ 1.890.000</span><b>Casa com vista no Campeche</b><div class="spec"><span>4 quartos</span><span>2 vagas</span><span>220 m²</span></div></div></div>
+              <div class="alerta info"><svg class="i s" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 11v5M12 8h.01"></path></svg><span>A equipe PAUTA confere o imóvel antes de ele entrar no catálogo. Os corretores veem o endereço para marcar a visita.</span></div>
+            </div>
+          </div>
+        </div>
+      </sc-if>
+      <sc-if value="{{enviado}}" hint-placeholder-val="{{ false }}">
+        <div class="card" style="padding: 40px; gap: 16px; max-width: 640px">
+          <span class="dot" style="width: 56px; height: 56px; border-radius: 16px"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 5 5L20 7"></path></svg></span>
+          <h2 class="t1">Imóvel enviado</h2>
+          <p class="p muted">A Casa com vista no Campeche está <b style="color: var(--ink)">aguardando aprovação</b>. Você recebe um aviso no WhatsApp e no site quando ela for aprovada. A exclusividade de 6 meses começa na aprovação.</p>
+          <div class="row" style="flex-wrap: wrap"><a class="btn sec" href="SiteProImoveis.dc.html">Voltar para meus imóveis</a><a class="roteiro" href="SiteAdmAprovar.dc.html"><span><b>Roteiro do protótipo</b>Ver o admin aprovando</span><svg class="i s" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg></a></div>
+        </div>
+      </sc-if>
+    </div>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1100}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { passo: 1, enviado: false, contato: false, aceito: false, ordem: [
+      { nome: 'Fachada e jardim', cls: 'foto' },
+      { nome: 'Sala com vista', cls: 'foto f3' },
+      { nome: 'Piscina e churrasqueira', cls: 'foto f4' },
+      { nome: 'Suíte principal', cls: 'foto f2' }
+    ] };
+  }
+  mover(i, d) {
+    const o = this.state.ordem.slice(); const j = i + d;
+    if (j < 0 || j >= o.length) return;
+    const t = o[i]; o[i] = o[j]; o[j] = t;
+    this.setState({ ordem: o });
+  }
+  renderVals() {
+    const st = this.state; const p = st.passo; const o = st.ordem;
+    const cls = (n) => (p === n ? 'on' : (p > n ? 'ok' : ''));
+    return {
+      editando: !st.enviado, enviado: st.enviado,
+      p1: p === 1, p2: p === 2, p3: p === 3,
+      s1: cls(1), s2: cls(2), s3: cls(3),
+      ir1: () => this.setState({ passo: 1 }), ir2: () => this.setState({ passo: 2 }), ir3: () => this.setState({ passo: 3 }),
+      fotos: o.map((f, i) => ({ ...f, capa: i === 0 ? 'Capa' : 'Foto ' + (i + 1), first: i === 0, last: i === o.length - 1, up: () => this.mover(i, -1), down: () => this.mover(i, 1) })),
+      contato: st.contato,
+      toggleCls: st.contato ? 'toggle on' : 'toggle',
+      contatoTxt: st.contato ? 'Corretores veem seu telefone e e-mail.' : 'Visitas e propostas passam só pelo site. Você pode mudar depois.',
+      trocaContato: () => this.setState({ contato: !st.contato }),
+      aceito: st.aceito, naoAceito: !st.aceito,
+      trocaAceito: () => this.setState({ aceito: !st.aceito }),
+      enviar: () => this.setState({ enviado: true })
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -29,7 +29,7 @@ O PAUTA reúne num só catálogo imóveis conferidos, captados por nós ou pelos
 
 ## Nome do app
 
-O nome usado em toda a documentação é **PAUTA** (antes, Domora e, antes disso, Captador). O repositório novo no GitHub vai se chamar `pauta`; o antigo, `imobilink`, fica arquivado para consulta.
+O nome usado em toda a documentação é **PAUTA** (antes, Domora e, antes disso, Captador). O repositório novo no GitHub é o `HevelynLV/PAUTA`; o antigo, `imobilink`, fica arquivado para consulta.
 
 ## Usuários e perfis
 
@@ -130,7 +130,7 @@ Ficam para depois do MVP: chat interno, mapa, app nativo nas lojas e outras cida
 
 ## Etapas do MVP
 
-O projeto recomeça do zero num repositório `pauta` e num projeto Supabase novos; o `imobilink` fica arquivado para consulta. Antes de programar, um protótipo do design das telas. Cada etapa entrega uma fatia do fluxo funcionando, com banco, tela e teste. O acompanhamento fica no Roadmap.
+O projeto recomeça do zero num repositório `PAUTA` e num projeto Supabase novos; o `imobilink` fica arquivado para consulta. Antes de programar, um protótipo do design das telas. Cada etapa entrega uma fatia do fluxo funcionando, com banco, tela e teste. O acompanhamento fica no Roadmap.
 
 | Etapa | O que entrega | Pronto quando | Decidir antes |
 | --- | --- | --- | --- |
@@ -149,9 +149,16 @@ O projeto recomeça do zero num repositório `pauta` e num projeto Supabase novo
 | 12. Exclusividade | Aviso de vencimento e renovação | Sem renovação, o imóvel sai do catálogo sozinho | Antecedência do aviso |
 | 13. PWA, testes e deploy | SMTP, PWA, roteiro completo, Vercel | O app abre no celular de outra pessoa pelo endereço público | Termo de assinatura |
 
+## Decisões tomadas em 20/10/2026
+
+- As migrations do banco são aplicadas pelo terminal com a Supabase CLI (`npx supabase db push`), e não à mão pelo SQL Editor. A CLI registra no banco quais migrations já rodaram, o que evita aplicar duas vezes ou esquecer uma com duas pessoas no mesmo banco. O passo a passo está no README (passo 5).
+- O Cache Components do Next.js 16 fica ligado, como o Next 16.4 cria o projeto. O Next vai torná-lo obrigatório na próxima versão grande.
+- Fotos e PDFs são enviados do navegador direto para o Supabase Storage, com permissão dada pelo servidor, porque as Server Actions aceitam no máximo 1 MB por padrão.
+- O repositório se chama `HevelynLV/PAUTA` (o pacote npm continua `pauta`, em minúsculas).
+
 ## Decisões tomadas em 16/10/2026
 
-- O nome do app passa a ser **PAUTA** (antes, Domora). O repositório novo no GitHub vai se chamar `pauta`.
+- O nome do app passa a ser **PAUTA** (antes, Domora). O repositório novo no GitHub se chama `PAUTA` (`HevelynLV/PAUTA`).
 
 ## Decisões tomadas na revisão de 13/10/2026
 

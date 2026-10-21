@@ -5,14 +5,13 @@ Marketplace de imóveis exclusivos em Florianópolis. O proprietário dá 6 mese
 Stack: Next.js (App Router, TypeScript), Supabase (Postgres, Auth, Storage), Tailwind CSS, Vercel, Asaas (cobrança) e WhatsApp (avisos).
 
 Documentos do projeto:
-- **PAUTA - Visão geral da plataforma:** ideia, regras do negócio, usuários, requisitos e decisões. É a fonte da verdade: em caso de dúvida, vale o que está lá
-- **PAUTA Roadmap:** onde o projeto parou, o próximo passo e as etapas do MVP. Leia "Onde paramos" e "Atenção" antes de qualquer tarefa
-- **PAUTA Roadmap de prompts:** os prompts para usar com o Claude Code em cada etapa, na ordem, do abrir ao fechar a etapa
-- **CLAUDE.md:** as instruções que o Claude Code segue no repositório. Será escrito na Etapa 1, a partir da Visão geral
+- **[docs/visao-geral.md](docs/visao-geral.md):** ideia, regras do negócio, usuários, requisitos e decisões. É a fonte da verdade: em caso de dúvida, vale o que está lá
+- **[ROADMAP.md](ROADMAP.md):** onde o projeto parou, o próximo passo e as etapas do MVP. Leia "Onde paramos" e "Atenção" antes de qualquer tarefa
+- **[docs/prompts.md](docs/prompts.md):** os prompts para usar com o Claude Code em cada etapa, na ordem, do abrir ao fechar a etapa
+- **[docs/prototipo/](docs/prototipo/):** as telas do protótipo (celular e site). A versão clicável fica em https://claude.ai/artifact/GBqYuzenozHgGygiGrSS12
+- **[CLAUDE.md](CLAUDE.md):** as instruções que o Claude Code segue no repositório
 
-No repositório `pauta`, este arquivo vira `README.md` e o Roadmap vira `ROADMAP.md`, na raiz do projeto, e o Roadmap de prompts vira `docs/prompts.md`.
-
-> **Situação atual:** o projeto está na Etapa 0 (protótipo do design). O repositório `pauta` e o projeto Supabase novo ainda não existem; eles são criados na Etapa 1. Os passos marcados com *(a partir da Etapa 1)* só valem depois disso.
+> **Situação atual:** o projeto está na Etapa 1 (setup). Veja "Onde paramos" no [ROADMAP.md](ROADMAP.md). Os passos marcados com *(a partir da Etapa N)* só valem depois que essa etapa for feita.
 
 ## Como começar a trabalhar no PAUTA
 
@@ -20,8 +19,8 @@ Checklist para quem chega no projeto. Faça na ordem, uma vez por computador.
 
 ### 1. Acessos
 
-- [ ] Convite como colaborador no GitHub, no repositório `HevelynLV/pauta` *(a partir da Etapa 1)*. Quem já está no projeto envia em Settings → Collaborators. Aceite pelo e-mail ou em github.com/notifications
-- [ ] Convite no Supabase *(a partir da Etapa 1)*: quem já está no projeto envia em **Organization → Members → Invite**. Aceite pelo e-mail e confira que o projeto do PAUTA aparece no seu painel. O ID do projeto entra aqui quando ele for criado
+- [ ] Convite como colaborador no GitHub, no repositório `HevelynLV/PAUTA` *(a partir da Etapa 1)*. Quem já está no projeto envia em Settings → Collaborators. Aceite pelo e-mail ou em github.com/notifications
+- [ ] Convite no Supabase *(a partir da Etapa 1)*: quem já está no projeto envia em **Organization → Members → Invite**. Aceite pelo e-mail e confira que o projeto do PAUTA aparece no seu painel. O ID do projeto é `zqvwyjcdjfkovtiwdryo`
 
 > **O banco é compartilhado.** Todos usam o mesmo projeto do Supabase. O que uma pessoa aplica no banco vale para a outra na hora. Combine antes de mexer no banco.
 
@@ -50,8 +49,8 @@ Confira: `node -v`, `git --version` e `claude --version` respondem sem erro.
 
 - [ ] Clonar o repositório e instalar as dependências:
   ```bash
-  git clone https://github.com/HevelynLV/pauta.git
-  cd pauta
+  git clone https://github.com/HevelynLV/PAUTA.git
+  cd PAUTA
   npm install
   ```
 - [ ] Baixar o navegador dos testes automáticos (uma vez por computador):
@@ -72,7 +71,7 @@ Confira: `node -v`, `git --version` e `claude --version` respondem sem erro.
 
   | Variável | O que é | Onde pegar no painel do Supabase |
   |---|---|---|
-  | `NEXT_PUBLIC_SUPABASE_URL` | Endereço do projeto | **Project Settings → Data API → Project URL** (ou botão **Connect** no topo do painel) |
+  | `NEXT_PUBLIC_SUPABASE_URL` | Endereço do projeto, só `https://<id>.supabase.co`, sem barra e sem `/rest/v1/` no fim | **Project Settings → Data API → Project URL** (ou botão **Connect** no topo do painel). Cuidado: o painel também mostra o endereço da API REST, que termina em `/rest/v1/`; esse não serve |
   | `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Chave pública do app; pode ir para o navegador porque o RLS protege os dados | **Project Settings → API Keys → Publishable key** |
   | `SITE_URL` | Endereço do site, usado nos links dos e-mails de cadastro e de recuperação de senha. Sem barra no fim | Não vem do painel: em desenvolvimento é sempre `http://localhost:3000` |
   | `SUPABASE_SECRET_KEY` | Chave secreta, **só para os testes automáticos** | **Project Settings → API Keys → Secret keys → Add new secret key**, com o nome `testes-e2e-<seu nome>`. Copie o valor (`sb_secret_...`) |
@@ -81,16 +80,36 @@ Confira: `node -v`, `git --version` e `claude --version` respondem sem erro.
 
 - [ ] As variáveis do Asaas e do WhatsApp entram aqui nas Etapas 10 e 11
 - [ ] Sempre que criar ou mudar o `.env.local`, pare e rode de novo o `npm run dev`. O Next.js só lê esse arquivo quando o servidor inicia
+- [ ] Confira a conexão: rode `npm run dev` e abra http://localhost:3000/teste-conexao. As três linhas precisam aparecer com ✅ (essa página de teste existe até a Etapa 13)
 
 ### 5. Banco de dados *(a partir da Etapa 2)*
 
-- [ ] Abra a seção **"Migrations aplicadas no banco"** do Roadmap e compare com a pasta `supabase/migrations/`: todo arquivo da pasta tem que estar na lista. Se faltar algum, **não aplique sozinho**: avise a outra pessoa antes (o banco é de todos)
+As migrations são aplicadas pelo terminal, com a Supabase CLI (`npx supabase`, já instalada pelo `npm install`). A CLI guarda no banco quais migrations já rodaram, então nenhuma roda duas vezes. Decidido em 20/10/2026.
 
-Regras do banco:
+**Preparação (uma vez por computador):**
+- [ ] Entrar na sua conta do Supabase pelo terminal (abre o navegador para você autorizar):
+  ```bash
+  npx supabase login
+  ```
+- [ ] Ligar a pasta do projeto ao banco do PAUTA. O comando pede a **senha do banco** (Project Settings → Database → Database password; se ninguém souber, quem é dono do projeto pode redefinir ali). Digite no terminal: a senha não vai para nenhum arquivo do repositório e não deve ser colada no chat
+  ```bash
+  npx supabase link --project-ref zqvwyjcdjfkovtiwdryo
+  ```
+- [ ] Conferir que funcionou: a lista abaixo aparece sem erro (vazia enquanto não houver migration)
+  ```bash
+  npx supabase migration list
+  ```
+
+**Regras do banco:**
 - Toda mudança no banco vira um arquivo novo em `supabase/migrations/`, nunca só no painel. Correção é sempre uma migration NOVA, nunca edição de uma que já rodou
-- O jeito de aplicar as migrations (à mão pelo SQL Editor ou pelo `supabase db push`) será decidido na Etapa 1 e registrado aqui
-- Depois de aplicar, rode o `supabase/testes/testar_rls.sql` inteiro: toda linha tem que mostrar "✅ passou". Só então siga para o próximo passo
-- Migration nova entra no "Atenção" e na lista "Migrations aplicadas no banco" do Roadmap
+- **Sempre `git pull` antes** de criar ou aplicar uma migration. Se o banco tiver uma migration que você não tem, o `db push` dá erro de propósito: faça o `git pull` e tente de novo
+- Criar uma migration: `npx supabase migration new <nome>` (ex.: `npx supabase migration new perfis`). A CLI cria o arquivo com data e hora no nome, o que garante a ordem
+- Aplicar no banco: `npx supabase db push`. Antes de confirmar, ele mostra quais migrations vai aplicar: leia a lista
+- Ver o que já foi aplicado: `npx supabase migration list` (coluna Local = repositório, Remote = banco)
+- Depois de aplicar, rode o `supabase/testes/testar_rls.sql` inteiro no SQL Editor do painel: toda linha tem que mostrar "✅ passou". Só então siga para o próximo passo
+- Migration nova entra no "Atenção" e na lista "Migrations aplicadas no banco" do Roadmap, para avisar a outra pessoa
+- **Nunca rode `npx supabase config push`.** O `supabase/config.toml` serve só para rodar o Supabase no próprio computador; esse comando copiaria essa configuração por cima da do projeto compartilhado (Site URL, login, e-mails)
+- **Nunca rode `npx supabase db reset --linked`**: ele apaga e recria o banco compartilhado inteiro. E `npx supabase db push --include-all` (aplica migrations mais antigas que a última aplicada) só com a outra pessoa sabendo
 
 ### 6. Configuração do Supabase (só conferir) *(a partir da Etapa 3)*
 
@@ -117,7 +136,7 @@ O admin nunca é criado pelo cadastro do app.
 - [ ] `npm run dev` e abra http://localhost:3000: a tela de login aparece
 - [ ] Em outro terminal, `npm run test:e2e`: todos os testes passam. Para ver o relatório: `npx playwright show-report`
 
-Se algo falhar, confira primeiro o `.env.local` (passo 4) e reinicie o `npm run dev`.
+Se algo falhar, confira primeiro o `.env.local` (passo 4) e reinicie o `npm run dev`. Se uma mudança no código ou no CSS não aparecer no navegador, pare o `npm run dev`, apague a pasta `.next/dev` (é só cache) e rode de novo.
 
 ## Fluxo de cada etapa
 
@@ -126,10 +145,10 @@ Uma etapa por vez, sempre numa branch própria. Nunca trabalhe direto na `main`.
 1. **Atualizar:** `git checkout main` e `git pull`. Se o `package.json` mudou, rode `npm install`
 2. **Ler:** "Onde paramos" e "Atenção" no Roadmap. Faça o que o "Atenção" pedir (variável nova no `.env.local`, migration nova, ferramenta nova)
 3. **Criar a branch:** `git checkout -b etapa-<número>-<nome>` (ex.: `etapa-4-imovel`)
-4. **Construir** com o Claude Code, em passos pequenos, testando cada passo. Toda migration nova: aplicar e rodar o `testar_rls.sql` antes de seguir
+4. **Construir** com o Claude Code, em passos pequenos, testando cada passo. Toda migration nova: aplicar e rodar o `testar_rls.sql` antes de seguir. Ao terminar cada passo do [docs/prompts.md](docs/prompts.md), atualizar "Onde paramos" no Roadmap com o passo feito e o próximo, para quem parar no meio saber onde retomar
 5. **Auditar numa sessão nova** do Claude Code (`/clear` ou abra outro terminal): `/auditar-etapa <número>`. A sessão nova revisa o código sem as suposições de quem escreveu
 6. **Corrigir** o que vocês escolherem da auditoria e rodar `npm run test:e2e`
 7. **Atualizar o Roadmap:** `/atualizar-roadmap` (sempre antes do push)
 8. **Enviar:** `git push -u origin <nome-da-branch>` e abra um **Pull Request** para a `main` no GitHub. A outra pessoa revisa e aceita
 
-Os comandos `/auditar-etapa` e `/atualizar-roadmap` vêm do projeto antigo e serão recriados na Etapa 1, com as regras de negócio do PAUTA.
+Os comandos `/auditar-etapa` e `/atualizar-roadmap` ficam em `.claude/commands/`. Foram recriados na Etapa 1 a partir dos do Captador, com as regras do PAUTA.

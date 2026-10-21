@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>PAUTA · Site · Entrar</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="./pauta.css">
+<link rel="stylesheet" href="./site.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&amp;family=Figtree:wght@400;500;600;700;800&amp;display=swap">
+<style>body{margin:0}</style>
+</helmet>
+<div class="site split">
+  <div class="art">
+    <a class="logo" href="SiteInicio.dc.html" style="color: #fff"><span class="logo-mark" style="background: #fff"><svg class="i s" viewBox="0 0 24 24" style="color: var(--mar)" aria-hidden="true"><path d="M4 11 12 4l8 7"></path><path d="M7 20v-6a5 5 0 0 1 10 0v6"></path></svg></span>PAUTA</a>
+    <div class="foto" style="flex: 1; min-height: 280px; background: #2C7570; color: #DCEEEA"><span>Foto: Lagoa da Conceição</span></div>
+    <p class="p disp" style="font-size: 30px; font-weight: 700; line-height: 1.15; max-width: 480px">Imóveis exclusivos, conferidos e acompanhados do primeiro contato até a venda.</p>
+  </div>
+  <div class="form">
+    <div class="box">
+      <div class="stack" style="gap: 6px"><h1 class="t1" style="font-size: 36px">Entrar</h1><p class="p muted">Use o e-mail e a senha do seu cadastro.</p></div>
+      <div class="field"><label for="email">E-mail</label><input id="email" type="email" placeholder="voce@email.com"></div>
+      <div class="field"><label for="senha">Senha</label><input id="senha" type="password" placeholder="Sua senha"></div>
+      <div class="between"><label class="check" style="font-size: 13px"><input type="checkbox">Manter conectado</label><a class="link small" href="SiteRecuperarSenha.dc.html">Esqueci minha senha</a></div>
+      <a class="btn" href="SiteProImoveis.dc.html">Entrar</a>
+      <p class="p small muted" style="text-align: center">Ainda não tem conta? <a class="link" href="SiteCadastro.dc.html">Cadastre-se</a></p>
+      <hr class="sep">
+      <p class="over">Protótipo · entrar como</p>
+      <div class="fgrid" style="grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 8px">
+        <a class="roteiro" href="SiteProImoveis.dc.html"><span><b>Proprietária</b>Marina</span></a>
+        <a class="roteiro" href="SiteCorCatalogo.dc.html"><span><b>Corretor</b>Rafael</span></a>
+        <a class="roteiro" href="SiteAdmPainel.dc.html"><span><b>Admin</b>PAUTA</span></a>
+        <a class="roteiro" href="SiteAcessoSuspenso.dc.html"><span><b>Suspenso</b>Assinante</span></a>
+      </div>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

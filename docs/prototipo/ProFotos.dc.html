@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>PAUTA · Novo imóvel: fotos</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="./pauta.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&amp;family=Figtree:wght@400;500;600;700;800&amp;display=swap">
+<style>body{margin:0}
+.ord { width: 44px; height: 44px; border-radius: 10px; border: 1px solid var(--line); background: var(--card); color: var(--ink); display: flex; align-items: center; justify-content: center; cursor: pointer; }
+.ord:disabled { opacity: .35; cursor: default; }</style>
+</helmet>
+<div class="app">
+  <div class="top">
+    <a class="voltar" href="ProNovo.dc.html" aria-label="Voltar"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"></path></svg></a>
+    <div class="stack" style="gap: 0; flex: 1"><span class="tiny muted">Passo 2 de 3</span><span class="t3">Fotos</span></div>
+  </div>
+  <div class="scroll" style="gap: 14px">
+    <div class="steps"><span class="on"></span><span class="on"></span><span></span></div>
+    <p class="p small muted">A primeira foto é a capa no catálogo. Use as setas para mudar a ordem.</p>
+    <button class="card" style="align-items: center; justify-content: center; min-height: 96px; border-style: dashed; border-width: 1.5px; cursor: pointer; font: inherit; color: var(--mar)">
+      <svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16V4M6 10l6-6 6 6M4 20h16"></path></svg>
+      <b>Adicionar fotos</b><span class="tiny muted">JPG ou PNG, até 10 MB cada</span>
+    </button>
+    <sc-for list="{{fotos}}" as="f" hint-placeholder-count="4">
+      <div class="card" style="flex-direction: row; align-items: center; gap: 12px; padding: 10px">
+        <div class="{{f.cls}}" style="width: 72px; height: 56px; flex-shrink: 0; padding: 0"></div>
+        <div class="stack" style="gap: 0; flex: 1; min-width: 0"><b class="small">{{f.nome}}</b><span class="tiny" style="color: var(--mar); font-weight: 700">{{f.capa}}</span></div>
+        <button class="ord" aria-label="Subir foto" onClick="{{f.up}}" disabled="{{f.first}}"><svg class="i s" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 15 6-6 6 6"></path></svg></button>
+        <button class="ord" aria-label="Descer foto" onClick="{{f.down}}" disabled="{{f.last}}"><svg class="i s" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></button>
+      </div>
+    </sc-for>
+  </div>
+  <div class="foot">
+    <a class="btn" href="ProTermo.dc.html">Continuar para o termo</a>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { ordem: [
+      { nome: 'Fachada e jardim', cls: 'foto' },
+      { nome: 'Sala com vista', cls: 'foto f3' },
+      { nome: 'Piscina e churrasqueira', cls: 'foto f4' },
+      { nome: 'Suíte principal', cls: 'foto f2' }
+    ] };
+  }
+  mover(i, d) {
+    const o = this.state.ordem.slice();
+    const j = i + d;
+    if (j < 0 || j >= o.length) return;
+    const t = o[i]; o[i] = o[j]; o[j] = t;
+    this.setState({ ordem: o });
+  }
+  renderVals() {
+    const o = this.state.ordem;
+    return {
+      fotos: o.map((f, i) => ({
+        ...f,
+        capa: i === 0 ? 'Capa' : 'Foto ' + (i + 1),
+        first: i === 0,
+        last: i === o.length - 1,
+        up: () => this.mover(i, -1),
+        down: () => this.mover(i, 1)
+      }))
+    };
+  }
+}
+</script>
+</body>
+</html>

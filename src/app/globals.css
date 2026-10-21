@@ -1,0 +1,61 @@
+@import "tailwindcss";
+
+/*
+  Visual do PAUTA, copiado de docs/prototipo/pauta.css (celular) e site.css (site).
+  Os nomes das cores são os mesmos do protótipo, para comparar cada tela com o original:
+  bg-mar, text-ink2, border-line, bg-areia-soft...
+  O protótipo não tem modo escuro, então o app também não tem.
+*/
+@theme {
+  /* Cores */
+  --color-ink: #10201e;
+  --color-ink2: #4d5d5a;
+  --color-bg: #f3f5f2;
+  --color-card: #ffffff;
+  --color-line: #dce3df;
+  --color-mar: #0d5c58;
+  --color-mar-dark: #08403d;
+  --color-mar-soft: #dceeea;
+  --color-areia: #94501a;
+  --color-areia-soft: #f6e8d8;
+  --color-erro: #a3302b;
+  --color-erro-soft: #f7e2df;
+  --color-roxo: #54469a;
+  --color-roxo-soft: #e9e6f6;
+  --color-cinza-soft: #e6ebe8;
+  /* Tons usados só em alertas e avisos novos */
+  --color-atencao-texto: #6e3a10;
+  --color-erro-texto: #7c221e;
+  --color-perigo-borda: #e3b9b5;
+  --color-aviso-novo: #f6fbfa;
+  --color-aviso-novo-borda: #a9d2cb;
+
+  /* Fontes: Figtree no texto, Bricolage Grotesque nos títulos (classe font-display) */
+  --font-sans: var(--font-figtree), system-ui, sans-serif;
+  --font-display: var(--font-bricolage), var(--font-figtree), sans-serif;
+
+  /* Tamanhos de texto do protótipo */
+  --text-tiny: 12px;
+  --text-small: 13px;
+  --text-corpo: 15px;
+  --text-t2: 20px;
+  --text-preco: 22px;
+  --text-t1: 28px;
+
+  /* Raios (cantos arredondados) do protótipo */
+  --radius-botao-sm: 10px;
+  --radius-botao: 12px;
+  --radius-foto: 14px;
+  --radius-cartao: 16px;
+  --radius-pcard: 18px;
+  --radius-modal: 20px;
+  --radius-folha: 22px;
+}
+
+body {
+  background: var(--color-bg);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  font-size: var(--text-corpo);
+  line-height: 1.45;
+}

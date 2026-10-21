@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>PAUTA · Cadastro de proprietário</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="./pauta.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&amp;family=Figtree:wght@400;500;600;700;800&amp;display=swap">
+<style>body{margin:0}</style>
+</helmet>
+<div class="app">
+  <div class="top">
+    <a class="voltar" href="Main.dc.html" aria-label="Voltar"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"></path></svg></a>
+    <span class="t3">Criar conta</span>
+  </div>
+  <div class="scroll" style="gap: 18px">
+    <div class="seg" role="tablist">
+      <a class="on" href="Cadastro.dc.html" aria-current="page">Proprietário</a>
+      <a href="CadastroImobiliaria.dc.html">Imobiliária ou corretor</a>
+    </div>
+    <div class="stack" style="gap: 6px">
+      <h1 class="t1">Seu imóvel, no seu controle</h1>
+      <p class="p muted small">Você confirma as visitas, escolhe as propostas e decide se mostra o seu contato aos corretores.</p>
+    </div>
+    <div class="stack" style="gap: 14px">
+      <div class="field"><label for="nome">Nome completo</label><input id="nome" value="Marina Duarte"></div>
+      <div class="field"><label for="email">E-mail</label><input id="email" type="email" value="marina@email.com"></div>
+      <div class="field"><label for="tel">Telefone com DDD</label><input id="tel" type="tel" value="(48) 99812-4410"><span class="hint">Obrigatório. Os avisos chegam por WhatsApp neste número.</span></div>
+      <div class="field"><label for="senha">Senha</label><input id="senha" type="password" value="12345678"><span class="hint">Mínimo de 8 caracteres.</span></div>
+    </div>
+  </div>
+  <div class="foot">
+    <a class="btn" href="ProImoveis.dc.html">Criar conta</a>
+    <p class="p tiny muted" style="text-align: center">Já tem conta? <a class="link" href="Entrar.dc.html">Entrar</a></p>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

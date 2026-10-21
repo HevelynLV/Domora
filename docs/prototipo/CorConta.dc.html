@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>PAUTA · Minha conta (corretor)</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="./pauta.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&amp;family=Figtree:wght@400;500;600;700;800&amp;display=swap">
+<style>body{margin:0}</style>
+</helmet>
+<div class="app">
+  <div class="top" style="padding-top: 22px">
+    <h1 class="t1">Minha conta</h1>
+  </div>
+  <div class="scroll">
+    <div class="stack" style="gap: 8px">
+      <p class="over">Protótipo · ver como</p>
+      <div class="seg" style="grid-template-columns: repeat(3, minmax(0, 1fr))" role="group" aria-label="Tipo de corretor">
+        <button class="{{cResp}}" onClick="{{selResp}}">Responsável</button>
+        <button class="{{cConv}}" onClick="{{selConv}}">Convidado</button>
+        <button class="{{cAut}}" onClick="{{selAut}}">Autônomo</button>
+      </div>
+    </div>
+    <div class="card" style="flex-direction: row; align-items: center; gap: 12px">
+      <span class="{{avCls}}">{{ini}}</span>
+      <div class="stack" style="gap: 0"><b>{{nome}}</b><span class="tiny muted">{{papel}}</span></div>
+    </div>
+    <sc-if value="{{resp}}" hint-placeholder-val="{{ true }}">
+      <div class="stack" style="gap: 10px">
+        <a class="card" href="ImobEquipe.dc.html" style="flex-direction: row; align-items: center; gap: 12px">
+          <span class="dot areia"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3.5"></circle><path d="M2.5 20c0-3.5 3-5.5 6.5-5.5s6.5 2 6.5 5.5"></path><path d="M16 4.5a3.5 3.5 0 0 1 0 7M18 14.8c2 .6 3.5 2.3 3.5 5.2"></path></svg></span>
+          <span style="flex: 1; display: flex; flex-direction: column"><b>Equipe e convites</b><span class="small muted">2 corretores · convidar novos</span></span>
+          <svg class="i s" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg>
+        </a>
+        <a class="card" href="CorPagamento.dc.html" style="flex-direction: row; align-items: center; gap: 12px">
+          <span class="dot"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="6" width="18" height="13" rx="2"></rect><path d="M3 10h18"></path></svg></span>
+          <span style="flex: 1; display: flex; flex-direction: column"><b>Assinatura e pagamentos</b><span class="small muted">Ativa · próxima cobrança 15/11</span></span>
+          <svg class="i s" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg>
+        </a>
+      </div>
+    </sc-if>
+    <sc-if value="{{aut}}" hint-placeholder-val="{{ false }}">
+      <a class="card" href="CorPagamento.dc.html" style="flex-direction: row; align-items: center; gap: 12px">
+        <span class="dot"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="6" width="18" height="13" rx="2"></rect><path d="M3 10h18"></path></svg></span>
+        <span style="flex: 1; display: flex; flex-direction: column"><b>Assinatura e pagamentos</b><span class="small muted">Ativa · próxima cobrança 15/11</span></span>
+        <svg class="i s" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg>
+      </a>
+    </sc-if>
+    <sc-if value="{{conv}}" hint-placeholder-val="{{ false }}">
+      <div class="alerta info"><span>A assinatura e os convites da Maré Imóveis ficam com o responsável, Rafael Souza. Você não paga mensalidade.</span></div>
+    </sc-if>
+    <div class="stack" style="gap: 14px">
+      <div class="field"><label for="nome">Nome completo</label><input id="nome" value="{{nome}}"></div>
+      <div class="field"><label for="email">E-mail</label><input id="email" type="email" value="{{email}}"></div>
+      <div class="field"><label for="tel">Telefone com DDD</label><input id="tel" type="tel" value="{{tel}}"><span class="hint">Os avisos chegam por WhatsApp neste número.</span></div>
+      <button class="btn sec">Salvar dados</button>
+    </div>
+    <a class="link small" href="RecuperarSenha.dc.html">Trocar senha</a>
+    <a class="btn perigo" href="Main.dc.html">Sair</a>
+  </div>
+  <nav class="nav" aria-label="Menu do corretor">
+    <a href="CorCatalogo.dc.html"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"></rect><rect x="14" y="3" width="7" height="7" rx="1.5"></rect><rect x="3" y="14" width="7" height="7" rx="1.5"></rect><rect x="14" y="14" width="7" height="7" rx="1.5"></rect></svg>Catálogo</a>
+    <a href="CorNegociacoes.dc.html"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 3H6v18h12V7z"></path><path d="M14 3v4h4M9 13h6M9 17h6"></path></svg>Negociações</a>
+    <a href="CorAvisos.dc.html"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9a6 6 0 1 1 12 0c0 6 2.5 8 2.5 8h-17S6 15 6 9"></path><path d="M10 20.5h4"></path></svg>Avisos<span class="pill">2</span></a>
+    <a class="on" href="CorConta.dc.html" aria-current="page"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"></circle><path d="M4 21c0-4 4-6 8-6s8 2 8 6"></path></svg>Conta</a>
+  </nav>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { tipo: 'resp' }; }
+  renderVals() {
+    const t = this.state.tipo;
+    const p = {
+      resp: { nome: 'Rafael Souza', ini: 'RS', avCls: 'avatar m', papel: 'Responsável · Maré Imóveis · CRECI 12345-J SC', email: 'rafael@mareimoveis.com.br', tel: '(48) 99654-2201' },
+      conv: { nome: 'Camila Reis', ini: 'CR', avCls: 'avatar r', papel: 'Corretora da Maré Imóveis · entrou por convite', email: 'camila@mareimoveis.com.br', tel: '(48) 99120-7788' },
+      aut: { nome: 'Thiago Lemos', ini: 'TL', avCls: 'avatar', papel: 'Corretor autônomo · CRECI 45678-F SC', email: 'thiago@email.com', tel: '(48) 99301-5520' }
+    }[t];
+    return {
+      ...p,
+      resp: t === 'resp', conv: t === 'conv', aut: t === 'aut',
+      cResp: t === 'resp' ? 'on' : '', cConv: t === 'conv' ? 'on' : '', cAut: t === 'aut' ? 'on' : '',
+      selResp: () => this.setState({ tipo: 'resp' }),
+      selConv: () => this.setState({ tipo: 'conv' }),
+      selAut: () => this.setState({ tipo: 'aut' })
+    };
+  }
+}
+</script>
+</body>
+</html>
