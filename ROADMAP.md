@@ -2,8 +2,8 @@
 
 ## Onde paramos
 
-Última atualização: 20/10/2026 · por Hevelyn
-Etapa atual: 1. Setup, na branch `etapa-1-setup` (passos 1.1 a 1.6 feitos; próximo: 1.7, auditoria numa sessão nova)
+Última atualização: 21/10/2026 · por Hevelyn
+Etapa atual: 1. Setup concluída na branch `etapa-1-setup` (passos 1.1 a 1.8 feitos). Próxima: Etapa 2, banco de dados
 
 O que aconteceu (replanejamento de 13 e 14/10/2026 e troca de nome em 16/10/2026):
 - O projeto antigo se chamava **Captador** (repositório `HevelynLV/imobilink`, pasta local `capimoveis`). Ele chegou até a Etapa 3 (login e perfis), mas o modelo de negócio mudou tanto que vamos recomeçar do zero
@@ -15,7 +15,7 @@ Etapa 0 (concluída em 20/10/2026):
 - Passos 0.1 a 0.3 feitos: revisão contra a Visão geral, 15 telas novas (pagamento da mensalidade, acesso suspenso, renovar exclusividade, recuperar senha, editar imóvel disponível, editar e reenviar reprovado, minha conta), confirmação de apagar, status "contrato em análise" e "vendido", "Equipe" só para o responsável da imobiliária, Domora trocado por PAUTA (o `domora.css` virou `pauta.css`) e o roteiro com as datas em ordem
 - O que o protótipo revelou e ainda não está decidido ficou em "Pendências e decisões em aberto", abaixo. As telas mostram esses pontos como [A DEFINIR]
 
-Etapa 1 (em andamento):
+Etapa 1 (concluída em 21/10/2026):
 - 1.1 feito: app Next.js 16.4.2 com TypeScript, Tailwind 4, ESLint, App Router e código em `src/` (pacote `pauta`). Cache Components ficou ligado, como o Next 16.4 cria (decisão no CLAUDE.md). `npm run lint` e `npm run build` passam
 - 1.2 feito: os documentos saíram de `PAUTA-docs/` e foram para `README.md`, `ROADMAP.md`, `CLAUDE.md`, `docs/visao-geral.md` e `docs/prompts.md`. As 63 telas do protótipo, o `pauta.css` e o `site.css` estão em `docs/prototipo/`. O CLAUDE.md carrega o `AGENTS.md` do Next e tem a regra de atualizar este "Onde paramos" a cada passo. O `.gitattributes` fixa a quebra de linha (LF) para Windows e Mac
 
@@ -27,8 +27,22 @@ Etapa 1 (em andamento):
 
 - 1.6 feito: Playwright 1.64 com `npm run test:e2e` (testes em `e2e/`, rodam em tela de celular e de computador, um de cada vez porque o banco é compartilhado, e carregam o `.env.local`). 4 testes passando: a página inicial abre e o app conecta ao Supabase. Cores, fontes (Figtree e Bricolage Grotesque), tamanhos de texto e raios do `pauta.css` estão no `src/app/globals.css` com os mesmos nomes do protótipo; componentes `Botao`, `Cartao`, `SeloStatus` e `MenuInferior` em `src/components/ui/`. Amostra em http://localhost:3000/amostra, conferida no navegador em tamanho de celular
 
+- 1.7 feito: auditoria numa sessão nova. Nada crítico. Lint, build e os 4 testes passaram, e a chave secreta não aparece no código do app
+- 1.8 feito: todos os achados da auditoria corrigidos ou levados para "Pendências":
+  - as páginas `/teste-conexao` e `/amostra` respondem "página não encontrada" (404) fora do computador de quem programa, ou seja, também num endereço de teste da Vercel
+  - os clientes do Supabase têm nomes diferentes, para ninguém usar o do navegador no servidor por engano: `criarClienteNavegador` (`client.ts`) e `criarClienteServidor` (`server.ts`)
+  - o menu de baixo acende a aba certa também nas páginas de dentro (ex.: `/imoveis/123` acende "Imóveis"), deixa espaço para a barra do iPhone e tem um aviso: nos layouts da Etapa 3, ele precisa ficar dentro de um `<Suspense>`, senão o `npm run build` falha
+  - os testes de celular usam 390 px de largura, como o protótipo
+  - o `@next/env` (usado pelo `playwright.config.ts`) entrou no `package.json`
+  - o `/atualizar-roadmap` agora começa com `git fetch` em vez de `git pull`
+  - o CLAUDE.md ganhou a regra do `server-only`, e foram corrigidos textos desatualizados no ROADMAP, no `docs/prompts.md` e na Visão geral
+  - lint, build e testes passaram de novo depois das correções
+
 Próximo passo exato:
-- **Passo 1.7**: `/auditar-etapa 1` numa sessão nova do Claude Code (`/clear` ou outro terminal), para quem revisa não ser quem escreveu
+- Abrir o Pull Request da `etapa-1-setup` para a `main` e fazer o merge
+- Antes do passo 2.1: cada pessoa faz o `supabase login` e o `supabase link` (README, passo 5). Hoje este computador ainda não tem o link: `npx supabase migration list` responde "Cannot find project ref"
+- Decidir, com o Gabriel, as pendências marcadas com **(banco)**, principalmente as da Etapa 2 (abaixo)
+- **Passo 2.1**: `/clear`, modo de planejamento, criar a branch `etapa-2-banco` a partir da `main` atualizada e colar o prompt 2.1 do `docs/prompts.md`
 
 Antes da Etapa 1 (fazer à mão, cada pessoa pelo próprio painel):
 - [ ] Avisar o Gabriel do replanejamento e da troca do nome para PAUTA, e combinar o arquivamento
@@ -44,6 +58,7 @@ Pendências e decisões em aberto (cada uma precisa estar resolvida antes da eta
 - Etapa 2 (banco):
   - **(banco)** Assinante bloqueado pelo admin e assinante com pagamento vencido são o mesmo status ou dois diferentes? Se o admin desbloqueia um vencido, ele volta sem pagar?
   - **(banco)** Bloquear uma imobiliária corta o acesso dos corretores dela na hora? (o protótipo e o prompt 5.2 dizem que sim; a Visão geral não diz)
+  - **(banco)** Como o app faz as ações de admin que mexem no login das pessoas: excluir a imobiliária pendente junto com o usuário dela (RF16), mandar o convite por e-mail (RF05) e criar a conta do dono do imóvel captado (RF08). Hoje a chave secreta é só para os testes e nunca vai para a Vercel (README, passo 4). Opções: (a) funções `security definer` no Postgres, sem chave no app; (b) um `src/lib/supabase/admin.ts` com `server-only` e uma chave secreta de produção separada da chave pessoal de testes. Achado da auditoria da Etapa 1
 - Etapa 3:
   - **(banco)** Como o corretor autônomo se cadastra: pela tela pública, como no protótipo, ou de outro jeito? Hoje o CLAUDE.md diz "cadastro pelo app só como proprietário ou imobiliária"
   - Quanto tempo a sessão dura e se existe "manter conectado" (aparece no login do site)
@@ -87,7 +102,9 @@ Pendências e decisões em aberto (cada uma precisa estar resolvida antes da eta
   - **(banco)** O que acontece com as propostas aceitas se a exclusividade vencer com o imóvel em negociação
 - Etapa 13:
   - Termo de assinatura do corretor e da imobiliária, com a cláusula contra desintermediação e a responsabilidade da imobiliária pelos corretores convidados (o protótipo pede o aceite já no cadastro)
-  - Tirar do app as páginas de teste da Etapa 1: `src/app/teste-conexao/` e `src/app/amostra/`
+  - Tirar do app as páginas de teste da Etapa 1: `src/app/teste-conexao/` e `src/app/amostra/` (desde a auditoria da Etapa 1 elas já respondem 404 em produção, mas o código continua no app)
+  - PWA no iPhone: colocar `viewportFit: "cover"` no `viewport` do `src/app/layout.tsx`. O menu de baixo já reserva o espaço da barra do iPhone (`env(safe-area-inset-bottom)`), mas isso só vale com essa opção ligada; ligar junto com o resto do PWA para conferir também o topo da tela
+  - O teste "o app conecta ao Supabase" (`e2e/inicio.spec.ts`) usa o Supabase de verdade e o `.env.local`: num CI sem as chaves, ele falha
   - Rever o `npm audit`: na Etapa 1 havia 5 avisos "high" no pacote `braces`, que vem só das ferramentas de lint (não vai para o app no ar). A correção sugerida (`npm audit fix --force`) voltaria o `eslint-config-next` para a versão 14 e não foi aplicada
 
 Lições do Captador (problemas já encontrados no projeto antigo; tratar desde o início no PAUTA):
@@ -108,7 +125,7 @@ Atenção (algo que a próxima pessoa precisa saber):
 - Primeira vez no projeto? Veja o `README.md` e a `docs/visao-geral.md`
 - O nome do app agora é **PAUTA** (antes, Domora)
 - Os documentos saíram de `PAUTA-docs/` e agora ficam na raiz (`README.md`, `ROADMAP.md`, `CLAUDE.md`) e em `docs/`. O protótipo está em `docs/prototipo/`
-- O app Next.js existe a partir da branch `etapa-1-setup`: depois de baixar, rode `npm install`
+- O app Next.js existe a partir da branch `etapa-1-setup`: depois de baixar, rode `npm install` (se já tinha rodado antes, rode de novo: entrou o pacote `@next/env`)
 - Migrations agora são aplicadas com `npx supabase db push`: antes da Etapa 2, cada pessoa faz a preparação do README (passo 5: `supabase login` e `supabase link`). Nunca rode `npx supabase config push`
 - O projeto Supabase do PAUTA já existe, mas ainda não tem tabelas. Não use o `imobilink` nem o projeto Supabase antigo para trabalho novo
 - O protótipo mudou na Etapa 0 (63 telas). O arquivo de estilo agora se chama `pauta.css` (antes, `domora.css`); o Roadmap de prompts já usa o nome novo nos passos 1.2 e 1.6
@@ -116,12 +133,12 @@ Atenção (algo que a próxima pessoa precisa saber):
 
 ## Migrations aplicadas no banco
 
-Nenhuma ainda. O projeto Supabase do PAUTA será criado na Etapa 1. Toda migration nova entra aqui assim que for aplicada e o `testar_rls.sql` passar.
+Nenhuma ainda. O projeto Supabase do PAUTA já existe (criado na Etapa 1), ainda sem tabelas. Toda migration nova entra aqui assim que for aplicada e o `testar_rls.sql` passar.
 
 ## Etapas do MVP
 
 - [x] 0. Protótipo do design — Pronto quando: o fluxo inteiro pode ser clicado, do cadastro do imóvel até o vendido
-- [ ] 1. Setup — Pronto quando: a página abre em localhost, conecta ao Supabase novo e o código está no repositório `PAUTA`
+- [x] 1. Setup — Pronto quando: a página abre em localhost, conecta ao Supabase novo e o código está no repositório `PAUTA`
 - [ ] 2. Banco de dados — Pronto quando: o `testar_rls.sql` passa e um assinante bloqueado não vê nenhum imóvel
 - [ ] 3. Login e perfis — Pronto quando: cada tipo de usuário só abre a própria área
 - [ ] 4. Imóvel — Pronto quando: imóvel do proprietário, com fotos e termo aceito, aparece como pendente; imóvel captado pelo admin entra disponível e vinculado ao dono
@@ -146,3 +163,4 @@ PAUTA (antes, Domora):
 - 13 e 14/10/2026 · Hevelyn · Replanejamento do MVP: o Captador vira Domora, o modelo de negócio é redefinido, o projeto recomeça do zero e o plano passa a ter 14 etapas (0 a 13)
 - 16/10/2026 · Hevelyn · Troca do nome do app de Domora para PAUTA; repositório novo passa a se chamar `pauta`
 - 20/10/2026 · Hevelyn · Etapa 0 concluída: revisão do protótipo contra a Visão geral, 15 telas novas, correções, troca de Domora por PAUTA e roteiro clicável do cadastro ao vendido (63 telas). Decisões que o protótipo revelou foram para "Pendências"
+- 21/10/2026 · Hevelyn · Etapa 1 concluída: app Next.js 16 conectado ao Supabase do PAUTA, migrations com `supabase db push`, comandos `/auditar-etapa` e `/atualizar-roadmap`, Playwright (4 testes) e visual do protótipo no Tailwind. Auditoria sem itens críticos; achados corrigidos ou levados para "Pendências"
