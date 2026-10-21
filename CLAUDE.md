@@ -84,7 +84,7 @@ Chat interno, mapa, app nativo nas lojas, outras cidades além de Florianópolis
 @docs/prompts.md
 - `src/lib/supabase/client.ts` e `src/lib/supabase/server.ts`: clientes do Supabase para o navegador e para o servidor (criados na Etapa 1)
 - `src/lib/auth.ts`: função `exigirTipo()` (criada na Etapa 3)
-- `.claude/commands/`: comandos `/auditar-etapa` e `/atualizar-roadmap` (recriados na Etapa 1 com as regras do PAUTA)
+- `.claude/commands/`: comandos `/auditar-etapa <n>` (revisa a etapa contra os RFs, RNFs e este arquivo, sem corrigir) e `/atualizar-roadmap` (atualização completa do ROADMAP antes do push)
 
 ## Equipe
 

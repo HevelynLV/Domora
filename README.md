@@ -151,4 +151,4 @@ Uma etapa por vez, sempre numa branch própria. Nunca trabalhe direto na `main`.
 7. **Atualizar o Roadmap:** `/atualizar-roadmap` (sempre antes do push)
 8. **Enviar:** `git push -u origin <nome-da-branch>` e abra um **Pull Request** para a `main` no GitHub. A outra pessoa revisa e aceita
 
-Os comandos `/auditar-etapa` e `/atualizar-roadmap` vêm do projeto antigo e serão recriados na Etapa 1, com as regras de negócio do PAUTA.
+Os comandos `/auditar-etapa` e `/atualizar-roadmap` ficam em `.claude/commands/`. Foram recriados na Etapa 1 a partir dos do Captador, com as regras do PAUTA.

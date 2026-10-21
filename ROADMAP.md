@@ -3,7 +3,7 @@
 ## Onde paramos
 
 Última atualização: 20/10/2026 · por Hevelyn
-Etapa atual: 1. Setup, na branch `etapa-1-setup` (passos 1.1 a 1.4 feitos; próximo: 1.5)
+Etapa atual: 1. Setup, na branch `etapa-1-setup` (passos 1.1 a 1.5 feitos; próximo: 1.6)
 
 O que aconteceu (replanejamento de 13 e 14/10/2026 e troca de nome em 16/10/2026):
 - O projeto antigo se chamava **Captador** (repositório `HevelynLV/imobilink`, pasta local `capimoveis`). Ele chegou até a Etapa 3 (login e perfis), mas o modelo de negócio mudou tanto que vamos recomeçar do zero
@@ -23,8 +23,10 @@ Etapa 1 (em andamento):
 
 - 1.4 feito: decidido usar `npx supabase db push` (Supabase CLI como dependência do projeto, pasta `supabase/` criada com `supabase init`). Registrado no README (passo 5), no CLAUDE.md e na Visão geral. Falta a preparação de cada computador (`supabase login` e `supabase link`), que cada pessoa faz no próprio terminal porque pede a senha do banco
 
+- 1.5 feito: `.claude/commands/auditar-etapa.md` e `atualizar-roadmap.md`, a partir dos do `imobilink`. Aproveitados: skill de code review do Superpowers, pedir evidência, tabela por gravidade, não corrigir, conferir variável, pacote e migration novos. Mudou: regras de negócio do PAUTA no lugar da reserva, checagens de `exigirTipo()`, RLS, testes do que deve ser barrado e cuidados do Next 16; migration conferida pelo `npx supabase migration list`
+
 Próximo passo exato:
-- **Passo 1.5** do `docs/prompts.md`: criar os comandos `/auditar-etapa` e `/atualizar-roadmap`
+- **Passo 1.6** do `docs/prompts.md`: Playwright com o primeiro teste e o `npm run test:e2e`; cores, fontes e componentes do protótipo no Tailwind, com uma página de amostra
 
 Antes da Etapa 1 (fazer à mão, cada pessoa pelo próprio painel):
 - [ ] Avisar o Gabriel do replanejamento e da troca do nome para PAUTA, e combinar o arquivamento
