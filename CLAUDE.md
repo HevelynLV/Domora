@@ -47,13 +47,21 @@ Estas decisões ainda não foram tomadas. Se uma tarefa depender delas, PERGUNTE
 
 ## Decisões tomadas
 
-- Cadastro pelo app só como `proprietario` ou `imobiliaria` (corretor autônomo entra como assinante sem imobiliária; corretor de imobiliária entra por convite). O admin nunca é criado pelo app: cadastro normal e depois troca do tipo direto no banco
+- Cadastro pelo app como proprietário, imobiliária ou corretor autônomo (o autônomo informa o próprio CRECI e assina sem imobiliária; corretor de imobiliária entra só por convite). O admin nunca é criado pelo app: cadastro normal e depois troca do tipo direto no banco. Autônomo decidido em 22/10/2026
 - Telefone com DDD é obrigatório para proprietário e assinante
-- Imobiliária cadastrada sempre entra com assinatura `pendente`, até o admin ativar
+- Imobiliária e corretor autônomo cadastrados sempre entram com assinatura `pendente`, até o admin ativar
+- Status da assinatura: `pendente`, `ativo`, `bloqueado` (decisão do admin) e `vencido` (pagamento atrasado). Desbloquear não libera um vencido: só o pagamento libera. O corretor convidado segue a assinatura da imobiliária: bloqueada ou vencida, os corretores dela perdem o acesso na hora. Decidido em 22/10/2026
+- Ações do admin que mexem no Supabase Auth (excluir imobiliária pendente com o usuário, convite por e-mail, criar a conta do dono de imóvel captado) usam `src/lib/supabase/admin.ts`, com `server-only` e uma chave secreta de produção separada das chaves pessoais de teste. Só depois de `exigirTipo("admin")` ou ao aceitar um convite válido. Decidido em 22/10/2026
 - O admin pode reprovar imóvel. O proprietário edita o imóvel reprovado e o reenvia por um passo explícito; editar não reenvia sozinho
 - Edição de imóvel disponível vale na hora, sem nova aprovação. Cada campo alterado, inclusive fotos, fica registrado para o admin revisar. Edição feita pelo admin não é registrada
 - A aprovação de imóvel falha se o imóvel mudou depois que o admin abriu a tela
 - O proprietário só apaga imóvel pendente de aprovação ou reprovado
+- A exclusividade de 6 meses conta da aprovação do admin; imóvel captado conta do cadastro. Decidido em 22/10/2026
+- Mostrar o contato aos corretores é uma escolha por imóvel, não da conta. Decidido em 22/10/2026
+- Tipos de imóvel e bairros de Florianópolis são listas fixas no banco, que só o admin altera. Decidido em 22/10/2026
+- Imóvel captado com dono sem conta: o admin cria a conta do dono, que recebe e-mail para criar a senha e aceita o termo de exclusividade no primeiro acesso (data e versão guardadas). O imóvel já entra disponível. Decidido em 22/10/2026
+- A visita não é obrigatória antes da proposta. Cada corretor tem no máximo uma proposta em aberto (aguardando ou aceita) por imóvel; depois de recusada, pode mandar outra. O proprietário pode desfazer o aceite enquanto o contrato daquela proposta não foi enviado. Decidido em 22/10/2026
+- No contrato, vale o valor final do contrato, registrado pelo admin ao aprovar. Ao aprovar, além de o imóvel virar vendido, todas as outras propostas em aberto (aceitas e sem resposta) são recusadas e as visitas pendentes ou marcadas são canceladas, na mesma operação. Decidido em 22/10/2026
 - O endereço do imóvel fica visível para qualquer assinante ativo. A proteção contra desintermediação é contratual, no termo de assinatura
 - Migrations aplicadas com a Supabase CLI: criar com `npx supabase migration new <nome>` e aplicar com `npx supabase db push`, sempre depois de `git pull`. Nunca rodar `npx supabase config push` (o `supabase/config.toml` é só para uso local) nem `npx supabase db reset --linked`. A senha do banco é digitada pela pessoa no terminal, nunca escrita em arquivo nem colada no chat. Decidido em 20/10/2026
 - Cache Components do Next.js 16 fica ligado (`cacheComponents` e `partialPrefetching` em `next.config.ts`, como o Next 16.4 cria). Nada é cacheado sem `"use cache"`; tudo o que lê a sessão (cookies) fica dentro de um `<Suspense>`, e a sessão nunca é lida no topo de um layout. Todo arquivo que lê a sessão começa com `import "server-only"` (ou importa um arquivo que tem, como `src/lib/supabase/server.ts`), para o build falhar se ele for parar no navegador. Decidido em 20/10/2026, porque o Next vai tornar isso obrigatório na próxima versão grande

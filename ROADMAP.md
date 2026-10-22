@@ -2,8 +2,12 @@
 
 ## Onde paramos
 
-Última atualização: 21/10/2026 · por Hevelyn
-Etapa atual: 1. Setup concluída na branch `etapa-1-setup` (passos 1.1 a 1.8 feitos). Próxima: Etapa 2, banco de dados
+Última atualização: 22/10/2026 · por Hevelyn
+Etapa atual: 2. Banco de dados, na branch `etapa-2-banco` (antes do passo 2.1). A Etapa 1 foi aceita na `main` (Pull Request #1)
+
+Preparação da Etapa 2 (22/10/2026):
+- `supabase login` e `supabase link` feitos no computador da Hevelyn: `npx supabase migration list` responde sem erro, com a lista vazia
+- 13 decisões **(banco)** tomadas e registradas em "Decisões tomadas em 22/10/2026" na Visão geral e no CLAUDE.md. Ficaram em aberto 3, que não travam o passo 2.1: campos da proposta (Etapa 8), pagamento antes ou depois da ativação (Etapa 11) e propostas aceitas quando a exclusividade vence (Etapa 12)
 
 O que aconteceu (replanejamento de 13 e 14/10/2026 e troca de nome em 16/10/2026):
 - O projeto antigo se chamava **Captador** (repositório `HevelynLV/imobilink`, pasta local `capimoveis`). Ele chegou até a Etapa 3 (login e perfis), mas o modelo de negócio mudou tanto que vamos recomeçar do zero
@@ -39,10 +43,8 @@ Etapa 1 (concluída em 21/10/2026):
   - lint, build e testes passaram de novo depois das correções
 
 Próximo passo exato:
-- Abrir o Pull Request da `etapa-1-setup` para a `main` e fazer o merge
-- Antes do passo 2.1: cada pessoa faz o `supabase login` e o `supabase link` (README, passo 5). Hoje este computador ainda não tem o link: `npx supabase migration list` responde "Cannot find project ref"
-- Decidir, com o Gabriel, as pendências marcadas com **(banco)**, principalmente as da Etapa 2 (abaixo)
-- **Passo 2.1**: `/clear`, modo de planejamento, criar a branch `etapa-2-banco` a partir da `main` atualizada e colar o prompt 2.1 do `docs/prompts.md`
+- Contar ao Gabriel as decisões de 22/10/2026 (Visão geral, "Decisões tomadas em 22/10/2026"). Se ele discordar de alguma, rever antes do passo 2.1
+- **Passo 2.1**: `/clear`, modo de planejamento, conferir que está na branch `etapa-2-banco` e colar o prompt 2.1 do `docs/prompts.md`
 
 Antes da Etapa 1 (fazer à mão, cada pessoa pelo próprio painel):
 - [ ] Avisar o Gabriel do replanejamento e da troca do nome para PAUTA, e combinar o arquivamento
@@ -55,38 +57,25 @@ Antes da Etapa 1 (fazer à mão, cada pessoa pelo próprio painel):
 
 Pendências e decisões em aberto (cada uma precisa estar resolvida antes da etapa indicada). Os itens marcados com **(banco)** mudam tabelas ou status: como a Etapa 2 modela o banco do MVP inteiro, vale decidi-los antes do passo 2.1, mesmo que a etapa deles venha depois. Ao decidir, registrar em "Decisões tomadas" na Visão geral (com a data) e no CLAUDE.md, e tirar daqui.
 
-- Etapa 2 (banco):
-  - **(banco)** Assinante bloqueado pelo admin e assinante com pagamento vencido são o mesmo status ou dois diferentes? Se o admin desbloqueia um vencido, ele volta sem pagar?
-  - **(banco)** Bloquear uma imobiliária corta o acesso dos corretores dela na hora? (o protótipo e o prompt 5.2 dizem que sim; a Visão geral não diz)
-  - **(banco)** Como o app faz as ações de admin que mexem no login das pessoas: excluir a imobiliária pendente junto com o usuário dela (RF16), mandar o convite por e-mail (RF05) e criar a conta do dono do imóvel captado (RF08). Hoje a chave secreta é só para os testes e nunca vai para a Vercel (README, passo 4). Opções: (a) funções `security definer` no Postgres, sem chave no app; (b) um `src/lib/supabase/admin.ts` com `server-only` e uma chave secreta de produção separada da chave pessoal de testes. Achado da auditoria da Etapa 1
 - Etapa 3:
-  - **(banco)** Como o corretor autônomo se cadastra: pela tela pública, como no protótipo, ou de outro jeito? Hoje o CLAUDE.md diz "cadastro pelo app só como proprietário ou imobiliária"
   - Quanto tempo a sessão dura e se existe "manter conectado" (aparece no login do site)
 - Etapa 4:
   - Texto do termo de exclusividade que o proprietário aceita no cadastro
-  - **(banco)** A exclusividade de 6 meses começa a contar na aprovação (como no protótipo) ou no aceite do termo?
-  - **(banco)** Mostrar o contato vale para cada imóvel (como no protótipo) ou para a conta toda?
   - O proprietário pode editar imóvel pendente de aprovação? Se puder, a edição é registrada?
   - O proprietário pode editar imóvel em negociação (ex.: mudar o preço com propostas aceitas)? Vale a mesma regra de "edição de imóvel disponível"?
-  - **(banco)** Lista de tipos de imóvel (hoje: casa, apartamento, cobertura, terreno, sala comercial) e de bairros de Florianópolis (hoje só 6 no protótipo)
+  - Conteúdo das listas de tipos de imóvel (hoje: casa, apartamento, cobertura, terreno, sala comercial) e de bairros de Florianópolis (hoje só 6 no protótipo). Que são listas fixas no banco já foi decidido em 22/10/2026
   - Limite das fotos: o protótipo usa JPG ou PNG de até 10 MB cada
-  - **(banco)** Imóvel captado pelo admin: o admin pode criar a conta do dono (o dono recebe um e-mail para criar a senha)? E como esse dono aceita o termo de exclusividade: no app, no primeiro acesso, ou em papel?
 - Etapa 6:
   - Quais filtros o catálogo terá (o protótipo sugere tipo, status, bairro, faixa de preço, quartos e busca por título ou bairro)
 - Etapa 7:
-  - **(banco)** A visita é obrigatória antes da proposta? (no protótipo, não é)
   - Visita recusada: o proprietário escreve um motivo ou sugere outro horário? (no protótipo, só recusa)
   - Horários da visita: livres ou em horários fixos (o protótipo usa horários das 09:00 às 17:00), e se o recado do corretor ao proprietário entra
   - O proprietário também vê o CRECI do corretor nas visitas e propostas? (o protótipo mostra; a Visão geral fala só em nome, imobiliária e contato)
 - Etapa 8:
   - **(banco)** Campos da proposta: o protótipo pede valor, forma de pagamento (à vista, financiamento, permuta), condições e o nome do comprador. O RF23 fala só em "valor e condições". O nome do comprador é dado pessoal de outra pessoa (LGPD): entra ou não?
-  - **(banco)** O mesmo corretor pode ter mais de uma proposta no mesmo imóvel? Pode mandar uma nova depois de uma recusada?
-  - **(banco)** O proprietário pode desfazer o aceite de uma proposta?
 - Etapa 9:
   - Qual a % de comissão do PAUTA (sobre a comissão do corretor ou sobre o valor do imóvel)
   - A cláusula da comissão do PAUTA no contrato é condição para o admin aprovar? (o protótipo trata como item da conferência)
-  - **(banco)** E se o valor final do contrato for diferente do valor da proposta aceita?
-  - **(banco)** Ao aprovar o contrato, o que acontece com as propostas ainda não respondidas e com as visitas marcadas de outros corretores? (a regra fala em "todas as outras propostas em aberto"; o protótipo só cita as aceitas)
   - Limite do PDF do contrato: o protótipo usa até 20 MB
 - Etapa 10:
   - Provedor da API oficial do WhatsApp (Meta direto ou um intermediário como Twilio ou Z-API) e o custo por mensagem
@@ -129,7 +118,7 @@ Atenção (algo que a próxima pessoa precisa saber):
 - Migrations agora são aplicadas com `npx supabase db push`: antes da Etapa 2, cada pessoa faz a preparação do README (passo 5: `supabase login` e `supabase link`). Nunca rode `npx supabase config push`
 - O projeto Supabase do PAUTA já existe, mas ainda não tem tabelas. Não use o `imobilink` nem o projeto Supabase antigo para trabalho novo
 - O protótipo mudou na Etapa 0 (63 telas). O arquivo de estilo agora se chama `pauta.css` (antes, `domora.css`); o Roadmap de prompts já usa o nome novo nos passos 1.2 e 1.6
-- Há várias decisões novas em "Pendências e decisões em aberto". As marcadas com **(banco)** precisam ser decididas antes do passo 2.1
+- Decisões novas de 22/10/2026 (status vencido separado do bloqueado, corretor autônomo pela tela pública, chave de admin só no servidor e outras): veja "Decisões tomadas em 22/10/2026" na Visão geral. As 3 marcadas com **(banco)** que sobraram em "Pendências" não travam o passo 2.1
 
 ## Migrations aplicadas no banco
 
