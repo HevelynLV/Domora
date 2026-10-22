@@ -99,11 +99,15 @@ as $$
 $$;
 
 -- Muda o status do assinante de um usuário, como o admin ou o webhook fariam.
+-- 'bloqueado' não é um status (passo 2.7): vira status ativo com o bloqueio do admin
+-- ligado, para o teste conferir o bloqueio e não um pendente.
 create or replace function pg_temp.mudar_status_do_assinante_de(p_perfil uuid, p_status text)
 returns void
 language sql
 as $$
-  update public.assinantes set status = p_status::public.status_assinatura
+  update public.assinantes
+  set status = case when p_status = 'bloqueado' then 'ativo' else p_status end::public.status_assinatura,
+      bloqueado_pelo_admin = (p_status = 'bloqueado')
   where id = (select assinante_id from public.perfis where id = p_perfil);
 $$;
 
@@ -1102,6 +1106,100 @@ do $$ declare v text; begin
   values ('Admin não libera assinante vencido sem pagamento', 'bloqueado (P0001)', v);
 end $$;
 
+-- Bloqueio do admin, separado do pagamento (passo 2.7) ----------------
+
+do $$ declare v text; a text; b text; begin
+  begin
+    perform pg_temp.criar_imobiliaria('00000000-0000-4000-a000-000000000011', '12345-J');
+    perform pg_temp.mudar_status_do_assinante_de('00000000-0000-4000-a000-000000000011', 'ativo');
+    perform pg_temp.criar_admin('00000000-0000-4000-a000-000000000009');
+    perform pg_temp.entrar_como('00000000-0000-4000-a000-000000000009');
+    update public.assinantes set bloqueado_pelo_admin = true
+    where responsavel_id = '00000000-0000-4000-a000-000000000011';
+    select status::text into v from public.assinantes
+    where responsavel_id = '00000000-0000-4000-a000-000000000011';
+    perform pg_temp.entrar_como('00000000-0000-4000-a000-000000000011');
+    a := public.eh_assinante_ativo()::text;
+    perform pg_temp.entrar_como('00000000-0000-4000-a000-000000000009');
+    update public.assinantes set bloqueado_pelo_admin = false
+    where responsavel_id = '00000000-0000-4000-a000-000000000011';
+    perform pg_temp.entrar_como('00000000-0000-4000-a000-000000000011');
+    b := public.eh_assinante_ativo()::text;
+    v := v || ' / ' || a || ' / ' || b;
+    raise exception using errcode = 'TR001';
+  exception when sqlstate 'TR001' then null;
+            when others then v := pg_temp.bloqueio(sqlstate, sqlerrm);
+  end;
+  insert into resultado (teste, esperado, obtido)
+  values ('Admin bloqueia e desbloqueia sem mexer no status (status / acesso bloqueado / acesso desbloqueado)',
+          'ativo / false / true', v);
+end $$;
+
+do $$ declare v text; a text; begin
+  begin
+    perform pg_temp.criar_imobiliaria('00000000-0000-4000-a000-000000000011', '12345-J');
+    perform pg_temp.mudar_status_do_assinante_de('00000000-0000-4000-a000-000000000011', 'vencido');
+    update public.assinantes set bloqueado_pelo_admin = true
+    where responsavel_id = '00000000-0000-4000-a000-000000000011';
+    perform pg_temp.criar_admin('00000000-0000-4000-a000-000000000009');
+    perform pg_temp.entrar_como('00000000-0000-4000-a000-000000000009');
+    -- O caminho que a auditoria achou: desbloquear e depois ativar.
+    update public.assinantes set bloqueado_pelo_admin = false
+    where responsavel_id = '00000000-0000-4000-a000-000000000011';
+    begin
+      update public.assinantes set status = 'ativo'
+      where responsavel_id = '00000000-0000-4000-a000-000000000011';
+      v := 'permitido';
+    exception when others then v := pg_temp.bloqueio(sqlstate, sqlerrm);
+    end;
+    perform pg_temp.entrar_como('00000000-0000-4000-a000-000000000011');
+    a := public.eh_assinante_ativo()::text;
+    v := v || ' / ' || a;
+    raise exception using errcode = 'TR001';
+  exception when sqlstate 'TR001' then null;
+            when others then v := pg_temp.bloqueio(sqlstate, sqlerrm);
+  end;
+  insert into resultado (teste, esperado, obtido)
+  values ('Vencido e bloqueado: desbloquear não libera, e o admin não ativa sem pagamento',
+          'bloqueado (P0001) / false', v);
+end $$;
+
+do $$ declare v text; begin
+  begin
+    perform pg_temp.criar_imobiliaria('00000000-0000-4000-a000-000000000011', '12345-J');
+    perform pg_temp.mudar_status_do_assinante_de('00000000-0000-4000-a000-000000000011', 'ativo');
+    perform pg_temp.criar_admin('00000000-0000-4000-a000-000000000009');
+    perform pg_temp.entrar_como('00000000-0000-4000-a000-000000000009');
+    begin
+      update public.assinantes set status = 'pendente'
+      where responsavel_id = '00000000-0000-4000-a000-000000000011';
+      v := 'permitido';
+    exception when others then v := pg_temp.bloqueio(sqlstate, sqlerrm);
+    end;
+    raise exception using errcode = 'TR001';
+  exception when sqlstate 'TR001' then null;
+            when others then v := pg_temp.bloqueio(sqlstate, sqlerrm);
+  end;
+  insert into resultado (teste, esperado, obtido)
+  values ('Admin não volta o assinante para pendente', 'bloqueado (P0001)', v);
+end $$;
+
+do $$ declare v text; n int; begin
+  begin
+    perform pg_temp.criar_imobiliaria('00000000-0000-4000-a000-000000000011', '12345-J');
+    perform pg_temp.mudar_status_do_assinante_de('00000000-0000-4000-a000-000000000011', 'bloqueado');
+    perform pg_temp.entrar_como('00000000-0000-4000-a000-000000000011');
+    update public.assinantes set bloqueado_pelo_admin = false;
+    get diagnostics n = row_count;
+    v := n::text;
+    raise exception using errcode = 'TR001';
+  exception when sqlstate 'TR001' then null;
+            when others then v := pg_temp.bloqueio(sqlstate, sqlerrm);
+  end;
+  insert into resultado (teste, esperado, obtido)
+  values ('Imobiliária não se desbloqueia (0 linhas alteradas)', '0', v);
+end $$;
+
 -- Excluir imobiliária pendente (RF16) --------------------------------
 
 do $$ declare v text; n int; begin
@@ -1702,21 +1800,29 @@ end $$;
 do $$ declare v text; n int; i uuid; begin
   begin
     perform pg_temp.criar_proprietario('00000000-0000-4000-a000-000000000001');
-    i := pg_temp.criar_imovel('00000000-0000-4000-a000-000000000001', 'pendente');
-    update public.imoveis set preco = 600000 where id = i;  -- o imóvel mudou: versão 2
+    i := pg_temp.criar_imovel('00000000-0000-4000-a000-000000000001', 'pendente');  -- versão 1
     perform pg_temp.criar_admin('00000000-0000-4000-a000-000000000009');
+    -- O imóvel muda pelo caminho que o dono tem num pendente: uma foto nova.
+    perform pg_temp.entrar_como('00000000-0000-4000-a000-000000000001');
+    insert into public.fotos_imovel (imovel_id, caminho, ordem)
+    values (i, i || '/foto-nova.jpg', 1);
     perform pg_temp.entrar_como('00000000-0000-4000-a000-000000000009');
+    select 'versão ' || versao into v from public.imoveis where id = i;
     begin
       perform public.aprovar_imovel(i, 1);  -- o admin viu a versão 1
-      v := 'permitido';
-    exception when others then v := pg_temp.bloqueio(sqlstate, sqlerrm);
+      v := v || ' / permitido';
+    exception when others then
+      -- Confere a mensagem também: "Só o admin aprova" é o mesmo código P0001.
+      v := v || ' / ' || case when sqlerrm like 'O imóvel mudou%' then pg_temp.bloqueio(sqlstate, sqlerrm)
+                              else 'erro inesperado: ' || sqlstate || ' ' || sqlerrm end;
     end;
     raise exception using errcode = 'TR001';
   exception when sqlstate 'TR001' then null;
             when others then v := pg_temp.bloqueio(sqlstate, sqlerrm);
   end;
   insert into resultado (teste, esperado, obtido)
-  values ('Aprovação falha se o imóvel mudou depois que o admin abriu a tela', 'bloqueado (P0001)', v);
+  values ('Aprovação falha se o dono mudou o imóvel (foto nova) depois que o admin abriu a tela',
+          'versão 2 / bloqueado (P0001)', v);
 end $$;
 
 do $$ declare v text; n int; i uuid; begin
