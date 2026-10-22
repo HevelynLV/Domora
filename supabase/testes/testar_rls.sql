@@ -129,6 +129,65 @@ as $$
     'convite', p_codigo)::jsonb);
 $$;
 
+-- Lista de tipos e de bairros de teste (as listas reais ficam vazias até a Etapa 4).
+create or replace function pg_temp.tipo_teste()
+returns bigint
+language sql
+as $$
+  insert into public.tipos_imovel (nome) values ('Tipo de Teste (roteiro)') on conflict (nome) do nothing;
+  select id from public.tipos_imovel where nome = 'Tipo de Teste (roteiro)';
+$$;
+
+create or replace function pg_temp.bairro_teste()
+returns bigint
+language sql
+as $$
+  insert into public.bairros (nome) values ('Bairro de Teste (roteiro)') on conflict (nome) do nothing;
+  select id from public.bairros where nome = 'Bairro de Teste (roteiro)';
+$$;
+
+-- Cria um imóvel do dono p_dono já no status p_status (como o banco ficaria
+-- depois do cadastro e da aprovação). Devolve o id.
+create or replace function pg_temp.criar_imovel(p_dono uuid, p_status text, p_mostrar_contato boolean default false)
+returns uuid
+language sql
+as $$
+  insert into public.imoveis (proprietario_id, titulo, descricao, tipo_id, endereco, bairro_id,
+                              preco, quartos, banheiros, vagas, area, mostrar_contato, status,
+                              motivo_reprovacao, termo_versao, termo_aceito_em,
+                              exclusividade_inicio, exclusividade_fim)
+  values (p_dono, 'Imóvel de teste', 'Descrição', pg_temp.tipo_teste(), 'Rua de Teste, 100',
+          pg_temp.bairro_teste(), 500000, 2, 1, 1, 70, p_mostrar_contato,
+          p_status::public.status_imovel,
+          case when p_status = 'reprovado' then 'Faltam fotos' end,
+          'termo-teste', now(),
+          case when p_status not in ('pendente', 'reprovado') then now() end,
+          case when p_status not in ('pendente', 'reprovado') then now() + interval '6 months' end)
+  returning id;
+$$;
+
+-- Corretor autônomo com a assinatura no status p_status.
+create or replace function pg_temp.criar_assinante(p_id uuid, p_status text)
+returns void
+language plpgsql
+as $$
+begin
+  perform pg_temp.criar_autonomo(p_id, 'CRECI-' || right(p_id::text, 4));
+  if p_status <> 'pendente' then
+    perform pg_temp.mudar_status_do_assinante_de(p_id, p_status);
+  end if;
+end;
+$$;
+
+-- Torna p_id admin (criado como proprietário e trocado à mão, como no criar_admin.sql).
+create or replace function pg_temp.criar_admin(p_id uuid)
+returns void
+language sql
+as $$
+  select pg_temp.criar_proprietario(p_id);
+  update public.perfis set tipo = 'admin' where id = p_id;
+$$;
+
 -- IDs fixos usados nos testes (cada teste desfaz o que cria, então podem repetir)
 --   ...0001 usuário principal do teste · ...0002 outro usuário · ...0009 admin
 --   ...0011 responsável da imobiliária A · ...0012 responsável da imobiliária B
@@ -1092,6 +1151,816 @@ do $$ declare v text; begin
   end;
   insert into resultado (teste, esperado, obtido)
   values ('Usuário não apaga assinante direto', 'bloqueado (42501)', v);
+end $$;
+
+-- ---------------------------------------------------------------
+-- 3. Imóveis, fotos e edições (migration 20261022221614_imoveis)
+-- ---------------------------------------------------------------
+
+-- Cadastro ---------------------------------------------------------
+
+do $$ declare v text; n int; i uuid; begin
+  begin
+    perform pg_temp.tipo_teste(); perform pg_temp.bairro_teste();
+    perform pg_temp.criar_proprietario('00000000-0000-4000-a000-000000000001');
+    perform pg_temp.entrar_como('00000000-0000-4000-a000-000000000001');
+    insert into public.imoveis (titulo, tipo_id, endereco, bairro_id, preco, area, termo_versao)
+    values ('Casa nova', (select id from public.tipos_imovel where nome = 'Tipo de Teste (roteiro)'), 'Rua Nova, 1', (select id from public.bairros where nome = 'Bairro de Teste (roteiro)'), 800000, 120, 'termo-v1')
+    returning status || ' / ' || case when termo_aceito_em is not null then 'termo aceito' else 'sem termo' end
+           || ' / ' || case when exclusividade_inicio is null then 'sem exclusividade' else 'com exclusividade' end
+           || ' / versão ' || versao
+      into v;
+    raise exception using errcode = 'TR001';
+  exception when sqlstate 'TR001' then null;
+            when others then v := pg_temp.bloqueio(sqlstate, sqlerrm);
+  end;
+  insert into resultado (teste, esperado, obtido)
+  values ('Proprietário cadastra imóvel e ele nasce pendente, com o termo aceito', 'pendente / termo aceito / sem exclusividade / versão 1', v);
+end $$;
+
+do $$ declare v text; n int; i uuid; begin
+  begin
+    perform pg_temp.tipo_teste(); perform pg_temp.bairro_teste();
+    perform pg_temp.criar_proprietario('00000000-0000-4000-a000-000000000001');
+    perform pg_temp.entrar_como('00000000-0000-4000-a000-000000000001');
+    begin
+      insert into public.imoveis (titulo, tipo_id, endereco, bairro_id, preco, area)
+      values ('Casa nova', (select id from public.tipos_imovel where nome = 'Tipo de Teste (roteiro)'), 'Rua Nova, 1', (select id from public.bairros where nome = 'Bairro de Teste (roteiro)'), 800000, 120);
+      v := 'permitido';
+    exception when others then v := pg_temp.bloqueio(sqlstate, sqlerrm);
+    end;
+    raise exception using errcode = 'TR001';
+  exception when sqlstate 'TR001' then null;
+            when others then v := pg_temp.bloqueio(sqlstate, sqlerrm);
+  end;
+  insert into resultado (teste, esperado, obtido)
+  values ('Proprietário não cadastra imóvel sem aceitar o termo', 'bloqueado (23514)', v);
+end $$;
+
+do $$ declare v text; n int; i uuid; begin
+  begin
+    perform pg_temp.tipo_teste(); perform pg_temp.bairro_teste();
+    perform pg_temp.criar_proprietario('00000000-0000-4000-a000-000000000001');
+    perform pg_temp.entrar_como('00000000-0000-4000-a000-000000000001');
+    begin
+      insert into public.imoveis (titulo, tipo_id, endereco, bairro_id, preco, area, termo_versao, status)
+      values ('Casa nova', (select id from public.tipos_imovel where nome = 'Tipo de Teste (roteiro)'), 'Rua Nova, 1', (select id from public.bairros where nome = 'Bairro de Teste (roteiro)'), 800000, 120, 'termo-v1', 'disponivel');
+      v := 'permitido';
+    exception when others then v := pg_temp.bloqueio(sqlstate, sqlerrm);
+    end;
+    raise exception using errcode = 'TR001';
+  exception when sqlstate 'TR001' then null;
+            when others then v := pg_temp.bloqueio(sqlstate, sqlerrm);
+  end;
+  insert into resultado (teste, esperado, obtido)
+  values ('Proprietário não cadastra imóvel já disponível', 'bloqueado (42501)', v);
+end $$;
+
+do $$ declare v text; n int; i uuid; begin
+  begin
+    perform pg_temp.tipo_teste(); perform pg_temp.bairro_teste();
+    perform pg_temp.criar_proprietario('00000000-0000-4000-a000-000000000001');
+    perform pg_temp.criar_proprietario('00000000-0000-4000-a000-000000000002');
+    perform pg_temp.entrar_como('00000000-0000-4000-a000-000000000001');
+    begin
+      insert into public.imoveis (proprietario_id, titulo, tipo_id, endereco, bairro_id, preco, area, termo_versao)
+      values ('00000000-0000-4000-a000-000000000002', 'Casa nova', (select id from public.tipos_imovel where nome = 'Tipo de Teste (roteiro)'), 'Rua Nova, 1', (select id from public.bairros where nome = 'Bairro de Teste (roteiro)'), 800000, 120, 'termo-v1');
+      v := 'permitido';
+    exception when others then v := pg_temp.bloqueio(sqlstate, sqlerrm);
+    end;
+    raise exception using errcode = 'TR001';
+  exception when sqlstate 'TR001' then null;
+            when others then v := pg_temp.bloqueio(sqlstate, sqlerrm);
+  end;
+  insert into resultado (teste, esperado, obtido)
+  values ('Proprietário não cadastra imóvel no nome de outro', 'bloqueado (42501)', v);
+end $$;
+
+do $$ declare v text; n int; i uuid; begin
+  begin
+    perform pg_temp.tipo_teste(); perform pg_temp.bairro_teste();
+    perform pg_temp.criar_assinante('00000000-0000-4000-a000-000000000031', 'ativo');
+    perform pg_temp.entrar_como('00000000-0000-4000-a000-000000000031');
+    begin
+      insert into public.imoveis (titulo, tipo_id, endereco, bairro_id, preco, area, termo_versao)
+    values ('Casa nova', (select id from public.tipos_imovel where nome = 'Tipo de Teste (roteiro)'), 'Rua Nova, 1', (select id from public.bairros where nome = 'Bairro de Teste (roteiro)'), 800000, 120, 'termo-v1');
+      v := 'permitido';
+    exception when others then v := pg_temp.bloqueio(sqlstate, sqlerrm);
+    end;
+    raise exception using errcode = 'TR001';
+  exception when sqlstate 'TR001' then null;
+            when others then v := pg_temp.bloqueio(sqlstate, sqlerrm);
+  end;
+  insert into resultado (teste, esperado, obtido)
+  values ('Assinante não cadastra imóvel', 'bloqueado (42501)', v);
+end $$;
+
+-- Quem vê os imóveis (o critério da Etapa 2) ------------------------
+
+do $$ declare v text; n int; i uuid; begin
+  begin
+    perform pg_temp.criar_proprietario('00000000-0000-4000-a000-000000000001');
+    perform pg_temp.criar_imovel('00000000-0000-4000-a000-000000000001', 'pendente');
+    perform pg_temp.criar_imovel('00000000-0000-4000-a000-000000000001', 'reprovado');
+    perform pg_temp.criar_imovel('00000000-0000-4000-a000-000000000001', 'disponivel');
+    perform pg_temp.criar_imovel('00000000-0000-4000-a000-000000000001', 'vendido');
+    perform pg_temp.criar_imovel('00000000-0000-4000-a000-000000000001', 'expirado');
+    perform pg_temp.criar_assinante('00000000-0000-4000-a000-000000000031', 'ativo');
+    perform pg_temp.entrar_como('00000000-0000-4000-a000-000000000031');
+    select count(*)::text into v from public.imoveis;
+    raise exception using errcode = 'TR001';
+  exception when sqlstate 'TR001' then null;
+            when others then v := pg_temp.bloqueio(sqlstate, sqlerrm);
+  end;
+  insert into resultado (teste, esperado, obtido)
+  values ('Assinante ativo vê só o imóvel disponível (de 5 status diferentes)', '1', v);
+end $$;
+
+do $$ declare v text; n int; i uuid; begin
+  begin
+    perform pg_temp.criar_proprietario('00000000-0000-4000-a000-000000000001');
+    perform pg_temp.criar_imovel('00000000-0000-4000-a000-000000000001', 'pendente');
+    perform pg_temp.criar_imovel('00000000-0000-4000-a000-000000000001', 'reprovado');
+    perform pg_temp.criar_imovel('00000000-0000-4000-a000-000000000001', 'disponivel');
+    perform pg_temp.criar_imovel('00000000-0000-4000-a000-000000000001', 'vendido');
+    perform pg_temp.criar_imovel('00000000-0000-4000-a000-000000000001', 'expirado');
+    perform pg_temp.criar_assinante('00000000-0000-4000-a000-000000000031', 'pendente');
+    perform pg_temp.entrar_como('00000000-0000-4000-a000-000000000031');
+    select count(*)::text into v from public.imoveis;
+    raise exception using errcode = 'TR001';
+  exception when sqlstate 'TR001' then null;
+            when others then v := pg_temp.bloqueio(sqlstate, sqlerrm);
+  end;
+  insert into resultado (teste, esperado, obtido)
+  values ('Assinante pendente não vê nenhum imóvel', '0', v);
+end $$;
+
+do $$ declare v text; n int; i uuid; begin
+  begin
+    perform pg_temp.criar_proprietario('00000000-0000-4000-a000-000000000001');
+    perform pg_temp.criar_imovel('00000000-0000-4000-a000-000000000001', 'pendente');
+    perform pg_temp.criar_imovel('00000000-0000-4000-a000-000000000001', 'reprovado');
+    perform pg_temp.criar_imovel('00000000-0000-4000-a000-000000000001', 'disponivel');
+    perform pg_temp.criar_imovel('00000000-0000-4000-a000-000000000001', 'vendido');
+    perform pg_temp.criar_imovel('00000000-0000-4000-a000-000000000001', 'expirado');
+    perform pg_temp.criar_assinante('00000000-0000-4000-a000-000000000031', 'bloqueado');
+    perform pg_temp.entrar_como('00000000-0000-4000-a000-000000000031');
+    select count(*)::text into v from public.imoveis;
+    raise exception using errcode = 'TR001';
+  exception when sqlstate 'TR001' then null;
+            when others then v := pg_temp.bloqueio(sqlstate, sqlerrm);
+  end;
+  insert into resultado (teste, esperado, obtido)
+  values ('Assinante bloqueado não vê nenhum imóvel', '0', v);
+end $$;
+
+do $$ declare v text; n int; i uuid; begin
+  begin
+    perform pg_temp.criar_proprietario('00000000-0000-4000-a000-000000000001');
+    perform pg_temp.criar_imovel('00000000-0000-4000-a000-000000000001', 'pendente');
+    perform pg_temp.criar_imovel('00000000-0000-4000-a000-000000000001', 'reprovado');
+    perform pg_temp.criar_imovel('00000000-0000-4000-a000-000000000001', 'disponivel');
+    perform pg_temp.criar_imovel('00000000-0000-4000-a000-000000000001', 'vendido');
+    perform pg_temp.criar_imovel('00000000-0000-4000-a000-000000000001', 'expirado');
+    perform pg_temp.criar_assinante('00000000-0000-4000-a000-000000000031', 'vencido');
+    perform pg_temp.entrar_como('00000000-0000-4000-a000-000000000031');
+    select count(*)::text into v from public.imoveis;
+    raise exception using errcode = 'TR001';
+  exception when sqlstate 'TR001' then null;
+            when others then v := pg_temp.bloqueio(sqlstate, sqlerrm);
+  end;
+  insert into resultado (teste, esperado, obtido)
+  values ('Assinante com pagamento vencido não vê nenhum imóvel', '0', v);
+end $$;
+
+do $$ declare v text; n int; i uuid; begin
+  begin
+    perform pg_temp.criar_proprietario('00000000-0000-4000-a000-000000000001');
+    perform pg_temp.criar_imovel('00000000-0000-4000-a000-000000000001', 'pendente');
+    perform pg_temp.criar_imovel('00000000-0000-4000-a000-000000000001', 'reprovado');
+    perform pg_temp.criar_imovel('00000000-0000-4000-a000-000000000001', 'disponivel');
+    perform pg_temp.criar_imovel('00000000-0000-4000-a000-000000000001', 'vendido');
+    perform pg_temp.criar_imovel('00000000-0000-4000-a000-000000000001', 'expirado');
+    perform pg_temp.criar_imobiliaria('00000000-0000-4000-a000-000000000011', '12345-J');
+    perform pg_temp.mudar_status_do_assinante_de('00000000-0000-4000-a000-000000000011', 'ativo');
+    perform pg_temp.criar_convite('00000000-0000-4000-a000-000000000011', 'codigo-de-teste', null, now() + interval '1 day');
+    perform pg_temp.criar_corretor('00000000-0000-4000-a000-000000000021', 'codigo-de-teste');
+    perform pg_temp.mudar_status_do_assinante_de('00000000-0000-4000-a000-000000000011', 'bloqueado');
+    perform pg_temp.entrar_como('00000000-0000-4000-a000-000000000021');
+    select count(*)::text into v from public.imoveis;
+    raise exception using errcode = 'TR001';
+  exception when sqlstate 'TR001' then null;
+            when others then v := pg_temp.bloqueio(sqlstate, sqlerrm);
+  end;
+  insert into resultado (teste, esperado, obtido)
+  values ('Corretor de imobiliária bloqueada não vê nenhum imóvel', '0', v);
+end $$;
+
+do $$ declare v text; n int; i uuid; begin
+  begin
+    perform pg_temp.criar_proprietario('00000000-0000-4000-a000-000000000001');
+    perform pg_temp.criar_proprietario('00000000-0000-4000-a000-000000000002');
+    perform pg_temp.criar_imovel('00000000-0000-4000-a000-000000000001', 'pendente');
+    perform pg_temp.criar_imovel('00000000-0000-4000-a000-000000000001', 'disponivel');
+    perform pg_temp.criar_imovel('00000000-0000-4000-a000-000000000002', 'disponivel');
+    perform pg_temp.entrar_como('00000000-0000-4000-a000-000000000001');
+    select count(*)::text into v from public.imoveis;
+    raise exception using errcode = 'TR001';
+  exception when sqlstate 'TR001' then null;
+            when others then v := pg_temp.bloqueio(sqlstate, sqlerrm);
+  end;
+  insert into resultado (teste, esperado, obtido)
+  values ('Proprietário vê só os próprios imóveis', '2', v);
+end $$;
+
+do $$ declare v text; n int; i uuid; begin
+  begin
+    perform pg_temp.criar_proprietario('00000000-0000-4000-a000-000000000001');
+    perform pg_temp.criar_imovel('00000000-0000-4000-a000-000000000001', 'pendente');
+    perform pg_temp.criar_imovel('00000000-0000-4000-a000-000000000001', 'reprovado');
+    perform pg_temp.criar_imovel('00000000-0000-4000-a000-000000000001', 'disponivel');
+    perform pg_temp.criar_imovel('00000000-0000-4000-a000-000000000001', 'vendido');
+    perform pg_temp.criar_imovel('00000000-0000-4000-a000-000000000001', 'expirado');
+    perform pg_temp.criar_admin('00000000-0000-4000-a000-000000000009');
+    perform pg_temp.entrar_como('00000000-0000-4000-a000-000000000009');
+    select count(*)::text into v from public.imoveis where proprietario_id = '00000000-0000-4000-a000-000000000001';
+    raise exception using errcode = 'TR001';
+  exception when sqlstate 'TR001' then null;
+            when others then v := pg_temp.bloqueio(sqlstate, sqlerrm);
+  end;
+  insert into resultado (teste, esperado, obtido)
+  values ('Admin vê os imóveis de todos os status', '5', v);
+end $$;
+
+do $$ declare v text; n int; i uuid; begin
+  begin
+    perform pg_temp.criar_proprietario('00000000-0000-4000-a000-000000000001');
+    perform pg_temp.criar_imovel('00000000-0000-4000-a000-000000000001', 'disponivel');
+    perform pg_temp.entrar_como_visitante();
+    begin
+      select count(*)::text into v from public.imoveis;
+      v := 'permitido';
+    exception when others then v := pg_temp.bloqueio(sqlstate, sqlerrm);
+    end;
+    raise exception using errcode = 'TR001';
+  exception when sqlstate 'TR001' then null;
+            when others then v := pg_temp.bloqueio(sqlstate, sqlerrm);
+  end;
+  insert into resultado (teste, esperado, obtido)
+  values ('Visitante sem login não lê imóveis', 'bloqueado (42501)', v);
+end $$;
+
+-- Contato do proprietário (RNF06) -----------------------------------
+
+do $$ declare v text; n int; i uuid; begin
+  begin
+    perform pg_temp.criar_proprietario('00000000-0000-4000-a000-000000000001');
+    i := pg_temp.criar_imovel('00000000-0000-4000-a000-000000000001', 'disponivel', false);
+    perform pg_temp.criar_assinante('00000000-0000-4000-a000-000000000031', 'ativo');
+    perform pg_temp.entrar_como('00000000-0000-4000-a000-000000000031');
+    select count(*)::text into v from public.contato_do_proprietario(i);
+    raise exception using errcode = 'TR001';
+  exception when sqlstate 'TR001' then null;
+            when others then v := pg_temp.bloqueio(sqlstate, sqlerrm);
+  end;
+  insert into resultado (teste, esperado, obtido)
+  values ('Contato escondido: o corretor não recebe nada', '0', v);
+end $$;
+
+do $$ declare v text; n int; i uuid; begin
+  begin
+    perform pg_temp.criar_proprietario('00000000-0000-4000-a000-000000000001');
+    i := pg_temp.criar_imovel('00000000-0000-4000-a000-000000000001', 'disponivel', true);
+    perform pg_temp.criar_assinante('00000000-0000-4000-a000-000000000031', 'ativo');
+    perform pg_temp.entrar_como('00000000-0000-4000-a000-000000000031');
+    select c.telefone || ' / ' || case when c.email like '%@exemplo.com' then 'com e-mail' else 'sem e-mail' end
+      into v from public.contato_do_proprietario(i) c;
+    raise exception using errcode = 'TR001';
+  exception when sqlstate 'TR001' then null;
+            when others then v := pg_temp.bloqueio(sqlstate, sqlerrm);
+  end;
+  insert into resultado (teste, esperado, obtido)
+  values ('Contato mostrado: o corretor ativo recebe telefone e e-mail', '48999990000 / com e-mail', v);
+end $$;
+
+do $$ declare v text; n int; i uuid; begin
+  begin
+    perform pg_temp.criar_proprietario('00000000-0000-4000-a000-000000000001');
+    i := pg_temp.criar_imovel('00000000-0000-4000-a000-000000000001', 'disponivel', true);
+    perform pg_temp.criar_assinante('00000000-0000-4000-a000-000000000031', 'bloqueado');
+    perform pg_temp.entrar_como('00000000-0000-4000-a000-000000000031');
+    select count(*)::text into v from public.contato_do_proprietario(i);
+    raise exception using errcode = 'TR001';
+  exception when sqlstate 'TR001' then null;
+            when others then v := pg_temp.bloqueio(sqlstate, sqlerrm);
+  end;
+  insert into resultado (teste, esperado, obtido)
+  values ('Contato mostrado não chega a assinante bloqueado', '0', v);
+end $$;
+
+do $$ declare v text; n int; i uuid; begin
+  begin
+    perform pg_temp.criar_proprietario('00000000-0000-4000-a000-000000000001');
+    i := pg_temp.criar_imovel('00000000-0000-4000-a000-000000000001', 'pendente', true);
+    perform pg_temp.criar_assinante('00000000-0000-4000-a000-000000000031', 'ativo');
+    perform pg_temp.entrar_como('00000000-0000-4000-a000-000000000031');
+    select count(*)::text into v from public.contato_do_proprietario(i);
+    raise exception using errcode = 'TR001';
+  exception when sqlstate 'TR001' then null;
+            when others then v := pg_temp.bloqueio(sqlstate, sqlerrm);
+  end;
+  insert into resultado (teste, esperado, obtido)
+  values ('Contato de imóvel pendente não chega ao corretor (mesmo marcado para mostrar)', '0', v);
+end $$;
+
+do $$ declare v text; n int; i uuid; begin
+  begin
+    perform pg_temp.criar_proprietario('00000000-0000-4000-a000-000000000001');
+    perform pg_temp.criar_imovel('00000000-0000-4000-a000-000000000001', 'disponivel', true);
+    perform pg_temp.criar_assinante('00000000-0000-4000-a000-000000000031', 'ativo');
+    perform pg_temp.entrar_como('00000000-0000-4000-a000-000000000031');
+    select count(*)::text into v from public.perfis where id = '00000000-0000-4000-a000-000000000001';
+    raise exception using errcode = 'TR001';
+  exception when sqlstate 'TR001' then null;
+            when others then v := pg_temp.bloqueio(sqlstate, sqlerrm);
+  end;
+  insert into resultado (teste, esperado, obtido)
+  values ('Corretor não lê o perfil do proprietário direto (nem com contato mostrado)', '0', v);
+end $$;
+
+do $$ declare v text; n int; i uuid; begin
+  begin
+    perform pg_temp.criar_proprietario('00000000-0000-4000-a000-000000000001');
+    i := pg_temp.criar_imovel('00000000-0000-4000-a000-000000000001', 'disponivel', true);
+    perform pg_temp.entrar_como_visitante();
+    begin
+      perform public.contato_do_proprietario(i);
+      v := 'permitido';
+    exception when others then v := pg_temp.bloqueio(sqlstate, sqlerrm);
+    end;
+    raise exception using errcode = 'TR001';
+  exception when sqlstate 'TR001' then null;
+            when others then v := pg_temp.bloqueio(sqlstate, sqlerrm);
+  end;
+  insert into resultado (teste, esperado, obtido)
+  values ('Visitante sem login não chama contato_do_proprietario()', 'bloqueado (42501)', v);
+end $$;
+
+-- Edição e registro (RF10, RNF11) -----------------------------------
+
+do $$ declare v text; n int; i uuid; begin
+  begin
+    perform pg_temp.criar_proprietario('00000000-0000-4000-a000-000000000001');
+    i := pg_temp.criar_imovel('00000000-0000-4000-a000-000000000001', 'disponivel');
+    perform pg_temp.entrar_como('00000000-0000-4000-a000-000000000001');
+    update public.imoveis set preco = 550000 where id = i;
+    reset role;
+    select e.campo || ': ' || e.valor_antigo || ' -> ' || e.valor_novo
+           || ' / versão ' || (select versao from public.imoveis where id = i)
+      into v from public.edicoes_imovel e where e.imovel_id = i;
+    raise exception using errcode = 'TR001';
+  exception when sqlstate 'TR001' then null;
+            when others then v := pg_temp.bloqueio(sqlstate, sqlerrm);
+  end;
+  insert into resultado (teste, esperado, obtido)
+  values ('Edição do proprietário em imóvel disponível fica registrada, com valor antigo e novo', 'preco: 500000.00 -> 550000.00 / versão 2', v);
+end $$;
+
+do $$ declare v text; n int; i uuid; begin
+  begin
+    perform pg_temp.criar_proprietario('00000000-0000-4000-a000-000000000001');
+    i := pg_temp.criar_imovel('00000000-0000-4000-a000-000000000001', 'disponivel');
+    perform pg_temp.criar_admin('00000000-0000-4000-a000-000000000009');
+    perform pg_temp.entrar_como('00000000-0000-4000-a000-000000000009');
+    update public.imoveis set preco = 550000 where id = i;
+    reset role;
+    select count(*)::text into v from public.edicoes_imovel where imovel_id = i;
+    raise exception using errcode = 'TR001';
+  exception when sqlstate 'TR001' then null;
+            when others then v := pg_temp.bloqueio(sqlstate, sqlerrm);
+  end;
+  insert into resultado (teste, esperado, obtido)
+  values ('Edição feita pelo admin não é registrada', '0', v);
+end $$;
+
+do $$ declare v text; n int; i uuid; begin
+  begin
+    perform pg_temp.criar_proprietario('00000000-0000-4000-a000-000000000001');
+    i := pg_temp.criar_imovel('00000000-0000-4000-a000-000000000001', 'reprovado');
+    perform pg_temp.entrar_como('00000000-0000-4000-a000-000000000001');
+    update public.imoveis set titulo = 'Título corrigido' where id = i;
+    reset role;
+    select count(*)::text into v from public.edicoes_imovel where imovel_id = i;
+    raise exception using errcode = 'TR001';
+  exception when sqlstate 'TR001' then null;
+            when others then v := pg_temp.bloqueio(sqlstate, sqlerrm);
+  end;
+  insert into resultado (teste, esperado, obtido)
+  values ('Edição de imóvel reprovado não vai para o registro (não está no catálogo)', '0', v);
+end $$;
+
+do $$ declare v text; n int; i uuid; begin
+  begin
+    perform pg_temp.criar_proprietario('00000000-0000-4000-a000-000000000001');
+    perform pg_temp.criar_proprietario('00000000-0000-4000-a000-000000000002');
+    i := pg_temp.criar_imovel('00000000-0000-4000-a000-000000000002', 'disponivel');
+    perform pg_temp.entrar_como('00000000-0000-4000-a000-000000000001');
+    update public.imoveis set preco = 1 where id = i;
+    get diagnostics n = row_count;
+    v := n::text;
+    raise exception using errcode = 'TR001';
+  exception when sqlstate 'TR001' then null;
+            when others then v := pg_temp.bloqueio(sqlstate, sqlerrm);
+  end;
+  insert into resultado (teste, esperado, obtido)
+  values ('Proprietário não edita imóvel de outro (0 linhas alteradas)', '0', v);
+end $$;
+
+do $$ declare v text; n int; i uuid; begin
+  begin
+    perform pg_temp.criar_proprietario('00000000-0000-4000-a000-000000000001');
+    i := pg_temp.criar_imovel('00000000-0000-4000-a000-000000000001', 'pendente');
+    perform pg_temp.entrar_como('00000000-0000-4000-a000-000000000001');
+    update public.imoveis set preco = 1 where id = i;
+    get diagnostics n = row_count;
+    v := n::text;
+    raise exception using errcode = 'TR001';
+  exception when sqlstate 'TR001' then null;
+            when others then v := pg_temp.bloqueio(sqlstate, sqlerrm);
+  end;
+  insert into resultado (teste, esperado, obtido)
+  values ('Proprietário não edita imóvel pendente, por enquanto (0 linhas alteradas)', '0', v);
+end $$;
+
+do $$ declare v text; n int; i uuid; begin
+  begin
+    perform pg_temp.criar_proprietario('00000000-0000-4000-a000-000000000001');
+    i := pg_temp.criar_imovel('00000000-0000-4000-a000-000000000001', 'reprovado');
+    perform pg_temp.entrar_como('00000000-0000-4000-a000-000000000001');
+    begin
+      update public.imoveis set status = 'disponivel' where id = i;
+      v := 'permitido';
+    exception when others then v := pg_temp.bloqueio(sqlstate, sqlerrm);
+    end;
+    raise exception using errcode = 'TR001';
+  exception when sqlstate 'TR001' then null;
+            when others then v := pg_temp.bloqueio(sqlstate, sqlerrm);
+  end;
+  insert into resultado (teste, esperado, obtido)
+  values ('Proprietário não muda o status direto', 'bloqueado (42501)', v);
+end $$;
+
+do $$ declare v text; n int; i uuid; begin
+  begin
+    perform pg_temp.criar_proprietario('00000000-0000-4000-a000-000000000001');
+    i := pg_temp.criar_imovel('00000000-0000-4000-a000-000000000001', 'disponivel');
+    perform pg_temp.entrar_como('00000000-0000-4000-a000-000000000001');
+    begin
+      update public.imoveis set exclusividade_fim = now() + interval '10 years' where id = i;
+      v := 'permitido';
+    exception when others then v := pg_temp.bloqueio(sqlstate, sqlerrm);
+    end;
+    raise exception using errcode = 'TR001';
+  exception when sqlstate 'TR001' then null;
+            when others then v := pg_temp.bloqueio(sqlstate, sqlerrm);
+  end;
+  insert into resultado (teste, esperado, obtido)
+  values ('Proprietário não mexe na data da exclusividade', 'bloqueado (42501)', v);
+end $$;
+
+do $$ declare v text; n int; i uuid; begin
+  begin
+    perform pg_temp.criar_proprietario('00000000-0000-4000-a000-000000000001');
+    i := pg_temp.criar_imovel('00000000-0000-4000-a000-000000000001', 'disponivel');
+    perform pg_temp.criar_assinante('00000000-0000-4000-a000-000000000031', 'ativo');
+    perform pg_temp.entrar_como('00000000-0000-4000-a000-000000000031');
+    update public.imoveis set preco = 1 where id = i;
+    get diagnostics n = row_count;
+    v := n::text;
+    raise exception using errcode = 'TR001';
+  exception when sqlstate 'TR001' then null;
+            when others then v := pg_temp.bloqueio(sqlstate, sqlerrm);
+  end;
+  insert into resultado (teste, esperado, obtido)
+  values ('Assinante não edita imóvel do catálogo (0 linhas alteradas)', '0', v);
+end $$;
+
+-- Apagar (RF12) ------------------------------------------------------
+
+do $$ declare v text; n int; i uuid; begin
+  begin
+    perform pg_temp.criar_proprietario('00000000-0000-4000-a000-000000000001');
+    i := pg_temp.criar_imovel('00000000-0000-4000-a000-000000000001', 'pendente');
+    perform pg_temp.entrar_como('00000000-0000-4000-a000-000000000001');
+    delete from public.imoveis where id = i;
+    get diagnostics n = row_count;
+    v := case when n = 1 then 'apagado' else 'não apagou' end;
+    raise exception using errcode = 'TR001';
+  exception when sqlstate 'TR001' then null;
+            when others then v := pg_temp.bloqueio(sqlstate, sqlerrm);
+  end;
+  insert into resultado (teste, esperado, obtido)
+  values ('Proprietário apaga imóvel pendente', 'apagado', v);
+end $$;
+
+do $$ declare v text; n int; i uuid; begin
+  begin
+    perform pg_temp.criar_proprietario('00000000-0000-4000-a000-000000000001');
+    i := pg_temp.criar_imovel('00000000-0000-4000-a000-000000000001', 'disponivel');
+    perform pg_temp.entrar_como('00000000-0000-4000-a000-000000000001');
+    delete from public.imoveis where id = i;
+    get diagnostics n = row_count;
+    v := n::text;
+    raise exception using errcode = 'TR001';
+  exception when sqlstate 'TR001' then null;
+            when others then v := pg_temp.bloqueio(sqlstate, sqlerrm);
+  end;
+  insert into resultado (teste, esperado, obtido)
+  values ('Proprietário não apaga imóvel disponível (0 linhas apagadas)', '0', v);
+end $$;
+
+-- Aprovar, reprovar e reenviar (RF11, RF14) --------------------------
+
+do $$ declare v text; n int; i uuid; begin
+  begin
+    perform pg_temp.criar_proprietario('00000000-0000-4000-a000-000000000001');
+    i := pg_temp.criar_imovel('00000000-0000-4000-a000-000000000001', 'pendente');
+    perform pg_temp.criar_admin('00000000-0000-4000-a000-000000000009');
+    perform pg_temp.entrar_como('00000000-0000-4000-a000-000000000009');
+    perform public.aprovar_imovel(i, 1);
+    select status || ' / ' || case when exclusividade_fim = exclusividade_inicio + interval '6 months'
+                                   then '6 meses' else 'prazo errado' end
+      into v from public.imoveis where id = i;
+    raise exception using errcode = 'TR001';
+  exception when sqlstate 'TR001' then null;
+            when others then v := pg_temp.bloqueio(sqlstate, sqlerrm);
+  end;
+  insert into resultado (teste, esperado, obtido)
+  values ('Admin aprova: o imóvel fica disponível com 6 meses de exclusividade', 'disponivel / 6 meses', v);
+end $$;
+
+do $$ declare v text; n int; i uuid; begin
+  begin
+    perform pg_temp.criar_proprietario('00000000-0000-4000-a000-000000000001');
+    i := pg_temp.criar_imovel('00000000-0000-4000-a000-000000000001', 'pendente');
+    update public.imoveis set preco = 600000 where id = i;  -- o imóvel mudou: versão 2
+    perform pg_temp.criar_admin('00000000-0000-4000-a000-000000000009');
+    perform pg_temp.entrar_como('00000000-0000-4000-a000-000000000009');
+    begin
+      perform public.aprovar_imovel(i, 1);  -- o admin viu a versão 1
+      v := 'permitido';
+    exception when others then v := pg_temp.bloqueio(sqlstate, sqlerrm);
+    end;
+    raise exception using errcode = 'TR001';
+  exception when sqlstate 'TR001' then null;
+            when others then v := pg_temp.bloqueio(sqlstate, sqlerrm);
+  end;
+  insert into resultado (teste, esperado, obtido)
+  values ('Aprovação falha se o imóvel mudou depois que o admin abriu a tela', 'bloqueado (P0001)', v);
+end $$;
+
+do $$ declare v text; n int; i uuid; begin
+  begin
+    perform pg_temp.criar_proprietario('00000000-0000-4000-a000-000000000001');
+    i := pg_temp.criar_imovel('00000000-0000-4000-a000-000000000001', 'pendente');
+    perform pg_temp.entrar_como('00000000-0000-4000-a000-000000000001');
+    begin
+      perform public.aprovar_imovel(i, 1);
+      v := 'permitido';
+    exception when others then v := pg_temp.bloqueio(sqlstate, sqlerrm);
+    end;
+    raise exception using errcode = 'TR001';
+  exception when sqlstate 'TR001' then null;
+            when others then v := pg_temp.bloqueio(sqlstate, sqlerrm);
+  end;
+  insert into resultado (teste, esperado, obtido)
+  values ('Proprietário não aprova o próprio imóvel', 'bloqueado (P0001)', v);
+end $$;
+
+do $$ declare v text; n int; i uuid; begin
+  begin
+    perform pg_temp.criar_proprietario('00000000-0000-4000-a000-000000000001');
+    i := pg_temp.criar_imovel('00000000-0000-4000-a000-000000000001', 'pendente');
+    perform pg_temp.criar_admin('00000000-0000-4000-a000-000000000009');
+    perform pg_temp.entrar_como('00000000-0000-4000-a000-000000000009');
+    perform public.reprovar_imovel(i, '  Fotos escuras ');
+    perform pg_temp.entrar_como('00000000-0000-4000-a000-000000000001');
+    select status || ' / ' || motivo_reprovacao into v from public.imoveis where id = i;
+    raise exception using errcode = 'TR001';
+  exception when sqlstate 'TR001' then null;
+            when others then v := pg_temp.bloqueio(sqlstate, sqlerrm);
+  end;
+  insert into resultado (teste, esperado, obtido)
+  values ('Admin reprova com motivo e o proprietário vê o motivo', 'reprovado / Fotos escuras', v);
+end $$;
+
+do $$ declare v text; n int; i uuid; begin
+  begin
+    perform pg_temp.criar_proprietario('00000000-0000-4000-a000-000000000001');
+    i := pg_temp.criar_imovel('00000000-0000-4000-a000-000000000001', 'pendente');
+    perform pg_temp.criar_admin('00000000-0000-4000-a000-000000000009');
+    perform pg_temp.entrar_como('00000000-0000-4000-a000-000000000009');
+    begin
+      perform public.reprovar_imovel(i, '   ');
+      v := 'permitido';
+    exception when others then v := pg_temp.bloqueio(sqlstate, sqlerrm);
+    end;
+    raise exception using errcode = 'TR001';
+  exception when sqlstate 'TR001' then null;
+            when others then v := pg_temp.bloqueio(sqlstate, sqlerrm);
+  end;
+  insert into resultado (teste, esperado, obtido)
+  values ('Reprovar sem motivo é barrado', 'bloqueado (P0001)', v);
+end $$;
+
+do $$ declare v text; n int; i uuid; begin
+  begin
+    perform pg_temp.criar_proprietario('00000000-0000-4000-a000-000000000001');
+    i := pg_temp.criar_imovel('00000000-0000-4000-a000-000000000001', 'reprovado');
+    perform pg_temp.entrar_como('00000000-0000-4000-a000-000000000001');
+    perform public.reenviar_imovel(i);
+    select status || ' / ' || coalesce(motivo_reprovacao, 'sem motivo') into v from public.imoveis where id = i;
+    raise exception using errcode = 'TR001';
+  exception when sqlstate 'TR001' then null;
+            when others then v := pg_temp.bloqueio(sqlstate, sqlerrm);
+  end;
+  insert into resultado (teste, esperado, obtido)
+  values ('Proprietário reenvia o imóvel reprovado e ele volta a pendente', 'pendente / sem motivo', v);
+end $$;
+
+do $$ declare v text; n int; i uuid; begin
+  begin
+    perform pg_temp.criar_proprietario('00000000-0000-4000-a000-000000000001');
+    perform pg_temp.criar_proprietario('00000000-0000-4000-a000-000000000002');
+    i := pg_temp.criar_imovel('00000000-0000-4000-a000-000000000002', 'reprovado');
+    perform pg_temp.entrar_como('00000000-0000-4000-a000-000000000001');
+    begin
+      perform public.reenviar_imovel(i);
+      v := 'permitido';
+    exception when others then v := pg_temp.bloqueio(sqlstate, sqlerrm);
+    end;
+    raise exception using errcode = 'TR001';
+  exception when sqlstate 'TR001' then null;
+            when others then v := pg_temp.bloqueio(sqlstate, sqlerrm);
+  end;
+  insert into resultado (teste, esperado, obtido)
+  values ('Proprietário não reenvia imóvel de outro', 'bloqueado (P0001)', v);
+end $$;
+
+-- Fotos (RF09) e registro de edições (RF17) -------------------------
+
+do $$ declare v text; n int; i uuid; begin
+  begin
+    perform pg_temp.criar_proprietario('00000000-0000-4000-a000-000000000001');
+    i := pg_temp.criar_imovel('00000000-0000-4000-a000-000000000001', 'disponivel');
+    insert into public.fotos_imovel (imovel_id, caminho, ordem) values (i, 'teste/disponivel.jpg', 1);
+    i := pg_temp.criar_imovel('00000000-0000-4000-a000-000000000001', 'pendente');
+    insert into public.fotos_imovel (imovel_id, caminho, ordem) values (i, 'teste/pendente.jpg', 1);
+    perform pg_temp.criar_assinante('00000000-0000-4000-a000-000000000031', 'ativo');
+    perform pg_temp.entrar_como('00000000-0000-4000-a000-000000000031');
+    select count(*)::text into v from public.fotos_imovel;
+    raise exception using errcode = 'TR001';
+  exception when sqlstate 'TR001' then null;
+            when others then v := pg_temp.bloqueio(sqlstate, sqlerrm);
+  end;
+  insert into resultado (teste, esperado, obtido)
+  values ('Assinante ativo vê foto de imóvel disponível e não de pendente', '1', v);
+end $$;
+
+do $$ declare v text; n int; i uuid; begin
+  begin
+    perform pg_temp.criar_proprietario('00000000-0000-4000-a000-000000000001');
+    i := pg_temp.criar_imovel('00000000-0000-4000-a000-000000000001', 'disponivel');
+    perform pg_temp.entrar_como('00000000-0000-4000-a000-000000000001');
+    insert into public.fotos_imovel (imovel_id, caminho, ordem) values (i, 'teste/nova.jpg', 1);
+    reset role;
+    select e.campo || ' / versão ' || (select versao from public.imoveis where id = i)
+      into v from public.edicoes_imovel e where e.imovel_id = i;
+    raise exception using errcode = 'TR001';
+  exception when sqlstate 'TR001' then null;
+            when others then v := pg_temp.bloqueio(sqlstate, sqlerrm);
+  end;
+  insert into resultado (teste, esperado, obtido)
+  values ('Foto nova em imóvel disponível fica registrada e sobe a versão', 'fotos / versão 2', v);
+end $$;
+
+do $$ declare v text; n int; i uuid; begin
+  begin
+    perform pg_temp.criar_proprietario('00000000-0000-4000-a000-000000000001');
+    perform pg_temp.criar_proprietario('00000000-0000-4000-a000-000000000002');
+    i := pg_temp.criar_imovel('00000000-0000-4000-a000-000000000002', 'disponivel');
+    perform pg_temp.entrar_como('00000000-0000-4000-a000-000000000001');
+    begin
+      insert into public.fotos_imovel (imovel_id, caminho, ordem) values (i, 'teste/intrusa.jpg', 1);
+      v := 'permitido';
+    exception when others then v := pg_temp.bloqueio(sqlstate, sqlerrm);
+    end;
+    raise exception using errcode = 'TR001';
+  exception when sqlstate 'TR001' then null;
+            when others then v := pg_temp.bloqueio(sqlstate, sqlerrm);
+  end;
+  insert into resultado (teste, esperado, obtido)
+  values ('Proprietário não põe foto no imóvel de outro', 'bloqueado (42501)', v);
+end $$;
+
+do $$ declare v text; n int; i uuid; begin
+  begin
+    perform pg_temp.criar_proprietario('00000000-0000-4000-a000-000000000001');
+    i := pg_temp.criar_imovel('00000000-0000-4000-a000-000000000001', 'disponivel');
+    perform pg_temp.entrar_como('00000000-0000-4000-a000-000000000001');
+    update public.imoveis set preco = 550000 where id = i;
+    select count(*)::text into v from public.edicoes_imovel;
+    raise exception using errcode = 'TR001';
+  exception when sqlstate 'TR001' then null;
+            when others then v := pg_temp.bloqueio(sqlstate, sqlerrm);
+  end;
+  insert into resultado (teste, esperado, obtido)
+  values ('Proprietário não lê o registro de edições', '0', v);
+end $$;
+
+do $$ declare v text; n int; i uuid; begin
+  begin
+    perform pg_temp.criar_proprietario('00000000-0000-4000-a000-000000000001');
+    i := pg_temp.criar_imovel('00000000-0000-4000-a000-000000000001', 'disponivel');
+    perform pg_temp.criar_admin('00000000-0000-4000-a000-000000000009');
+    perform pg_temp.entrar_como('00000000-0000-4000-a000-000000000009');
+    begin
+      insert into public.edicoes_imovel (imovel_id, campo) values (i, 'preco');
+      v := 'permitido';
+    exception when others then v := pg_temp.bloqueio(sqlstate, sqlerrm);
+    end;
+    raise exception using errcode = 'TR001';
+  exception when sqlstate 'TR001' then null;
+            when others then v := pg_temp.bloqueio(sqlstate, sqlerrm);
+  end;
+  insert into resultado (teste, esperado, obtido)
+  values ('Ninguém grava direto no registro de edições', 'bloqueado (42501)', v);
+end $$;
+
+do $$ declare v text; n int; i uuid; begin
+  begin
+    perform pg_temp.criar_proprietario('00000000-0000-4000-a000-000000000001');
+    i := pg_temp.criar_imovel('00000000-0000-4000-a000-000000000001', 'disponivel');
+    perform pg_temp.entrar_como('00000000-0000-4000-a000-000000000001');
+    update public.imoveis set preco = 550000 where id = i;
+    reset role;
+    perform pg_temp.criar_admin('00000000-0000-4000-a000-000000000009');
+    perform pg_temp.entrar_como('00000000-0000-4000-a000-000000000009');
+    update public.edicoes_imovel set revisado_em = now(), revisado_por = '00000000-0000-4000-a000-000000000009' where imovel_id = i;
+    select count(*) || ' revisada' into v from public.edicoes_imovel where imovel_id = i and revisado_em is not null;
+    raise exception using errcode = 'TR001';
+  exception when sqlstate 'TR001' then null;
+            when others then v := pg_temp.bloqueio(sqlstate, sqlerrm);
+  end;
+  insert into resultado (teste, esperado, obtido)
+  values ('Admin lê e marca a edição como revisada', '1 revisada', v);
+end $$;
+
+-- Listas fixas -------------------------------------------------------
+
+do $$ declare v text; n int; i uuid; begin
+  begin
+    perform pg_temp.bairro_teste();
+    perform pg_temp.criar_proprietario('00000000-0000-4000-a000-000000000001');
+    perform pg_temp.entrar_como('00000000-0000-4000-a000-000000000001');
+    select count(*)::text into v from public.bairros where nome = 'Bairro de Teste (roteiro)';
+    raise exception using errcode = 'TR001';
+  exception when sqlstate 'TR001' then null;
+            when others then v := pg_temp.bloqueio(sqlstate, sqlerrm);
+  end;
+  insert into resultado (teste, esperado, obtido)
+  values ('Usuário logado lê a lista de bairros', '1', v);
+end $$;
+
+do $$ declare v text; n int; i uuid; begin
+  begin
+    perform pg_temp.criar_proprietario('00000000-0000-4000-a000-000000000001');
+    perform pg_temp.entrar_como('00000000-0000-4000-a000-000000000001');
+    begin
+      insert into public.bairros (nome) values ('Bairro Inventado');
+      v := 'permitido';
+    exception when others then v := pg_temp.bloqueio(sqlstate, sqlerrm);
+    end;
+    raise exception using errcode = 'TR001';
+  exception when sqlstate 'TR001' then null;
+            when others then v := pg_temp.bloqueio(sqlstate, sqlerrm);
+  end;
+  insert into resultado (teste, esperado, obtido)
+  values ('Proprietário não cria bairro', 'bloqueado (42501)', v);
+end $$;
+
+do $$ declare v text; n int; i uuid; begin
+  begin
+    perform pg_temp.criar_admin('00000000-0000-4000-a000-000000000009');
+    perform pg_temp.entrar_como('00000000-0000-4000-a000-000000000009');
+    insert into public.tipos_imovel (nome) values ('Tipo Criado pelo Admin (roteiro)');
+    select count(*)::text into v from public.tipos_imovel where nome = 'Tipo Criado pelo Admin (roteiro)';
+    raise exception using errcode = 'TR001';
+  exception when sqlstate 'TR001' then null;
+            when others then v := pg_temp.bloqueio(sqlstate, sqlerrm);
+  end;
+  insert into resultado (teste, esperado, obtido)
+  values ('Admin cria tipo de imóvel', '1', v);
 end $$;
 
 -- ---------------------------------------------------------------
