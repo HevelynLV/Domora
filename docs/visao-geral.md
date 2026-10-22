@@ -154,7 +154,7 @@ O projeto recomeça do zero num repositório `PAUTA` e num projeto Supabase novo
 Decididas antes do passo 2.1, porque mudam tabelas ou status do banco.
 
 **Contas e assinatura**
-- A assinatura tem quatro status: pendente, ativo, bloqueado (decisão do admin) e vencido (pagamento atrasado no Asaas). Bloqueado e vencido perdem o acesso. Desbloquear não libera quem está vencido: só o pagamento libera.
+- A assinatura tem três status: pendente, ativo e vencido (pagamento atrasado no Asaas). O bloqueio é decisão do admin e fica à parte do status (coluna `bloqueado_pelo_admin`, desde a auditoria da Etapa 2), para o admin não tirar ninguém do vencido sem pagamento. Bloqueado e vencido perdem o acesso. Desbloquear não libera quem está vencido: só o pagamento libera.
 - O corretor convidado segue a assinatura da imobiliária: se a imobiliária for bloqueada ou vencer, os corretores dela perdem o acesso na hora.
 - O corretor autônomo se cadastra pela tela pública, com o próprio CRECI, e entra pendente até o admin ativar, como a imobiliária. O cadastro pelo app passa a ser como proprietário, imobiliária ou corretor autônomo.
 - As ações do admin que mexem no login das pessoas (excluir a imobiliária pendente com o usuário dela, mandar o convite por e-mail, criar a conta do dono de imóvel captado) usam uma chave secreta de produção, separada das chaves pessoais de teste, só no servidor (`src/lib/supabase/admin.ts`, com `server-only`, sem `NEXT_PUBLIC_`). Ela só é usada depois de conferir que quem pede é admin, ou ao aceitar um convite válido.
