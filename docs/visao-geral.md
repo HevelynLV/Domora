@@ -149,6 +149,13 @@ O projeto recomeça do zero num repositório `PAUTA` e num projeto Supabase novo
 | 12. Exclusividade | Aviso de vencimento e renovação | Sem renovação, o imóvel sai do catálogo sozinho | Antecedência do aviso |
 | 13. PWA, testes e deploy | SMTP, PWA, roteiro completo, Vercel | O app abre no celular de outra pessoa pelo endereço público | Termo de assinatura |
 
+## Decisões tomadas em 22/10/2026 (plano da Etapa 3)
+
+- O login fica sempre conectado até a pessoa sair: não existe a opção "manter conectado" (o app é usado principalmente no celular).
+- O cadastro pede só o número do CRECI. A UF é sempre SC, porque o piloto é só em Florianópolis. Na comparação de CRECI repetido, pontos, traços e espaços não contam ("12.345-J" e "12345J" são o mesmo CRECI).
+- O link do e-mail de recuperação de senha funciona em qualquer navegador (modelo do e-mail com `token_hash` no painel do Supabase, trocado na Etapa 3), não só no navegador em que foi pedido.
+- O aceite do termo de assinatura entra no cadastro de imobiliária e autônomo só no passo 13.4, quando o texto do termo existir. Até lá, o cadastro não mostra a caixa de aceite.
+
 ## Decisões tomadas em 22/10/2026
 
 Decididas antes do passo 2.1, porque mudam tabelas ou status do banco.
