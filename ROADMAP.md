@@ -13,7 +13,14 @@ Etapa 3 (em andamento):
   - Migration `20261022231442_cadastro_etapa_3`: `normalizar_creci()`, coluna `assinantes.creci_normalizado` com o `unique` (`12.345-J`, `12345J`, `12345-J SC` e `CRECI/SC 12345-J` são o mesmo CRECI), as duas funções acima e a limpeza do metadata no gatilho de cadastro
   - O teste real mostrou que o Supabase Auth regrava o metadata logo depois do cadastro e desfazia a limpeza. Correção na migration `20261022232122_limpar_metadata_do_cadastro`: gatilho `before update` em `auth.users` que tira `tipo`, `nome`, `telefone`, `creci`, `nome_imobiliaria` e `convite` em toda gravação. Conferido com `signUp` real: o banco e o token renovado ficam limpos; só o primeiro token, devolvido pelo `signUp`, ainda leva esses dados (o app nunca lê o tipo no token)
   - `testar_rls.sql`: 120 de 120 passando (13 testes novos, inclusive os que faltavam da auditoria da Etapa 2: metadata forjado, visitante chamando as funções do imóvel, proprietário e assinante chamando `reprovar_imovel`)
-- Próximo: passo 3.2 (prompt do `docs/prompts.md`)
+- 3.2 feito (22/10/2026):
+  - `src/lib/auth.ts`: `exigirTipo(tipos, { assinaturaAtiva })` lê o usuário com `getClaims()` e o tipo em `perfis` (nunca no token). Sem login vai para `/entrar`; outro tipo vai para a própria área (`areaDoTipo()`); assinante sem acesso vai para `/aguardando-ativacao` (pendente) ou `/acesso-suspenso` (vencido ou bloqueado), pela `eh_assinante_ativo()` do banco. Também `usuarioAtual()` (sem redirecionar) e `TIPOS_ASSINANTE`. Nada fica em cache entre visitas: conferido que bloquear um assinante tira o acesso na hora, com o mesmo token
+  - `src/proxy.ts`: renova a sessão do Supabase e manda para `/entrar` quem abre `/proprietario`, `/assinante` ou `/admin` sem sessão. Não é a proteção (não lê tipo nem assinatura)
+  - Áreas `/proprietario`, `/assinante` e `/admin`: `layout.tsx` com o `AreaLogada` (menu de baixo no celular, menu lateral do `site.css` a partir de 768 px, quadro "quem está logado" num `<Suspense>`) e uma página inicial provisória que chama `exigirTipo()` dentro de um `<Suspense>`. Itens dos menus em `src/lib/menus.ts`; ícones em `src/components/ui/icones.tsx`; `MenuLateral` e `Logo` novos
+  - `criarClienteServidor()` agora chama `connection()` antes do `cookies()`: sem isso, o Next acusa o `Date.now()` do cliente do Supabase ao adiantar a parte da sessão (Cache Components)
+  - Conferido no navegador com contas de teste: proprietário, autônomo ativo e admin abrem só a própria área e voltam para ela ao digitar outra; imobiliária pendente vai para `/aguardando-ativacao`. `/entrar`, `/aguardando-ativacao` e `/acesso-suspenso` ainda dão 404 (3.3 e 3.4). Lint, tipos e build passam
+  - Para o 3.5: assinante ativo não pode ser excluído (RF16). Para apagar a conta de teste, os testes voltam o status para `pendente` com a chave secreta antes de excluir
+- Próximo: passo 3.3 (cadastro)
 
 Etapa 2 (concluída em 22/10/2026):
 - 2.1 feito (22/10/2026): modelo do MVP aprovado. Tabelas desta etapa: `perfis`, `assinantes` (imobiliária **ou** corretor autônomo: quem paga, com o CRECI único e o status da assinatura; o corretor convidado aponta para o assinante da imobiliária), `convites`, `tipos_imovel`, `bairros`, `imoveis`, `fotos_imovel` e `edicoes_imovel`. Visitas, propostas, contratos, avisos e cobranças entram nas etapas delas. Pontos do modelo: o contato do proprietário (telefone e e-mail) não fica no imóvel, só sai pela função `contato_do_proprietario()`; o `tipo` do perfil é definido só pelo banco no cadastro e não pode ser alterado pelo app; "em negociação" e "contrato em análise" são calculados, não guardados; a exclusividade guarda início e fim; a aprovação usa um contador de versão do imóvel (RF14). Divisão das migrations: 2.2 tipos e perfis; 2.3 assinantes e convites; 2.4 imóveis, fotos, edições e listas
@@ -72,7 +79,7 @@ Etapa 1 (concluída em 21/10/2026):
 
 Próximo passo exato:
 - Contar ao Gabriel as decisões de 22/10/2026 (Visão geral, as duas seções "Decisões tomadas em 22/10/2026") e a mudança do bloqueio (o "Atenção" abaixo)
-- **Passo 3.2** (Etapa 3), na branch `etapa-3-login`: colar o prompt 3.2 do `docs/prompts.md`. Depois, 3.3 a 3.5, um de cada vez
+- **Passo 3.3** (Etapa 3, cadastro), na branch `etapa-3-login`: colar o prompt 3.3 do `docs/prompts.md`. Depois, 3.4 e 3.5
 
 Antes da Etapa 1 (fazer à mão, cada pessoa pelo próprio painel):
 - [ ] Avisar o Gabriel do replanejamento e da troca do nome para PAUTA, e combinar o arquivamento
