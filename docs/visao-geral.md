@@ -68,8 +68,8 @@ O que o app faz. Todos os 32 estão a construir no repositório novo (RF01 a RF0
 
 | ID | Módulo | Requisito | Situação |
 | --- | --- | --- | --- |
-| RF01 | Contas | Cadastro como proprietário ou imobiliária, com e-mail, senha, nome e telefone com DDD | A construir |
-| RF02 | Contas | Imobiliária informa nome e CRECI; o CRECI não pode repetir; entra com assinatura pendente | A construir |
+| RF01 | Contas | Cadastro como proprietário, imobiliária ou corretor autônomo, com e-mail, senha, nome e telefone com DDD | A construir |
+| RF02 | Contas | Imobiliária informa nome e CRECI (o corretor autônomo, o próprio CRECI); o CRECI não pode repetir; entra com assinatura pendente | A construir |
 | RF03 | Contas | Login, logout e recuperação de senha por e-mail | A construir |
 | RF04 | Contas | Cada tipo de usuário só abre a própria área, nem digitando o endereço | A construir |
 | RF05 | Contas | O responsável pela imobiliária convida corretores por e-mail ou link; o corretor cria a conta pelo convite e já entra vinculado e ativo, sem nova conferência do admin | A construir |
@@ -161,7 +161,7 @@ Decididas antes do passo 2.1, porque mudam tabelas ou status do banco.
 
 **Imóvel**
 - Os 6 meses de exclusividade começam a contar na aprovação do admin. Imóvel captado pelo admin começa a contar no cadastro, porque já entra disponível.
-- A escolha de mostrar o contato aos corretores vale para cada imóvel, não para a conta toda.
+- A escolha de mostrar o contato aos corretores vale para cada imóvel, não para a conta toda. O contato mostrado é o telefone e o e-mail da conta do proprietário.
 - Tipos de imóvel e bairros de Florianópolis ficam em listas fixas no banco, que só o admin altera.
 - Imóvel captado cujo dono ainda não tem conta: o admin cria a conta do dono (nome, e-mail e telefone), o dono recebe um e-mail para criar a senha e aceita o termo de exclusividade no app, no primeiro acesso, com data e versão guardadas. O imóvel já entra disponível.
 

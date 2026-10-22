@@ -57,7 +57,7 @@ Estas decisões ainda não foram tomadas. Se uma tarefa depender delas, PERGUNTE
 - A aprovação de imóvel falha se o imóvel mudou depois que o admin abriu a tela
 - O proprietário só apaga imóvel pendente de aprovação ou reprovado
 - A exclusividade de 6 meses conta da aprovação do admin; imóvel captado conta do cadastro. Decidido em 22/10/2026
-- Mostrar o contato aos corretores é uma escolha por imóvel, não da conta. Decidido em 22/10/2026
+- Mostrar o contato aos corretores é uma escolha por imóvel, não da conta. O contato é o telefone e o e-mail da conta, e só chega ao corretor pela função `contato_do_proprietario()`, nunca por uma coluna do imóvel. Decidido em 22/10/2026
 - Tipos de imóvel e bairros de Florianópolis são listas fixas no banco, que só o admin altera. Decidido em 22/10/2026
 - Imóvel captado com dono sem conta: o admin cria a conta do dono, que recebe e-mail para criar a senha e aceita o termo de exclusividade no primeiro acesso (data e versão guardadas). O imóvel já entra disponível. Decidido em 22/10/2026
 - A visita não é obrigatória antes da proposta. Cada corretor tem no máximo uma proposta em aberto (aguardando ou aceita) por imóvel; depois de recusada, pode mandar outra. O proprietário pode desfazer o aceite enquanto o contrato daquela proposta não foi enviado. Decidido em 22/10/2026
