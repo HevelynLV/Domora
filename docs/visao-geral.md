@@ -38,7 +38,7 @@ O app tem três tipos de usuário, cada um com a própria área, que os outros n
 | Perfil | O que faz | Como entra |
 | --- | --- | --- |
 | Proprietário | Cadastra o imóvel, confirma visitas, aceita ou recusa propostas, escolhe se mostra o contato | Cadastro pelo app, com telefone obrigatório, ou conta vinculada pelo admin ao imóvel captado |
-| Imobiliária / corretor / corretor autônomo | Assinante: vê o catálogo, pede visitas, envia propostas e envia o contrato assinado | Cadastro pelo app com nome da imobiliária e CRECI; entra como pendente até o admin ativar |
+| Imobiliária / corretor / corretor autônomo | Assinante: vê o catálogo, pede visitas, envia propostas e envia o contrato assinado | Imobiliária e corretor autônomo: cadastro pelo app com CRECI (e o nome da imobiliária), entram como pendentes até o admin ativar. Corretor de imobiliária: por convite do responsável |
 | Admin | Cadastra imóveis captados, aprova ou reprova imóveis, ativa ou bloqueia assinantes, revisa edições, confere contratos | Criado à mão no banco, nunca pelo app |
 
 Uma imobiliária pode ter vários corretores, cada um com login próprio, que entra por convite do responsável e fica vinculado à imobiliária em que trabalha.
@@ -68,8 +68,8 @@ O que o app faz. Todos os 32 estão a construir no repositório novo (RF01 a RF0
 
 | ID | Módulo | Requisito | Situação |
 | --- | --- | --- | --- |
-| RF01 | Contas | Cadastro como proprietário ou imobiliária, com e-mail, senha, nome e telefone com DDD | A construir |
-| RF02 | Contas | Imobiliária informa nome e CRECI; o CRECI não pode repetir; entra com assinatura pendente | A construir |
+| RF01 | Contas | Cadastro como proprietário, imobiliária ou corretor autônomo, com e-mail, senha, nome e telefone com DDD | A construir |
+| RF02 | Contas | Imobiliária informa nome e CRECI (o corretor autônomo, o próprio CRECI); o CRECI não pode repetir; entra com assinatura pendente | A construir |
 | RF03 | Contas | Login, logout e recuperação de senha por e-mail | A construir |
 | RF04 | Contas | Cada tipo de usuário só abre a própria área, nem digitando o endereço | A construir |
 | RF05 | Contas | O responsável pela imobiliária convida corretores por e-mail ou link; o corretor cria a conta pelo convite e já entra vinculado e ativo, sem nova conferência do admin | A construir |
@@ -148,6 +148,31 @@ O projeto recomeça do zero num repositório `PAUTA` e num projeto Supabase novo
 | 11. Cobrança | Asaas em ambiente de testes | Assinante vencido perde o acesso sozinho | Preço da mensalidade |
 | 12. Exclusividade | Aviso de vencimento e renovação | Sem renovação, o imóvel sai do catálogo sozinho | Antecedência do aviso |
 | 13. PWA, testes e deploy | SMTP, PWA, roteiro completo, Vercel | O app abre no celular de outra pessoa pelo endereço público | Termo de assinatura |
+
+## Decisões tomadas em 22/10/2026
+
+Decididas antes do passo 2.1, porque mudam tabelas ou status do banco.
+
+**Contas e assinatura**
+- A assinatura tem três status: pendente, ativo e vencido (pagamento atrasado no Asaas). O bloqueio é decisão do admin e fica à parte do status (coluna `bloqueado_pelo_admin`, desde a auditoria da Etapa 2), para o admin não tirar ninguém do vencido sem pagamento. Bloqueado e vencido perdem o acesso. Desbloquear não libera quem está vencido: só o pagamento libera.
+- O corretor convidado segue a assinatura da imobiliária: se a imobiliária for bloqueada ou vencer, os corretores dela perdem o acesso na hora.
+- O corretor autônomo se cadastra pela tela pública, com o próprio CRECI, e entra pendente até o admin ativar, como a imobiliária. O cadastro pelo app passa a ser como proprietário, imobiliária ou corretor autônomo.
+- As ações do admin que mexem no login das pessoas (excluir a imobiliária pendente com o usuário dela, mandar o convite por e-mail, criar a conta do dono de imóvel captado) usam uma chave secreta de produção, separada das chaves pessoais de teste, só no servidor (`src/lib/supabase/admin.ts`, com `server-only`, sem `NEXT_PUBLIC_`). Ela só é usada depois de conferir que quem pede é admin, ou ao aceitar um convite válido.
+
+**Imóvel**
+- Os 6 meses de exclusividade começam a contar na aprovação do admin. Imóvel captado pelo admin começa a contar no cadastro, porque já entra disponível.
+- A escolha de mostrar o contato aos corretores vale para cada imóvel, não para a conta toda. O contato mostrado é o telefone e o e-mail da conta do proprietário.
+- Tipos de imóvel e bairros de Florianópolis ficam em listas fixas no banco, que só o admin altera.
+- Imóvel captado cujo dono ainda não tem conta: o admin cria a conta do dono (nome, e-mail e telefone), o dono recebe um e-mail para criar a senha e aceita o termo de exclusividade no app, no primeiro acesso, com data e versão guardadas. O imóvel já entra disponível.
+
+**Visita e proposta**
+- A visita não é obrigatória antes da proposta.
+- Cada corretor tem no máximo uma proposta em aberto (aguardando resposta ou aceita) por imóvel. Depois de recusada, pode mandar outra.
+- O proprietário pode desfazer o aceite de uma proposta enquanto o corretor não enviou o contrato dela; o corretor é avisado. Com contrato enviado, não pode mais.
+
+**Contrato e venda**
+- Se o valor final do contrato for diferente do da proposta, vale o do contrato: o admin registra o valor final ao aprovar, e a proposta fica guardada como estava.
+- Ao aprovar o contrato, na mesma operação: o imóvel vira vendido, todas as outras propostas em aberto (aceitas e ainda sem resposta) são recusadas e as visitas pendentes ou marcadas são canceladas. Os corretores envolvidos são avisados.
 
 ## Decisões tomadas em 20/10/2026
 

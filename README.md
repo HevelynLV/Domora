@@ -76,7 +76,7 @@ Confira: `node -v`, `git --version` e `claude --version` respondem sem erro.
   | `SITE_URL` | Endereço do site, usado nos links dos e-mails de cadastro e de recuperação de senha. Sem barra no fim | Não vem do painel: em desenvolvimento é sempre `http://localhost:3000` |
   | `SUPABASE_SECRET_KEY` | Chave secreta, **só para os testes automáticos** | **Project Settings → API Keys → Secret keys → Add new secret key**, com o nome `testes-e2e-<seu nome>`. Copie o valor (`sb_secret_...`) |
 
-  > ⚠️ **A secret key é pessoal.** Cada pessoa cria a sua; não compartilhe. Ela ignora todo o RLS: quem tem a chave lê e apaga qualquer dado do banco. Por isso ela **nunca** tem o prefixo `NEXT_PUBLIC_`, nunca é usada no código do app (`src/`), nunca vai para a Vercel e **nunca vai para o GitHub** (o `.gitignore` ignora `.env*`). Se vazar, revogue-a no mesmo lugar onde criou.
+  > ⚠️ **A secret key é pessoal.** Cada pessoa cria a sua; não compartilhe. Ela ignora todo o RLS: quem tem a chave lê e apaga qualquer dado do banco. Por isso ela **nunca** tem o prefixo `NEXT_PUBLIC_`, nunca é usada no código do app (`src/`), nunca vai para a Vercel e **nunca vai para o GitHub** (o `.gitignore` ignora `.env*`). Se vazar, revogue-a no mesmo lugar onde criou. A partir da Etapa 5, o app terá outra chave secreta, de produção, só para as ações do admin no login (`src/lib/supabase/admin.ts`, decisão de 22/10/2026). Ela é diferente desta chave pessoal de testes.
 
 - [ ] As variáveis do Asaas e do WhatsApp entram aqui nas Etapas 10 e 11
 - [ ] Sempre que criar ou mudar o `.env.local`, pare e rode de novo o `npm run dev`. O Next.js só lê esse arquivo quando o servidor inicia
