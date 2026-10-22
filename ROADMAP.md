@@ -3,7 +3,17 @@
 ## Onde paramos
 
 Última atualização: 22/10/2026 · por Hevelyn
-Etapa atual: 2. Banco de dados, **concluída** na branch `etapa-2-banco` (passos 2.1 a 2.7 feitos). Falta só enviar a branch (`git push`), abrir o Pull Request e aceitá-lo na `main`. A Etapa 1 foi aceita na `main` (Pull Request #1)
+Etapa atual: 3. Login e perfis, na branch `etapa-3-login`. A Etapa 2 foi aceita na `main` (Pull Request #2)
+
+Etapa 3 (em andamento):
+- 3.1 feito (22/10/2026): plano aprovado. Passos: **3.2a** (novo, antes do 3.2: confirmar com um `signUp` real se o código do erro do gatilho chega ao app; migration com CRECI normalizado, `creci_disponivel()`, `convite_valido()`, limpeza do `raw_user_meta_data` e os testes que faltam da auditoria da Etapa 2), 3.2 (`exigirTipo()`, áreas e `src/proxy.ts`), 3.3 (cadastro), 3.4 (login, saída, senha e `criar_admin.sql`), 3.5 (testes das áreas separadas, usando a tela "Minha conta" de cada área como a action de outra área). Decisões: a área do assinante fica em `/assinante` (as outras em `/proprietario` e `/admin`); login sempre conectado; CRECI só o número, UF SC fixa; link de recuperação com `token_hash` (trocar o modelo do e-mail no painel do Supabase); termo de assinatura só no 13.4 (Visão geral, "Decisões tomadas em 22/10/2026 (plano da Etapa 3)"). Ainda não se sabe se a confirmação de e-mail está ligada no Supabase compartilhado: conferir no 3.2a
+- 3.2a feito (22/10/2026):
+  - Um `signUp` real confirmou: CRECI repetido e convite inválido chegam ao app iguais, `500 "Database error saving new user"`, sem o código do erro. Por isso o app pergunta antes, com `creci_disponivel(creci)` e `convite_valido(codigo, email)`, que respondem só sim ou não e funcionam sem login
+  - A confirmação de e-mail estava ligada no Supabase compartilhado; foi **desligada no painel** até a Etapa 13 (o SMTP padrão só entrega para a equipe do projeto). O cadastro já entra logado
+  - Migration `20261022231442_cadastro_etapa_3`: `normalizar_creci()`, coluna `assinantes.creci_normalizado` com o `unique` (`12.345-J`, `12345J`, `12345-J SC` e `CRECI/SC 12345-J` são o mesmo CRECI), as duas funções acima e a limpeza do metadata no gatilho de cadastro
+  - O teste real mostrou que o Supabase Auth regrava o metadata logo depois do cadastro e desfazia a limpeza. Correção na migration `20261022232122_limpar_metadata_do_cadastro`: gatilho `before update` em `auth.users` que tira `tipo`, `nome`, `telefone`, `creci`, `nome_imobiliaria` e `convite` em toda gravação. Conferido com `signUp` real: o banco e o token renovado ficam limpos; só o primeiro token, devolvido pelo `signUp`, ainda leva esses dados (o app nunca lê o tipo no token)
+  - `testar_rls.sql`: 120 de 120 passando (13 testes novos, inclusive os que faltavam da auditoria da Etapa 2: metadata forjado, visitante chamando as funções do imóvel, proprietário e assinante chamando `reprovar_imovel`)
+- Próximo: passo 3.2 (prompt do `docs/prompts.md`)
 
 Etapa 2 (concluída em 22/10/2026):
 - 2.1 feito (22/10/2026): modelo do MVP aprovado. Tabelas desta etapa: `perfis`, `assinantes` (imobiliária **ou** corretor autônomo: quem paga, com o CRECI único e o status da assinatura; o corretor convidado aponta para o assinante da imobiliária), `convites`, `tipos_imovel`, `bairros`, `imoveis`, `fotos_imovel` e `edicoes_imovel`. Visitas, propostas, contratos, avisos e cobranças entram nas etapas delas. Pontos do modelo: o contato do proprietário (telefone e e-mail) não fica no imóvel, só sai pela função `contato_do_proprietario()`; o `tipo` do perfil é definido só pelo banco no cadastro e não pode ser alterado pelo app; "em negociação" e "contrato em análise" são calculados, não guardados; a exclusividade guarda início e fim; a aprovação usa um contador de versão do imóvel (RF14). Divisão das migrations: 2.2 tipos e perfis; 2.3 assinantes e convites; 2.4 imóveis, fotos, edições e listas
@@ -61,9 +71,8 @@ Etapa 1 (concluída em 21/10/2026):
   - lint, build e testes passaram de novo depois das correções
 
 Próximo passo exato:
-- Enviar a branch: `git push -u origin etapa-2-banco`, abrir o Pull Request da Etapa 2 no GitHub e aceitá-lo na `main`
-- Contar ao Gabriel as decisões de 22/10/2026 (Visão geral, "Decisões tomadas em 22/10/2026") e a mudança do bloqueio (o "Atenção" abaixo)
-- **Passo 3.1** (Etapa 3, login e perfis): na `main` atualizada (`git checkout main` e `git pull`), criar a branch `etapa-3-login` (`git checkout -b etapa-3-login`), abrir uma sessão nova do Claude Code (`/clear`) no modo de planejamento e colar o prompt 3.1 do `docs/prompts.md`. Antes, leia as pendências da Etapa 3 marcadas "(auditoria da Etapa 2)": a primeira (o código de erro do cadastro) muda o plano do passo 3.3
+- Contar ao Gabriel as decisões de 22/10/2026 (Visão geral, as duas seções "Decisões tomadas em 22/10/2026") e a mudança do bloqueio (o "Atenção" abaixo)
+- **Passo 3.2** (Etapa 3), na branch `etapa-3-login`: colar o prompt 3.2 do `docs/prompts.md`. Depois, 3.3 a 3.5, um de cada vez
 
 Antes da Etapa 1 (fazer à mão, cada pessoa pelo próprio painel):
 - [ ] Avisar o Gabriel do replanejamento e da troca do nome para PAUTA, e combinar o arquivamento
@@ -77,12 +86,8 @@ Antes da Etapa 1 (fazer à mão, cada pessoa pelo próprio painel):
 Pendências e decisões em aberto (cada uma precisa estar resolvida antes da etapa indicada). Os itens marcados com **(banco)** mudam tabelas ou status: como a Etapa 2 modela o banco do MVP inteiro, vale decidi-los antes do passo 2.1, mesmo que a etapa deles venha depois. Ao decidir, registrar em "Decisões tomadas" na Visão geral (com a data) e no CLAUDE.md, e tirar daqui.
 
 - Etapa 3:
-  - Quanto tempo a sessão dura e se existe "manter conectado" (aparece no login do site)
-  - (auditoria da Etapa 2) O erro do cadastro nasce no gatilho em `auth.users`, e o Supabase Auth costuma devolver só "Database error saving new user", sem o código (`23505`, `P0001`). Confirmar com um `signUp` real no início da etapa; se for assim, checar CRECI e convite antes do cadastro (ex.: funções `creci_disponivel()` e `convite_valido()` que respondem só sim ou não), mantendo o `unique` como última barreira
-  - (auditoria da Etapa 2) **(banco)** "12.345-J", "12345-J" e "12345J" contam como CRECIs diferentes: guardar também o CRECI só com letras e números (`creci_normalizado`) com o `unique` nele (`20261022171933_assinantes_e_convites.sql:194`)
-  - (auditoria da Etapa 2) O gatilho de cadastro deve apagar de `raw_user_meta_data` o código do convite em texto puro, o CRECI e os outros dados copiados; o `exigirTipo()` lê o tipo em `perfis`, nunca no token (o usuário muda o próprio `user_metadata`)
+  - (auditoria da Etapa 2) O `exigirTipo()` lê o tipo em `perfis`, nunca no token (o primeiro token do cadastro ainda leva o metadata, e o usuário pode mudar o próprio `user_metadata`). O código do erro, o CRECI normalizado e a limpeza do metadata foram resolvidos no 3.2a
   - (auditoria da Etapa 2) Os gatilhos confiam em `current_user = 'authenticated'` ou em `auth.uid()`: quem usar a chave secreta (`admin.ts`) pula a regra de status do assinante, a data do aceite do termo e o registro de edições. Escrever isso no `admin.ts` e nunca usá-lo para editar imóvel ou status
-  - (auditoria da Etapa 2) Testes que faltam no `testar_rls.sql`: cadastro com metadata forjado (`"status":"ativo"`, `"assinante_id"`) sendo ignorado; visitante sem login chamando `aprovar_imovel`, `reprovar_imovel` e `reenviar_imovel`; proprietário ou assinante chamando `reprovar_imovel`
 - Etapa 4:
   - (auditoria da Etapa 2) **(banco)** `fotos_imovel.caminho` aceita qualquer texto, inclusive o arquivo de outro imóvel: exigir que comece com o id do imóvel (`check (caminho like imovel_id::text || '/%')`), alinhado com as políticas do bucket
   - (auditoria da Etapa 2) Captação (4.7): o gatilho de cadastro exige tipo, nome e telefone no momento em que a conta é criada; o `admin.createUser` do dono precisa mandar esses dados no metadata
@@ -127,6 +132,7 @@ Pendências e decisões em aberto (cada uma precisa estar resolvida antes da eta
 - Etapa 13:
   - (auditoria da Etapa 2) LGPD: `imoveis.proprietario_id` não tem `on delete` e só assinante pendente pode ser excluído, então proprietário com imóvel e assinante ativo não podem ser apagados. Planejar a anonimização no 13.4
   - (auditoria da Etapa 2) Dois cadastros com o mesmo convite e duas aprovações do mesmo imóvel ao mesmo tempo estão protegidos pela leitura do código (`for update` no convite, `where versao = ...` na aprovação), mas não há teste com duas conexões. Incluir no roteiro completo (13.5)
+  - Religar a confirmação de e-mail no Supabase (Authentication → Sign In / Providers → Email → "Confirm email"): desligada em 22/10/2026 (passo 3.2a) porque o SMTP padrão só entrega para a equipe do projeto. Com ela ligada, o cadastro passa a mostrar "confira seu e-mail" em vez de entrar logado
   - Termo de assinatura do corretor e da imobiliária, com a cláusula contra desintermediação e a responsabilidade da imobiliária pelos corretores convidados (o protótipo pede o aceite já no cadastro)
   - Tirar do app as páginas de teste da Etapa 1: `src/app/teste-conexao/` e `src/app/amostra/` (desde a auditoria da Etapa 1 elas já respondem 404 em produção, mas o código continua no app)
   - PWA no iPhone: colocar `viewportFit: "cover"` no `viewport` do `src/app/layout.tsx`. O menu de baixo já reserva o espaço da barra do iPhone (`env(safe-area-inset-bottom)`), mas isso só vale com essa opção ligada; ligar junto com o resto do PWA para conferir também o topo da tela
@@ -153,6 +159,8 @@ Atenção (algo que a próxima pessoa precisa saber):
 - Os documentos saíram de `PAUTA-docs/` e agora ficam na raiz (`README.md`, `ROADMAP.md`, `CLAUDE.md`) e em `docs/`. O protótipo está em `docs/prototipo/`
 - O app Next.js existe a partir da branch `etapa-1-setup`: depois de baixar, rode `npm install` (se já tinha rodado antes, rode de novo: entrou o pacote `@next/env`)
 - Migrations agora são aplicadas com `npx supabase db push`: antes da Etapa 2, cada pessoa faz a preparação do README (passo 5: `supabase login` e `supabase link`). Nunca rode `npx supabase config push`
+- **Migrations novas da Etapa 3** (`20261022231442_cadastro_etapa_3` e `20261022232122_limpar_metadata_do_cadastro`): já aplicadas no Supabase compartilhado. Depois do `git pull`, confira com `npx supabase migration list` (Local e Remote iguais). O CRECI repetido agora é conferido pelo `creci_normalizado`
+- **A confirmação de e-mail foi desligada** no painel do Supabase em 22/10/2026, até a Etapa 13: o cadastro entra logado direto
 - **Migrations novas no banco** (`20261022171241_perfis`, `20261022171933_assinantes_e_convites`, `20261022221614_imoveis` e `20261022224630_bloqueio_separado_do_pagamento`): já estão aplicadas no Supabase compartilhado, não precisa rodar `db push` para elas. Depois do `git pull`, confira com `npx supabase migration list` (Local e Remote iguais). Não use o `imobilink` nem o projeto Supabase antigo para trabalho novo
 - O protótipo mudou na Etapa 0 (63 telas). O arquivo de estilo agora se chama `pauta.css` (antes, `domora.css`); o Roadmap de prompts já usa o nome novo nos passos 1.2 e 1.6
 - Mudou no 2.7: "bloqueado" não é mais um status da assinatura. O status é só `pendente`, `ativo` ou `vencido`, e o bloqueio do admin é a coluna `assinantes.bloqueado_pelo_admin`. Tem acesso quem está `ativo` e não bloqueado
@@ -166,6 +174,8 @@ Toda migration nova entra aqui assim que for aplicada e o `testar_rls.sql` passa
 - `20261022171933_assinantes_e_convites` · 22/10/2026 · Hevelyn · assinantes, convites, `meu_assinante_id()`, `eh_assinante_ativo()` e o cadastro de imobiliária, autônomo e corretor. `testar_rls.sql`: 58 de 58 passando
 - `20261022221614_imoveis` · 22/10/2026 · Hevelyn · listas de tipos e bairros, imóveis, fotos, registro de edições, aprovar/reprovar/reenviar e `contato_do_proprietario()`. `testar_rls.sql`: 103 de 103 passando
 - `20261022224630_bloqueio_separado_do_pagamento` · 22/10/2026 · Hevelyn · correção da auditoria (item 1): bloqueio do admin numa coluna própria (`bloqueado_pelo_admin`), status só `pendente`/`ativo`/`vencido`, e o acesso exige ativo e não bloqueado. `testar_rls.sql`: 107 de 107 passando
+- `20261022231442_cadastro_etapa_3` · 22/10/2026 · Hevelyn · CRECI normalizado (`normalizar_creci()`, `creci_normalizado` com `unique`), `creci_disponivel()` e `convite_valido()` sem login, e limpeza do metadata no gatilho de cadastro. `testar_rls.sql`: 119 de 119 passando
+- `20261022232122_limpar_metadata_do_cadastro` · 22/10/2026 · Hevelyn · correção: gatilho `before update` em `auth.users` que tira os dados copiados do metadata, porque o Supabase Auth regravava o metadata depois do cadastro. `testar_rls.sql`: 120 de 120 passando
 
 ## Etapas do MVP
 
