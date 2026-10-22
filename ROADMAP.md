@@ -3,12 +3,15 @@
 ## Onde paramos
 
 Última atualização: 22/10/2026 · por Hevelyn
-Etapa atual: 2. Banco de dados, na branch `etapa-2-banco` (passos 2.1 e 2.2 feitos; próximo: 2.3). A Etapa 1 foi aceita na `main` (Pull Request #1)
+Etapa atual: 2. Banco de dados, na branch `etapa-2-banco` (passos 2.1 a 2.3 feitos; próximo: 2.4). A Etapa 1 foi aceita na `main` (Pull Request #1)
 
 Etapa 2 (em andamento):
 - 2.1 feito (22/10/2026): modelo do MVP aprovado. Tabelas desta etapa: `perfis`, `assinantes` (imobiliária **ou** corretor autônomo: quem paga, com o CRECI único e o status da assinatura; o corretor convidado aponta para o assinante da imobiliária), `convites`, `tipos_imovel`, `bairros`, `imoveis`, `fotos_imovel` e `edicoes_imovel`. Visitas, propostas, contratos, avisos e cobranças entram nas etapas delas. Pontos do modelo: o contato do proprietário (telefone e e-mail) não fica no imóvel, só sai pela função `contato_do_proprietario()`; o `tipo` do perfil é definido só pelo banco no cadastro e não pode ser alterado pelo app; "em negociação" e "contrato em análise" são calculados, não guardados; a exclusividade guarda início e fim; a aprovação usa um contador de versão do imóvel (RF14). Divisão das migrations: 2.2 tipos e perfis; 2.3 assinantes e convites; 2.4 imóveis, fotos, edições e listas
 - 2.2 feito (22/10/2026): migration `20261022171241_perfis` aplicada com `npx supabase db push`. Cria os tipos `tipo_usuario` e `status_assinatura`, a tabela `perfis` (o banco cria o perfil sozinho no cadastro, limpa o telefone e confere o DDD; por enquanto só aceita `proprietario`), as funções `meu_tipo()` e `eh_admin()` e o RLS: cada um lê só o próprio perfil, o admin lê todos, e pelo app só dá para mudar nome e telefone. Criado o `supabase/testes/testar_rls.sql`: 21 testes, todos passando, sem deixar dado nem schema no banco. Ele roda pelo terminal com `npx supabase db query --linked -f supabase/testes/testar_rls.sql` (ou colando no SQL Editor)
-- O verificador do Supabase (`npx supabase db advisors --linked`) mostra 2 avisos "Signed-In Users Can Execute SECURITY DEFINER Function", para `meu_tipo()` e `eh_admin()`. São intencionais: as regras de RLS precisam delas, e cada uma só responde sobre a própria pessoa
+- 2.3 feito (22/10/2026): migration `20261022171933_assinantes_e_convites` aplicada. Tabela `assinantes` (imobiliária ou autônomo, CRECI guardado em maiúsculas e sem espaços, sem repetir, status só muda pelo admin: ele não marca `vencido` nem libera um vencido), coluna `perfis.assinante_id` (o corretor aponta para a imobiliária e segue o status dela), tabela `convites` (só o hash do código, uso único, validade padrão de 7 dias, só o responsável de imobiliária ativa cria), funções `meu_assinante_id()` e `eh_assinante_ativo()`. O cadastro agora aceita `imobiliaria` (nome_imobiliaria e creci), `autonomo` (creci) e `corretor` (convite). Excluir a conta do responsável de uma imobiliária pendente apaga o assinante e libera o CRECI; ativa não é excluída. `testar_rls.sql`: 58 de 58 passando
+- O verificador do Supabase (`npx supabase db advisors --linked`) mostra avisos "Signed-In Users Can Execute SECURITY DEFINER Function" para `meu_tipo()`, `eh_admin()`, `meu_assinante_id()` e `eh_assinante_ativo()`. São intencionais: as regras de RLS precisam delas, e cada uma só responde sobre a própria pessoa
+- Para a Etapa 3 (cadastro): o app envia em `options.data` do signUp `tipo`, `nome` e `telefone`, e mais `nome_imobiliaria` e `creci` (imobiliária), `creci` (autônomo) ou `convite` (corretor). CRECI repetido volta como erro `23505`; convite inválido, tipo não permitido ou falta de CRECI, como `P0001`
+- Para a Etapa 5: a validade de 7 dias do convite foi escolhida no 2.3 por falta de definição; dá para mudar só o padrão da coluna `convites.expira_em`. Se o admin bloquear um assinante vencido e depois desbloquear, ele volta como `ativo` (o banco não guarda que estava vencido): rever na Etapa 11, junto com a decisão do pagamento
 - Risco anotado para a Etapa 6: o `proprietario_id` do imóvel fica visível para o corretor (não é contato, mas mostra quais imóveis são do mesmo dono). Decidir na Etapa 6 se o catálogo passa por uma função
 
 Preparação da Etapa 2 (22/10/2026):
@@ -50,7 +53,7 @@ Etapa 1 (concluída em 21/10/2026):
 
 Próximo passo exato:
 - Contar ao Gabriel as decisões de 22/10/2026 (Visão geral, "Decisões tomadas em 22/10/2026")
-- **Passo 2.3**: migration de `assinantes` (imobiliária ou autônomo, CRECI único, status) e `convites`, com os testes no `testar_rls.sql`. O gatilho de cadastro passa a aceitar `imobiliaria` e `autonomo` (com CRECI) e `corretor` (só com convite válido)
+- **Passo 2.4**: migration de `tipos_imovel`, `bairros`, `imoveis`, `fotos_imovel` e `edicoes_imovel`, com a função `contato_do_proprietario()`, o RLS (assinante ativo vê só imóvel disponível) e os testes no `testar_rls.sql`
 
 Antes da Etapa 1 (fazer à mão, cada pessoa pelo próprio painel):
 - [ ] Avisar o Gabriel do replanejamento e da troca do nome para PAUTA, e combinar o arquivamento
@@ -122,7 +125,7 @@ Atenção (algo que a próxima pessoa precisa saber):
 - Os documentos saíram de `PAUTA-docs/` e agora ficam na raiz (`README.md`, `ROADMAP.md`, `CLAUDE.md`) e em `docs/`. O protótipo está em `docs/prototipo/`
 - O app Next.js existe a partir da branch `etapa-1-setup`: depois de baixar, rode `npm install` (se já tinha rodado antes, rode de novo: entrou o pacote `@next/env`)
 - Migrations agora são aplicadas com `npx supabase db push`: antes da Etapa 2, cada pessoa faz a preparação do README (passo 5: `supabase login` e `supabase link`). Nunca rode `npx supabase config push`
-- **Migration nova no banco** (`20261022171241_perfis`): já está aplicada no Supabase compartilhado, não precisa rodar `db push` para ela. Depois do `git pull`, confira com `npx supabase migration list` (Local e Remote iguais). Não use o `imobilink` nem o projeto Supabase antigo para trabalho novo
+- **Migrations novas no banco** (`20261022171241_perfis` e `20261022171933_assinantes_e_convites`): já estão aplicadas no Supabase compartilhado, não precisa rodar `db push` para elas. Depois do `git pull`, confira com `npx supabase migration list` (Local e Remote iguais). Não use o `imobilink` nem o projeto Supabase antigo para trabalho novo
 - O protótipo mudou na Etapa 0 (63 telas). O arquivo de estilo agora se chama `pauta.css` (antes, `domora.css`); o Roadmap de prompts já usa o nome novo nos passos 1.2 e 1.6
 - Decisões novas de 22/10/2026 (status vencido separado do bloqueado, corretor autônomo pela tela pública, chave de admin só no servidor e outras): veja "Decisões tomadas em 22/10/2026" na Visão geral. As 3 marcadas com **(banco)** que sobraram em "Pendências" não travam o passo 2.1
 
@@ -131,6 +134,7 @@ Atenção (algo que a próxima pessoa precisa saber):
 Toda migration nova entra aqui assim que for aplicada e o `testar_rls.sql` passar. Para conferir: `npx supabase migration list` (coluna Remote).
 
 - `20261022171241_perfis` · 22/10/2026 · Hevelyn · tipos, perfis, `meu_tipo()`, `eh_admin()` e o gatilho de cadastro. `testar_rls.sql`: 21 de 21 passando
+- `20261022171933_assinantes_e_convites` · 22/10/2026 · Hevelyn · assinantes, convites, `meu_assinante_id()`, `eh_assinante_ativo()` e o cadastro de imobiliária, autônomo e corretor. `testar_rls.sql`: 58 de 58 passando
 
 ## Etapas do MVP
 
