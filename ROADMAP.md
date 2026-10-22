@@ -20,7 +20,15 @@ Etapa 3 (em andamento):
   - `criarClienteServidor()` agora chama `connection()` antes do `cookies()`: sem isso, o Next acusa o `Date.now()` do cliente do Supabase ao adiantar a parte da sessão (Cache Components)
   - Conferido no navegador com contas de teste: proprietário, autônomo ativo e admin abrem só a própria área e voltam para ela ao digitar outra; imobiliária pendente vai para `/aguardando-ativacao`. `/entrar`, `/aguardando-ativacao` e `/acesso-suspenso` ainda dão 404 (3.3 e 3.4). Lint, tipos e build passam
   - Para o 3.5: assinante ativo não pode ser excluído (RF16). Para apagar a conta de teste, os testes voltam o status para `pendente` com a chave secreta antes de excluir
-- Próximo: passo 3.3 (cadastro)
+- 3.3 feito (22/10/2026):
+  - Cadastro em três endereços, sem estado no navegador: `/cadastro` (proprietário), `/cadastro/imobiliaria` e `/cadastro/autonomo`. No celular seguem Cadastro e CadastroImobiliaria; a partir de 768 px, o SiteCadastro (painel escuro e os 3 perfis). Sem a caixa do termo de assinatura (13.4) e sem o preço (Etapa 11)
+  - Server Action `cadastrar` (`src/app/cadastro/acoes.ts`): valida tudo no servidor com as regras do banco (`src/lib/validacao.ts`: telefone com 0 na frente e máscara, CRECI só o número com a UF SC fixa), pergunta `creci_disponivel()` antes do `signUp` e de novo se o banco recusar, e reconhece os erros do Supabase pelo `error.code` (`user_already_exists`, `email_exists`, `weak_password`, limites de tentativas). Mantém o que foi digitado (menos a senha) quando mostra erro. Proprietário vai para `/proprietario`; imobiliária e autônomo, para `/aguardando-ativacao`
+  - `/aguardando-ativacao` (AguardandoAtivacao): "Cadastro recebido", o CRECI e os passos até a ativação. Quem não está pendente é mandado para a tela certa. O "Sair" entra no 3.4
+  - Componente `Campo` (`.field` do protótipo), com dica e erro ligados à caixa para leitor de tela
+  - `e2e/cadastro.spec.ts`: proprietário (telefone guardado limpo), imobiliária (pendente e barrada no catálogo), CRECI repetido escrito de outro jeito (mensagem clara, nada criado) e campos errados. `e2e/apoio/supabase.ts` cria e apaga as contas de teste com a chave secreta. `npm run test:e2e`: 12 de 12 passando, sem deixar conta no banco. Lint e build passam
+  - Risco anotado (já em Pendências, Etapa 13): com a confirmação de e-mail desligada, o cadastro diz "Já existe uma conta com este e-mail", ou seja, revela quem tem conta
+  - Lição: o `.next/dev` guardou também uma página estática antiga (a ordem dos campos não mudava, e o navegador acusava "Hydration failed"). Apagar `.next/dev` e reiniciar o `npm run dev` resolveu
+- Próximo: passo 3.4 (login, saída, recuperação de senha e `criar_admin.sql`; também a página inicial do protótipo, o "Sair" do aguardando e a tela `/acesso-suspenso`)
 
 Etapa 2 (concluída em 22/10/2026):
 - 2.1 feito (22/10/2026): modelo do MVP aprovado. Tabelas desta etapa: `perfis`, `assinantes` (imobiliária **ou** corretor autônomo: quem paga, com o CRECI único e o status da assinatura; o corretor convidado aponta para o assinante da imobiliária), `convites`, `tipos_imovel`, `bairros`, `imoveis`, `fotos_imovel` e `edicoes_imovel`. Visitas, propostas, contratos, avisos e cobranças entram nas etapas delas. Pontos do modelo: o contato do proprietário (telefone e e-mail) não fica no imóvel, só sai pela função `contato_do_proprietario()`; o `tipo` do perfil é definido só pelo banco no cadastro e não pode ser alterado pelo app; "em negociação" e "contrato em análise" são calculados, não guardados; a exclusividade guarda início e fim; a aprovação usa um contador de versão do imóvel (RF14). Divisão das migrations: 2.2 tipos e perfis; 2.3 assinantes e convites; 2.4 imóveis, fotos, edições e listas
@@ -79,7 +87,7 @@ Etapa 1 (concluída em 21/10/2026):
 
 Próximo passo exato:
 - Contar ao Gabriel as decisões de 22/10/2026 (Visão geral, as duas seções "Decisões tomadas em 22/10/2026") e a mudança do bloqueio (o "Atenção" abaixo)
-- **Passo 3.3** (Etapa 3, cadastro), na branch `etapa-3-login`: colar o prompt 3.3 do `docs/prompts.md`. Depois, 3.4 e 3.5
+- **Passo 3.4** (Etapa 3, login e senha), na branch `etapa-3-login`: colar o prompt 3.4 do `docs/prompts.md`. Depois, o 3.5
 
 Antes da Etapa 1 (fazer à mão, cada pessoa pelo próprio painel):
 - [ ] Avisar o Gabriel do replanejamento e da troca do nome para PAUTA, e combinar o arquivamento

@@ -1,11 +1,14 @@
 import Link from "next/link";
 
 // Logo do protótipo (.logo e .logo-mark em docs/prototipo/pauta.css).
-export function Logo({ href = "/" }: { href?: string }) {
+// claro: texto branco, para fundo escuro (painel do site).
+export function Logo({ href = "/", claro = false }: { href?: string; claro?: boolean }) {
   return (
     <Link
       href={href}
-      className="inline-flex items-center gap-2 font-display text-[22px] font-extrabold tracking-[-0.03em] text-ink no-underline"
+      className={`inline-flex items-center gap-2 font-display text-[22px] font-extrabold tracking-[-0.03em] no-underline ${
+        claro ? "text-white" : "text-ink"
+      }`}
     >
       <span className="flex size-[30px] items-center justify-center rounded-[9px] bg-mar">
         <svg

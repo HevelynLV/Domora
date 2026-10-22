@@ -100,6 +100,12 @@ export async function usuarioAtual(): Promise<Usuario | null> {
   return (await lerSessao())?.usuario ?? null;
 }
 
+// Assinatura de quem está logado (null para proprietário, admin ou sem login).
+// Para as telas de quem está sem acesso escolherem o que mostrar.
+export async function assinaturaAtual() {
+  return (await lerSessao())?.assinatura ?? null;
+}
+
 /**
  * Exige um usuário logado de um dos tipos pedidos e devolve quem é.
  *
