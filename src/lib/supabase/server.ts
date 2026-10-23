@@ -2,6 +2,7 @@ import "server-only";
 
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
+import { connection } from "next/server";
 
 // Cliente do Supabase para o servidor: Server Components, Server Actions e
 // Route Handlers. A sessão do usuário vem dos cookies da requisição.
@@ -21,6 +22,12 @@ export async function criarClienteServidor() {
       "Faltam NEXT_PUBLIC_SUPABASE_URL ou NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY no .env.local",
     );
   }
+
+  // Com Cache Components, o Next pode adiantar a parte que lê cookies antes da
+  // visita (prefetch). O cliente do Supabase usa Date.now() para conferir o
+  // token, o que o Next barra nesse adiantamento. connection() garante que tudo
+  // daqui em diante roda só na hora da visita (numa Server Action, não muda nada).
+  await connection();
 
   // No Next.js 16, cookies() é sempre assíncrono.
   const cookieStore = await cookies();

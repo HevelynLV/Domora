@@ -1,0 +1,19 @@
+<!--
+  Modelo do e-mail "Reset password" do Supabase Auth (passo 3.4).
+  Onde colar: painel do Supabase → Authentication → Emails → Reset password.
+  Assunto: Crie uma senha nova no PAUTA
+
+  Por que este modelo: o link leva o token_hash direto para /auth/confirmar e
+  funciona em qualquer navegador (o modelo padrão do Supabase usa o fluxo PKCE,
+  que só funciona no navegador em que a pessoa pediu o link).
+
+  {{ .SiteURL }} é o "Site URL" do painel (Authentication → URL Configuration):
+  http://localhost:3000 em desenvolvimento; o endereço público na Etapa 13.
+-->
+<h2>Criar senha nova</h2>
+<p>Recebemos um pedido para criar uma senha nova para a sua conta no PAUTA.</p>
+<p>
+  <a href="{{ .SiteURL }}/auth/confirmar?token_hash={{ .TokenHash }}&type=recovery&proximo=/redefinir-senha">Criar senha nova</a>
+</p>
+<p>O link vale por tempo limitado e só uma vez.</p>
+<p>Se você não pediu, ignore este e-mail: a sua senha continua a mesma.</p>
