@@ -38,7 +38,11 @@ Etapa 3 (em andamento):
   - `supabase/modelos-email/recuperar-senha.html`: modelo do e-mail em português com o link `token_hash`
   - `e2e/login.spec.ts`: cada tipo entra e cai na tela certa (proprietário, admin, assinante ativo, pendente, vencido e bloqueado), senha errada, sair, pedido de senha sem revelar conta, link de recuperação de ponta a ponta (gerado pela chave secreta, sem e-mail), sessão comum não troca a senha e link forjado não sai do PAUTA. `npm run test:e2e`: 24 passando e 2 pulados de propósito (o teste de todos os tipos e o da senha nova rodam só no celular, pelo limite de logins do Supabase, de cerca de 30 a cada 5 minutos por endereço). Lint e build passam
   - **Falta fazer à mão no painel do Supabase** (ver "Atenção")
-- Próximo: passo 3.5 (testes das áreas separadas e tela Minha conta)
+- 3.5 feito (22/10/2026):
+  - Tela Minha conta (ProConta, CorConta, SiteConta) em `/proprietario/conta` e `/assinante/conta`: nome e telefone editáveis, e-mail só para leitura, "Trocar senha" (pelo link no e-mail) e, no celular, "Sair". Cada área tem a própria action (`salvarContaProprietario`, `salvarContaAssinante`), que chama `exigirTipo()` antes de `salvarDadosDaConta()` (`src/lib/conta.ts`). O corretor convidado vê que a assinatura fica com o responsável
+  - `e2e/areas.spec.ts`: 16 casos de endereço digitado (visitante, proprietário, imobiliária ativa, admin e autônomo pendente, cada um tentando as outras áreas), Minha conta salvando, e a action de cada área chamada direto com a sessão de outro tipo. O teste grava a requisição real que a tela manda, confere que ela funciona para o dono e depois a reenvia como assinante, admin, pendente e visitante: nenhum nome muda. Cada conta entra uma vez só (`cookiesDeSessao`), por causa do limite de logins
+  - `npm run test:e2e`: 60 passando e 2 pulados de propósito, sem deixar conta no banco. Lint e build passam
+- Próximo: passo 3.6 (auditoria, numa sessão nova: `/clear` e `/auditar-etapa 3`)
 
 Etapa 2 (concluída em 22/10/2026):
 - 2.1 feito (22/10/2026): modelo do MVP aprovado. Tabelas desta etapa: `perfis`, `assinantes` (imobiliária **ou** corretor autônomo: quem paga, com o CRECI único e o status da assinatura; o corretor convidado aponta para o assinante da imobiliária), `convites`, `tipos_imovel`, `bairros`, `imoveis`, `fotos_imovel` e `edicoes_imovel`. Visitas, propostas, contratos, avisos e cobranças entram nas etapas delas. Pontos do modelo: o contato do proprietário (telefone e e-mail) não fica no imóvel, só sai pela função `contato_do_proprietario()`; o `tipo` do perfil é definido só pelo banco no cadastro e não pode ser alterado pelo app; "em negociação" e "contrato em análise" são calculados, não guardados; a exclusividade guarda início e fim; a aprovação usa um contador de versão do imóvel (RF14). Divisão das migrations: 2.2 tipos e perfis; 2.3 assinantes e convites; 2.4 imóveis, fotos, edições e listas
@@ -98,7 +102,7 @@ Etapa 1 (concluída em 21/10/2026):
 Próximo passo exato:
 - Contar ao Gabriel as decisões de 22/10/2026 (Visão geral, as duas seções "Decisões tomadas em 22/10/2026") e a mudança do bloqueio (o "Atenção" abaixo)
 - No painel do Supabase (uma pessoa só, vale para o projeto compartilhado): Authentication → URL Configuration: "Site URL" `http://localhost:3000` e, em "Redirect URLs", `http://localhost:3000/**`. Authentication → Emails → "Reset password": assunto e corpo de `supabase/modelos-email/recuperar-senha.html`. Depois, pedir uma senha nova em `/recuperar-senha` com o próprio e-mail e abrir o link no celular
-- **Passo 3.5** (Etapa 3, áreas separadas), na branch `etapa-3-login`: colar o prompt 3.5 do `docs/prompts.md`
+- **Passo 3.6** (Etapa 3, auditoria): numa sessão nova do Claude Code (`/clear`), rodar `/auditar-etapa 3`. Depois, o 3.7 (corrigir e fechar)
 
 Antes da Etapa 1 (fazer à mão, cada pessoa pelo próprio painel):
 - [ ] Avisar o Gabriel do replanejamento e da troca do nome para PAUTA, e combinar o arquivamento
@@ -158,6 +162,7 @@ Pendências e decisões em aberto (cada uma precisa estar resolvida antes da eta
 - Etapa 13:
   - (auditoria da Etapa 2) LGPD: `imoveis.proprietario_id` não tem `on delete` e só assinante pendente pode ser excluído, então proprietário com imóvel e assinante ativo não podem ser apagados. Planejar a anonimização no 13.4
   - (auditoria da Etapa 2) Dois cadastros com o mesmo convite e duas aprovações do mesmo imóvel ao mesmo tempo estão protegidos pela leitura do código (`for update` no convite, `where versao = ...` na aprovação), mas não há teste com duas conexões. Incluir no roteiro completo (13.5)
+  - Trocar o e-mail da conta: na tela Minha conta (passo 3.5) o e-mail fica só para leitura, porque a troca precisa de confirmação pelo próprio e-mail (SMTP). Decidir se o usuário troca sozinho (com "Secure email change" ligado) ou só pela equipe PAUTA
   - Religar a confirmação de e-mail no Supabase (Authentication → Sign In / Providers → Email → "Confirm email"): desligada em 22/10/2026 (passo 3.2a) porque o SMTP padrão só entrega para a equipe do projeto. Com ela ligada, o cadastro passa a mostrar "confira seu e-mail" em vez de entrar logado
   - Termo de assinatura do corretor e da imobiliária, com a cláusula contra desintermediação e a responsabilidade da imobiliária pelos corretores convidados (o protótipo pede o aceite já no cadastro)
   - Tirar do app as páginas de teste da Etapa 1: `src/app/teste-conexao/` e `src/app/amostra/` (desde a auditoria da Etapa 1 elas já respondem 404 em produção, mas o código continua no app)

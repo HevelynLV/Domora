@@ -22,6 +22,7 @@ export type Usuario = {
   id: string;
   tipo: TipoUsuario;
   nome: string;
+  email: string;
   // Imobiliária e autônomo: a própria assinatura. Corretor: a da imobiliária.
   // Proprietário e admin: null.
   assinanteId: string | null;
@@ -70,6 +71,7 @@ const lerSessao = cache(async (): Promise<LeituraDaSessao> => {
     id,
     tipo: perfil.tipo as TipoUsuario,
     nome: perfil.nome,
+    email: String(claims?.claims.email ?? ""),
     assinanteId: perfil.assinante_id,
   };
 

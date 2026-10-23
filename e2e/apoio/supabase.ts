@@ -1,3 +1,4 @@
+import { createServerClient } from "@supabase/ssr";
 import { createClient } from "@supabase/supabase-js";
 
 // Apoio dos testes: cria, confere e apaga contas de teste com a chave secreta
@@ -67,6 +68,22 @@ export async function linkDeRecuperacao(email: string) {
   const { data, error } = await clienteAdmin().auth.admin.generateLink({ type: "recovery", email });
   if (error) throw new Error(`linkDeRecuperacao: ${error.message}`);
   return `/auth/confirmar?token_hash=${data.properties.hashed_token}&type=recovery&proximo=/redefinir-senha`;
+}
+
+// Entra com a conta (como o /entrar faria) e devolve os cookies de sessão, no
+// formato do Playwright (context.addCookies). Um login por conta, reaproveitado
+// pelos testes: o Supabase limita os logins por endereço.
+export async function cookiesDeSessao(email: string, senha = SENHA_TESTE) {
+  const guardados = new Map<string, string>();
+  const cliente = createServerClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!, {
+    cookies: {
+      getAll: () => [...guardados].map(([name, value]) => ({ name, value })),
+      setAll: (lista) => lista.forEach(({ name, value }) => (value ? guardados.set(name, value) : guardados.delete(name))),
+    },
+  });
+  const { error } = await cliente.auth.signInWithPassword({ email, password: senha });
+  if (error) throw new Error(`cookiesDeSessao(${email}): ${error.message}`);
+  return [...guardados].map(([name, value]) => ({ name, value, domain: "localhost", path: "/" }));
 }
 
 // Apaga as contas de teste cujo e-mail começa com o prefixo. Assinante só pode
