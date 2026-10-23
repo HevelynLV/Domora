@@ -46,6 +46,29 @@ export async function perfilPorEmail(email: string) {
   return data;
 }
 
+// Muda a assinatura do assinante cujo responsável é a conta, como o admin ou o
+// pagamento fariam (o app só faz isso na Etapa 5 e na 11).
+export async function mudarAssinatura(contaId: string, status: "pendente" | "ativo" | "vencido", bloqueado = false) {
+  const { error } = await clienteAdmin()
+    .from("assinantes")
+    .update({ status, bloqueado_pelo_admin: bloqueado })
+    .eq("responsavel_id", contaId);
+  if (error) throw new Error(`mudarAssinatura: ${error.message}`);
+}
+
+// Troca o tipo de um proprietário para admin, como o supabase/scripts/criar_admin.sql.
+export async function tornarAdmin(contaId: string) {
+  const { error } = await clienteAdmin().from("perfis").update({ tipo: "admin" }).eq("id", contaId);
+  if (error) throw new Error(`tornarAdmin: ${error.message}`);
+}
+
+// O mesmo link do e-mail de recuperação, sem mandar e-mail.
+export async function linkDeRecuperacao(email: string) {
+  const { data, error } = await clienteAdmin().auth.admin.generateLink({ type: "recovery", email });
+  if (error) throw new Error(`linkDeRecuperacao: ${error.message}`);
+  return `/auth/confirmar?token_hash=${data.properties.hashed_token}&type=recovery&proximo=/redefinir-senha`;
+}
+
 // Apaga as contas de teste cujo e-mail começa com o prefixo. Assinante só pode
 // ser excluído pendente (RF16): antes, volta o status para pendente.
 export async function apagarContas(prefixo: string) {

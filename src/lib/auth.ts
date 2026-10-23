@@ -100,6 +100,16 @@ export async function usuarioAtual(): Promise<Usuario | null> {
   return (await lerSessao())?.usuario ?? null;
 }
 
+// A sessão foi aberta por um link de recuperação de senha? O token registra como
+// a pessoa entrou (amr). Só esse tipo de sessão troca a senha sem pedir a atual:
+// quem só está logado (ex.: celular de outra pessoa) não troca.
+export async function veioDeLinkDeRecuperacao() {
+  const supabase = await criarClienteServidor();
+  const { data } = await supabase.auth.getClaims();
+  const amr = data?.claims.amr as { method: string }[] | undefined;
+  return !!amr?.some((m) => m.method === "recovery" || m.method === "otp");
+}
+
 // Assinatura de quem está logado (null para proprietário, admin ou sem login).
 // Para as telas de quem está sem acesso escolherem o que mostrar.
 export async function assinaturaAtual() {

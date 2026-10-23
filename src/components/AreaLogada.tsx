@@ -1,5 +1,6 @@
 import { Suspense, type ReactNode } from "react";
 
+import { BotaoSair } from "@/components/BotaoSair";
 import { Logo } from "@/components/ui/Logo";
 import { MenuInferior } from "@/components/ui/MenuInferior";
 import { MenuLateral } from "@/components/ui/MenuLateral";
@@ -26,6 +27,8 @@ export function AreaLogada({ menu, children }: { menu: MenusDaArea; children: Re
         <Suspense fallback={null}>
           <MenuLateral itens={menu.computador} rotulo={menu.rotulo} />
         </Suspense>
+        {/* No celular, o "Sair" fica na tela Minha conta (passo 3.5). */}
+        <BotaoSair className="mt-auto" />
       </aside>
 
       <div className="flex min-w-0 flex-1 flex-col">

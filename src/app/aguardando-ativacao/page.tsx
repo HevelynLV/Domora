@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { Suspense, type ReactNode } from "react";
 
+import { BotaoSair } from "@/components/BotaoSair";
 import { Cartao } from "@/components/ui/Cartao";
 import { Logo } from "@/components/ui/Logo";
 import { assinaturaAtual, exigirTipo, TIPOS_ASSINANTE } from "@/lib/auth";
@@ -16,7 +17,7 @@ export default function AguardandoAtivacao() {
     <div className="flex flex-1 flex-col bg-bg">
       <div className="mx-auto flex w-full max-w-[440px] items-center justify-between px-5 pt-[22px] md:pt-12">
         <Logo />
-        {/* "Sair" entra no passo 3.4, junto com o login. */}
+        <BotaoSair />
       </div>
       <Suspense fallback={<p className="mx-auto w-full max-w-[440px] px-5 pt-8 text-ink2">Carregando…</p>}>
         <Conteudo />

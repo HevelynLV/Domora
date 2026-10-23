@@ -28,7 +28,17 @@ Etapa 3 (em andamento):
   - `e2e/cadastro.spec.ts`: proprietário (telefone guardado limpo), imobiliária (pendente e barrada no catálogo), CRECI repetido escrito de outro jeito (mensagem clara, nada criado) e campos errados. `e2e/apoio/supabase.ts` cria e apaga as contas de teste com a chave secreta. `npm run test:e2e`: 12 de 12 passando, sem deixar conta no banco. Lint e build passam
   - Risco anotado (já em Pendências, Etapa 13): com a confirmação de e-mail desligada, o cadastro diz "Já existe uma conta com este e-mail", ou seja, revela quem tem conta
   - Lição: o `.next/dev` guardou também uma página estática antiga (a ordem dos campos não mudava, e o navegador acusava "Hydration failed"). Apagar `.next/dev` e reiniciar o `npm run dev` resolveu
-- Próximo: passo 3.4 (login, saída, recuperação de senha e `criar_admin.sql`; também a página inicial do protótipo, o "Sair" do aguardando e a tela `/acesso-suspenso`)
+- 3.4 feito (22/10/2026):
+  - `/entrar` (Entrar e SiteEntrar, sem "manter conectado"): action `entrar` com `signInWithPassword`, lê o tipo em `perfis` e manda para `areaDoTipo()`. Erros pelo código (`invalid_credentials` dá "E-mail ou senha incorretos." para senha errada e para e-mail sem conta; `email_not_confirmed`; limite de tentativas)
+  - Sair: action `sair` (`src/lib/sessao.ts`, confere só que há sessão) e `BotaoSair` no menu lateral, em `/aguardando-ativacao` e em `/acesso-suspenso`. No celular, o "Sair" das áreas entra na tela Minha conta (3.5)
+  - Recuperação de senha (RF03): `/recuperar-senha` responde sempre "Confira seu e-mail", tenha o e-mail conta ou não; `/auth/confirmar` aceita o link com `token_hash` (qualquer navegador) e o `code` do modelo padrão, e o `proximo` só aceita caminho dentro do PAUTA; `/redefinir-senha` só troca a senha numa sessão aberta pelo link (`veioDeLinkDeRecuperacao()` lê o `amr` do token: quem só está logado não troca a senha sem saber a atual) e encerra a sessão depois de salvar
+  - `/acesso-suspenso` (AcessoSuspenso): mensagem de pagamento vencido ou de bloqueio do admin, e o aviso para o corretor convidado. Pagar pelo app e o contato da equipe ficam para a Etapa 11
+  - Página inicial (Main no celular, SiteInicio no computador), sem os links das páginas de teste da Etapa 1
+  - `supabase/scripts/criar_admin.sql`: promove a admin uma conta de proprietário pelo e-mail digitado no SQL Editor (nada salvo no arquivo)
+  - `supabase/modelos-email/recuperar-senha.html`: modelo do e-mail em português com o link `token_hash`
+  - `e2e/login.spec.ts`: cada tipo entra e cai na tela certa (proprietário, admin, assinante ativo, pendente, vencido e bloqueado), senha errada, sair, pedido de senha sem revelar conta, link de recuperação de ponta a ponta (gerado pela chave secreta, sem e-mail), sessão comum não troca a senha e link forjado não sai do PAUTA. `npm run test:e2e`: 24 passando e 2 pulados de propósito (o teste de todos os tipos e o da senha nova rodam só no celular, pelo limite de logins do Supabase, de cerca de 30 a cada 5 minutos por endereço). Lint e build passam
+  - **Falta fazer à mão no painel do Supabase** (ver "Atenção")
+- Próximo: passo 3.5 (testes das áreas separadas e tela Minha conta)
 
 Etapa 2 (concluída em 22/10/2026):
 - 2.1 feito (22/10/2026): modelo do MVP aprovado. Tabelas desta etapa: `perfis`, `assinantes` (imobiliária **ou** corretor autônomo: quem paga, com o CRECI único e o status da assinatura; o corretor convidado aponta para o assinante da imobiliária), `convites`, `tipos_imovel`, `bairros`, `imoveis`, `fotos_imovel` e `edicoes_imovel`. Visitas, propostas, contratos, avisos e cobranças entram nas etapas delas. Pontos do modelo: o contato do proprietário (telefone e e-mail) não fica no imóvel, só sai pela função `contato_do_proprietario()`; o `tipo` do perfil é definido só pelo banco no cadastro e não pode ser alterado pelo app; "em negociação" e "contrato em análise" são calculados, não guardados; a exclusividade guarda início e fim; a aprovação usa um contador de versão do imóvel (RF14). Divisão das migrations: 2.2 tipos e perfis; 2.3 assinantes e convites; 2.4 imóveis, fotos, edições e listas
@@ -87,7 +97,8 @@ Etapa 1 (concluída em 21/10/2026):
 
 Próximo passo exato:
 - Contar ao Gabriel as decisões de 22/10/2026 (Visão geral, as duas seções "Decisões tomadas em 22/10/2026") e a mudança do bloqueio (o "Atenção" abaixo)
-- **Passo 3.4** (Etapa 3, login e senha), na branch `etapa-3-login`: colar o prompt 3.4 do `docs/prompts.md`. Depois, o 3.5
+- No painel do Supabase (uma pessoa só, vale para o projeto compartilhado): Authentication → URL Configuration: "Site URL" `http://localhost:3000` e, em "Redirect URLs", `http://localhost:3000/**`. Authentication → Emails → "Reset password": assunto e corpo de `supabase/modelos-email/recuperar-senha.html`. Depois, pedir uma senha nova em `/recuperar-senha` com o próprio e-mail e abrir o link no celular
+- **Passo 3.5** (Etapa 3, áreas separadas), na branch `etapa-3-login`: colar o prompt 3.5 do `docs/prompts.md`
 
 Antes da Etapa 1 (fazer à mão, cada pessoa pelo próprio painel):
 - [ ] Avisar o Gabriel do replanejamento e da troca do nome para PAUTA, e combinar o arquivamento
@@ -176,6 +187,9 @@ Atenção (algo que a próxima pessoa precisa saber):
 - Migrations agora são aplicadas com `npx supabase db push`: antes da Etapa 2, cada pessoa faz a preparação do README (passo 5: `supabase login` e `supabase link`). Nunca rode `npx supabase config push`
 - **Migrations novas da Etapa 3** (`20261022231442_cadastro_etapa_3` e `20261022232122_limpar_metadata_do_cadastro`): já aplicadas no Supabase compartilhado. Depois do `git pull`, confira com `npx supabase migration list` (Local e Remote iguais). O CRECI repetido agora é conferido pelo `creci_normalizado`
 - **A confirmação de e-mail foi desligada** no painel do Supabase em 22/10/2026, até a Etapa 13: o cadastro entra logado direto
+- **E-mail de recuperação de senha** (passo 3.4): o modelo do PAUTA fica em `supabase/modelos-email/recuperar-senha.html` e é colado à mão no painel (Authentication → Emails → Reset password). Até a Etapa 13, o SMTP padrão do Supabase só entrega e-mail para quem é da equipe do projeto
+- **Admin**: para ter um admin de teste, cadastre-se como proprietário pelo app e rode `supabase/scripts/criar_admin.sql` no SQL Editor com o seu e-mail
+- **Testes e2e** (`npm run test:e2e`): usam a `SUPABASE_SECRET_KEY` do `.env.local` para criar e apagar contas `e2e-…@exemplo.com`. Rodar a bateria várias vezes seguidas pode esbarrar no limite de logins do Supabase (cerca de 30 a cada 5 minutos): espere alguns minutos
 - **Migrations novas no banco** (`20261022171241_perfis`, `20261022171933_assinantes_e_convites`, `20261022221614_imoveis` e `20261022224630_bloqueio_separado_do_pagamento`): já estão aplicadas no Supabase compartilhado, não precisa rodar `db push` para elas. Depois do `git pull`, confira com `npx supabase migration list` (Local e Remote iguais). Não use o `imobilink` nem o projeto Supabase antigo para trabalho novo
 - O protótipo mudou na Etapa 0 (63 telas). O arquivo de estilo agora se chama `pauta.css` (antes, `domora.css`); o Roadmap de prompts já usa o nome novo nos passos 1.2 e 1.6
 - Mudou no 2.7: "bloqueado" não é mais um status da assinatura. O status é só `pendente`, `ativo` ou `vencido`, e o bloqueio do admin é a coluna `assinantes.bloqueado_pelo_admin`. Tem acesso quem está `ativo` e não bloqueado
