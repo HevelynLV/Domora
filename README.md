@@ -118,7 +118,8 @@ Configurado uma vez no projeto compartilhado. Confira, sem mudar nada sem combin
 - [ ] **Authentication → Sign In / Providers → Email → Confirm email**: **desligado** durante o desenvolvimento. Os testes automáticos usam e-mails `@exemplo.com`, que não existem. A confirmação é religada na Etapa 13, com SMTP próprio
 - [ ] **Authentication → URL Configuration**:
   - Site URL: `http://localhost:3000`
-  - Redirect URLs: `http://localhost:3000/auth/callback/**` e `http://localhost:3000/auth/confirm`
+  - Redirect URLs: `http://localhost:3000/**` (os links dos e-mails voltam para `/auth/confirmar`)
+- [ ] **Authentication → Emails**: o modelo padrão (em inglês). Trocar pelo modelo em português de `supabase/modelos-email/` só é possível com SMTP próprio (Etapa 13). Até lá, o link de "esqueci minha senha" só funciona se for aberto **no mesmo navegador** em que foi pedido, e o e-mail só chega para quem é da equipe do projeto Supabase
 
 Todo mundo roda o app na porta 3000, porque o Site URL é um só para o projeto.
 
@@ -127,14 +128,14 @@ Todo mundo roda o app na porta 3000, porque o Site URL é um só para o projeto.
 O admin nunca é criado pelo cadastro do app.
 
 - [ ] Rode `npm run dev` e crie uma conta como **Proprietário** com o seu e-mail
-- [ ] Rode o script `supabase/scripts/criar_admin.sql` com o e-mail dessa conta. Tem que aparecer 1 linha com `tipo = admin`
+- [ ] No painel do Supabase, abra o **SQL Editor**, cole o `supabase/scripts/criar_admin.sql`, troque `<email>` pelo e-mail dessa conta e clique em Run. Tem que aparecer 1 linha com `tipo = admin`
 - [ ] **Não salve** o script com o seu e-mail (desfaça a troca antes de qualquer commit)
 - [ ] Saia e entre de novo no app: você cai na área do admin
 
 ### 8. Conferir que está tudo certo *(a partir da Etapa 3)*
 
-- [ ] `npm run dev` e abra http://localhost:3000: a tela de login aparece
-- [ ] Em outro terminal, `npm run test:e2e`: todos os testes passam. Para ver o relatório: `npx playwright show-report`
+- [ ] `npm run dev` e abra http://localhost:3000: a página inicial do PAUTA aparece, e "Entrar" leva ao login
+- [ ] Em outro terminal, `npm run test:e2e`: todos os testes passam (alguns aparecem como "skipped" de propósito). Eles precisam da `SUPABASE_SECRET_KEY` no `.env.local` (passo 4), porque criam e apagam contas `e2e-…@exemplo.com`. Se aparecer erro de "rate limit", é o limite de logins do Supabase (cerca de 30 a cada 5 minutos): espere uns minutos e rode de novo. Para ver o relatório: `npx playwright show-report`
 
 Se algo falhar, confira primeiro o `.env.local` (passo 4) e reinicie o `npm run dev`. Se uma mudança no código ou no CSS não aparecer no navegador, pare o `npm run dev`, apague a pasta `.next/dev` (é só cache) e rode de novo.
 
