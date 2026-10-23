@@ -2,10 +2,10 @@
 
 ## Onde paramos
 
-Última atualização: 22/10/2026 · por Hevelyn
-Etapa atual: 3. Login e perfis, na branch `etapa-3-login`. A Etapa 2 foi aceita na `main` (Pull Request #2)
+Última atualização: 23/10/2026 · por Hevelyn
+Etapa atual: 3. Login e perfis, **concluída** na branch `etapa-3-login` (passo 3.7 feito), falta o push e o Pull Request. Depois vem a Etapa 4 (imóvel). A Etapa 2 foi aceita na `main` (Pull Request #2)
 
-Etapa 3 (em andamento):
+Etapa 3 (concluída em 23/10/2026):
 - 3.1 feito (22/10/2026): plano aprovado. Passos: **3.2a** (novo, antes do 3.2: confirmar com um `signUp` real se o código do erro do gatilho chega ao app; migration com CRECI normalizado, `creci_disponivel()`, `convite_valido()`, limpeza do `raw_user_meta_data` e os testes que faltam da auditoria da Etapa 2), 3.2 (`exigirTipo()`, áreas e `src/proxy.ts`), 3.3 (cadastro), 3.4 (login, saída, senha e `criar_admin.sql`), 3.5 (testes das áreas separadas, usando a tela "Minha conta" de cada área como a action de outra área). Decisões: a área do assinante fica em `/assinante` (as outras em `/proprietario` e `/admin`); login sempre conectado; CRECI só o número, UF SC fixa; link de recuperação com `token_hash` (trocar o modelo do e-mail no painel do Supabase); termo de assinatura só no 13.4 (Visão geral, "Decisões tomadas em 22/10/2026 (plano da Etapa 3)"). Ainda não se sabe se a confirmação de e-mail está ligada no Supabase compartilhado: conferir no 3.2a
 - 3.2a feito (22/10/2026):
   - Um `signUp` real confirmou: CRECI repetido e convite inválido chegam ao app iguais, `500 "Database error saving new user"`, sem o código do erro. Por isso o app pergunta antes, com `creci_disponivel(creci)` e `convite_valido(codigo, email)`, que respondem só sim ou não e funcionam sem login
@@ -42,7 +42,17 @@ Etapa 3 (em andamento):
   - Tela Minha conta (ProConta, CorConta, SiteConta) em `/proprietario/conta` e `/assinante/conta`: nome e telefone editáveis, e-mail só para leitura, "Trocar senha" (pelo link no e-mail) e, no celular, "Sair". Cada área tem a própria action (`salvarContaProprietario`, `salvarContaAssinante`), que chama `exigirTipo()` antes de `salvarDadosDaConta()` (`src/lib/conta.ts`). O corretor convidado vê que a assinatura fica com o responsável
   - `e2e/areas.spec.ts`: 16 casos de endereço digitado (visitante, proprietário, imobiliária ativa, admin e autônomo pendente, cada um tentando as outras áreas), Minha conta salvando, e a action de cada área chamada direto com a sessão de outro tipo. O teste grava a requisição real que a tela manda, confere que ela funciona para o dono e depois a reenvia como assinante, admin, pendente e visitante: nenhum nome muda. Cada conta entra uma vez só (`cookiesDeSessao`), por causa do limite de logins
   - `npm run test:e2e`: 60 passando e 2 pulados de propósito, sem deixar conta no banco. Lint e build passam
-- Próximo: passo 3.6 (auditoria, numa sessão nova: `/clear` e `/auditar-etapa 3`)
+- 3.6 feito (23/10/2026): auditoria numa sessão nova (`/auditar-etapa 3`, com revisor separado). Nada crítico; 3 itens importantes e 8 melhorias. Lint, build, `testar_rls.sql` (120 de 120) e e2e passavam antes das correções
+- 3.7 feito (23/10/2026): correções da auditoria, sem migration:
+  - `/auth/confirmar`: o `proximo=/%09/outro.com` passava na checagem (o navegador apaga o TAB e vira `//outro.com`) e, com um link verdadeiro, levava para outro site já logado na conta de quem montou o link. Agora o endereço é conferido depois de montado (mesma origem). Teste novo no "link forjado"
+  - Admin sem "Sair" no celular: o "Sair" fica no topo do painel, como no AdmPainel. Teste novo (só no celular)
+  - `veioDeLinkDeRecuperacao()`: a sessão do link só troca a senha sem a atual até 15 minutos depois de aberta. Conferido com um link real que o `token_hash` grava `amr` `otp` (não `recovery`) e que o horário não muda quando o token é renovado
+  - `/entrar` e `/cadastro` mandam quem já está logado para a própria área (`RedirecionarLogado`); antes, um cadastro trocava a sessão de quem estava logado. 3 casos novos em `areas.spec.ts`
+  - `pedirLinkDeSenha` dá erro claro se faltar o `SITE_URL`; `exigirTipo()` trata assinante sem `assinante_id` como sem acesso (o banco já impede, mas o código não confiava nisso)
+  - Itens 4, 8, 9, 10 e 11 da auditoria foram para "Pendências" (Etapas 5 e 13), marcados "auditoria da Etapa 3"
+  - `npm run lint` e `npm run build` passam; `npm run test:e2e`: 67 passando e 3 pulados de propósito; `testar_rls.sql`: 120 de 120 (o banco não mudou)
+  - "Pronto quando" conferido: cada tipo (visitante, proprietário, imobiliária ativa, admin, autônomo pendente) cai na própria área e é barrado nas outras digitando o endereço (`areas.spec.ts`, 19 casos), a action de outra área chamada direto não muda nada (`areas.spec.ts`), pendente, vencido e bloqueado caem na tela certa (`login.spec.ts`) e ninguém muda o próprio tipo nem o status pelo banco (`testar_rls.sql`)
+- Próximo: `git push -u origin etapa-3-login` e o Pull Request da Etapa 3; depois, a Etapa 4 (decidir antes o texto do termo de exclusividade)
 
 Etapa 2 (concluída em 22/10/2026):
 - 2.1 feito (22/10/2026): modelo do MVP aprovado. Tabelas desta etapa: `perfis`, `assinantes` (imobiliária **ou** corretor autônomo: quem paga, com o CRECI único e o status da assinatura; o corretor convidado aponta para o assinante da imobiliária), `convites`, `tipos_imovel`, `bairros`, `imoveis`, `fotos_imovel` e `edicoes_imovel`. Visitas, propostas, contratos, avisos e cobranças entram nas etapas delas. Pontos do modelo: o contato do proprietário (telefone e e-mail) não fica no imóvel, só sai pela função `contato_do_proprietario()`; o `tipo` do perfil é definido só pelo banco no cadastro e não pode ser alterado pelo app; "em negociação" e "contrato em análise" são calculados, não guardados; a exclusividade guarda início e fim; a aprovação usa um contador de versão do imóvel (RF14). Divisão das migrations: 2.2 tipos e perfis; 2.3 assinantes e convites; 2.4 imóveis, fotos, edições e listas
@@ -102,7 +112,8 @@ Etapa 1 (concluída em 21/10/2026):
 Próximo passo exato:
 - Contar ao Gabriel as decisões de 22/10/2026 (Visão geral, as duas seções "Decisões tomadas em 22/10/2026") e a mudança do bloqueio (o "Atenção" abaixo)
 - Feito em 23/10/2026 no painel do Supabase: "Site URL" `http://localhost:3000` e "Redirect URLs" `http://localhost:3000/**`. **Não deu para trocar o modelo do e-mail**: o plano gratuito do Supabase só deixa editar os modelos com SMTP próprio. Até a Etapa 13, o e-mail de recuperação usa o modelo padrão (em inglês, link com `code`), que a rota `/auth/confirmar` já aceita, mas que só funciona no mesmo navegador em que a senha nova foi pedida. Testar à mão: pedir uma senha nova em `/recuperar-senha` com o próprio e-mail e abrir o link **no mesmo navegador**
-- **Passo 3.6** (Etapa 3, auditoria): numa sessão nova do Claude Code (`/clear`), rodar `/auditar-etapa 3`. Depois, o 3.7 (corrigir e fechar)
+- Enviar a Etapa 3: `git push -u origin etapa-3-login` e abrir o Pull Request para a `main`. Depois que ele for aceito, criar a branch `etapa-4-imovel` a partir da `main` atualizada
+- **Antes da Etapa 4**: decidir com o Gabriel o texto do termo de exclusividade (prompt "Antes da Etapa 1: decisões em aberto" do `docs/prompts.md`) e as outras pendências da Etapa 4 abaixo. Depois, o passo 4.1 numa sessão nova (`/clear` e modo de planejamento)
 
 Antes da Etapa 1 (fazer à mão, cada pessoa pelo próprio painel):
 - [ ] Avisar o Gabriel do replanejamento e da troca do nome para PAUTA, e combinar o arquivamento
@@ -115,10 +126,8 @@ Antes da Etapa 1 (fazer à mão, cada pessoa pelo próprio painel):
 
 Pendências e decisões em aberto (cada uma precisa estar resolvida antes da etapa indicada). Os itens marcados com **(banco)** mudam tabelas ou status: como a Etapa 2 modela o banco do MVP inteiro, vale decidi-los antes do passo 2.1, mesmo que a etapa deles venha depois. Ao decidir, registrar em "Decisões tomadas" na Visão geral (com a data) e no CLAUDE.md, e tirar daqui.
 
-- Etapa 3:
-  - (auditoria da Etapa 2) O `exigirTipo()` lê o tipo em `perfis`, nunca no token (o primeiro token do cadastro ainda leva o metadata, e o usuário pode mudar o próprio `user_metadata`). O código do erro, o CRECI normalizado e a limpeza do metadata foram resolvidos no 3.2a
-  - (auditoria da Etapa 2) Os gatilhos confiam em `current_user = 'authenticated'` ou em `auth.uid()`: quem usar a chave secreta (`admin.ts`) pula a regra de status do assinante, a data do aceite do termo e o registro de edições. Escrever isso no `admin.ts` e nunca usá-lo para editar imóvel ou status
 - Etapa 4:
+  - (auditoria da Etapa 2) Os gatilhos confiam em `current_user = 'authenticated'` ou em `auth.uid()`: quem usar a chave secreta (`admin.ts`, criado no 4.7 ou no 5.2) pula a regra de status do assinante, a data do aceite do termo e o registro de edições. Escrever isso no `admin.ts` e nunca usá-lo para editar imóvel ou status
   - (auditoria da Etapa 2) **(banco)** `fotos_imovel.caminho` aceita qualquer texto, inclusive o arquivo de outro imóvel: exigir que comece com o id do imóvel (`check (caminho like imovel_id::text || '/%')`), alinhado com as políticas do bucket
   - (auditoria da Etapa 2) Captação (4.7): o gatilho de cadastro exige tipo, nome e telefone no momento em que a conta é criada; o `admin.createUser` do dono precisa mandar esses dados no metadata
   - (auditoria da Etapa 2) **(banco)** `termo_versao` aceita qualquer texto (conferir contra uma tabela de versões do termo); tipo e bairro com `ativo = false` continuam aceitos no imóvel; `revisado_por` e `revisado_em` são livres para o admin (preencher por gatilho com `auth.uid()` e `now()`); a versão e o registro de edições usam listas de campos diferentes, que podem divergir (`20261022221614_imoveis.sql:218-224` e `:253-255`)
@@ -133,6 +142,8 @@ Pendências e decisões em aberto (cada uma precisa estar resolvida antes da eta
   - (auditoria da Etapa 2) Convite por e-mail: o `inviteUserByEmail` do Supabase cria a conta antes de o corretor informar nome e telefone, e o gatilho de cadastro recusa. Decidir no plano da etapa (ex.: o e-mail só leva o link do app, e o cadastro normal usa o código)
   - (auditoria da Etapa 2) O `token_hash` do convite é sha256 sem sal, escolhido por quem cria o convite: gerar o código no servidor com pelo menos 128 bits aleatórios, ou criar o convite por uma função do banco que gera o código
   - (auditoria da Etapa 2) Testes que faltam: responsável não escolhe `expira_em` nem `usado_em` ao criar convite; corretor convidado de imobiliária ativa **vê** o imóvel disponível
+  - (auditoria da Etapa 3) **(banco)** Decidir antes da ativação de assinantes (5.2): `normalizar_creci()` trata `12345` e `12345J` como CRECIs diferentes, então o mesmo número entra duas vezes, com e sem a letra. A letra conta na comparação? Até lá, o admin confere à mão
+  - (auditoria da Etapa 3) Teste Playwright no 5.4: corretor convidado perde o acesso na hora quando a imobiliária é bloqueada ou vence (hoje só o `testar_rls.sql` e o `eh_assinante_ativo()` cobrem)
 - Etapa 6:
   - Quais filtros o catálogo terá (o protótipo sugere tipo, status, bairro, faixa de preço, quartos e busca por título ou bairro)
   - (auditoria da Etapa 2) O assinante lê todas as colunas do imóvel, inclusive `proprietario_id`, `exclusividade_fim` (diz quando o PAUTA perde a exclusividade, o que ajuda a desintermediação), `termo_versao`, `captado_pelo_admin` e `versao`. Servir o catálogo por uma view ou função só com as colunas do corretor
@@ -164,6 +175,10 @@ Pendências e decisões em aberto (cada uma precisa estar resolvida antes da eta
   - (auditoria da Etapa 2) Dois cadastros com o mesmo convite e duas aprovações do mesmo imóvel ao mesmo tempo estão protegidos pela leitura do código (`for update` no convite, `where versao = ...` na aprovação), mas não há teste com duas conexões. Incluir no roteiro completo (13.5)
   - Trocar o e-mail da conta: na tela Minha conta (passo 3.5) o e-mail fica só para leitura, porque a troca precisa de confirmação pelo próprio e-mail (SMTP). Decidir se o usuário troca sozinho (com "Secure email change" ligado) ou só pela equipe PAUTA
   - Com o SMTP próprio, colar no painel (Authentication → Emails → Reset password) o modelo em português de `supabase/modelos-email/recuperar-senha.html`, com o link `token_hash` decidido no 3.1 (o plano gratuito não deixa editar os modelos sem SMTP próprio). Conferir que o link funciona abrindo o e-mail em outro navegador, e que `/redefinir-senha` aceita a sessão (o `amr` do token tem "recovery" ou "otp")
+  - (auditoria da Etapa 3) Depois da senha nova, `redefinirSenha` encerra só a sessão deste aparelho (`scope: "local"`). Conferir se o Supabase encerra as outras sozinho; se não, chamar `signOut({ scope: "others" })` antes
+  - (auditoria da Etapa 3) Risco aceito, registrar no 13.4: `creci_disponivel()` responde a visitantes, então dá para descobrir se um CRECI já está no PAUTA (o CRECI é público)
+  - (auditoria da Etapa 3) No roteiro completo (13.5), rodar também no computador os testes "cada tipo entra e cai na tela certa" e "link de recuperação cria a senha nova" (hoje só no celular, pelo limite de logins): a tela SiteEntrar não tem login testado
+  - (auditoria da Etapa 3) Com a confirmação de e-mail religada, o link de confirmação do cadastro também abre uma sessão `otp`, que troca a senha sem a atual por 15 minutos (`veioDeLinkDeRecuperacao()`). É aceitável (a pessoa acabou de provar que é dona do e-mail), mas conferir junto com o modelo de e-mail
   - Religar a confirmação de e-mail no Supabase (Authentication → Sign In / Providers → Email → "Confirm email"): desligada em 22/10/2026 (passo 3.2a) porque o SMTP padrão só entrega para a equipe do projeto. Com ela ligada, o cadastro passa a mostrar "confira seu e-mail" em vez de entrar logado
   - Termo de assinatura do corretor e da imobiliária, com a cláusula contra desintermediação e a responsabilidade da imobiliária pelos corretores convidados (o protótipo pede o aceite já no cadastro)
   - Tirar do app as páginas de teste da Etapa 1: `src/app/teste-conexao/` e `src/app/amostra/` (desde a auditoria da Etapa 1 elas já respondem 404 em produção, mas o código continua no app)
@@ -217,7 +232,7 @@ Toda migration nova entra aqui assim que for aplicada e o `testar_rls.sql` passa
 - [x] 0. Protótipo do design — Pronto quando: o fluxo inteiro pode ser clicado, do cadastro do imóvel até o vendido
 - [x] 1. Setup — Pronto quando: a página abre em localhost, conecta ao Supabase novo e o código está no repositório `PAUTA`
 - [x] 2. Banco de dados — Pronto quando: o `testar_rls.sql` passa e um assinante bloqueado não vê nenhum imóvel
-- [ ] 3. Login e perfis — Pronto quando: cada tipo de usuário só abre a própria área
+- [x] 3. Login e perfis — Pronto quando: cada tipo de usuário só abre a própria área
 - [ ] 4. Imóvel — Pronto quando: imóvel do proprietário, com fotos e termo aceito, aparece como pendente; imóvel captado pelo admin entra disponível e vinculado ao dono
 - [ ] 5. Assinantes — Pronto quando: o admin ativa imobiliária e autônomo, e o corretor convidado entra já vinculado e ativo
 - [ ] 6. Catálogo — Pronto quando: assinante ativo filtra pelo celular e vê "disponível" ou "em negociação"; bloqueado não vê nada; vendido não aparece
@@ -242,3 +257,4 @@ PAUTA (antes, Domora):
 - 20/10/2026 · Hevelyn · Etapa 0 concluída: revisão do protótipo contra a Visão geral, 15 telas novas, correções, troca de Domora por PAUTA e roteiro clicável do cadastro ao vendido (63 telas). Decisões que o protótipo revelou foram para "Pendências"
 - 21/10/2026 · Hevelyn · Etapa 1 concluída: app Next.js 16 conectado ao Supabase do PAUTA, migrations com `supabase db push`, comandos `/auditar-etapa` e `/atualizar-roadmap`, Playwright (4 testes) e visual do protótipo no Tailwind. Auditoria sem itens críticos; achados corrigidos ou levados para "Pendências"
 - 22/10/2026 · Hevelyn · Etapa 2 concluída: banco do MVP para contas e imóveis (perfis, assinantes, convites, listas, imóveis, fotos e registro de edições), com RLS, permissões por coluna e `contato_do_proprietario()`. 4 migrations e `testar_rls.sql` com 107 testes passando. Auditoria sem itens críticos; o bloqueio do admin foi separado do status do pagamento e o teste de aprovação foi corrigido; o resto foi para "Pendências"
+- 23/10/2026 · Hevelyn · Etapa 3 concluída: cadastro de proprietário, imobiliária e autônomo, login, saída, recuperação de senha, `exigirTipo()`, áreas separadas com menus e Minha conta. 2 migrations, `testar_rls.sql` com 120 testes e e2e com 67 passando. Auditoria sem itens críticos; corrigidos o redirecionamento para fora do site em `/auth/confirmar`, o "Sair" do admin no celular, o prazo da sessão do link de senha e o redirecionamento de quem já está logado; o resto foi para "Pendências"
