@@ -15,12 +15,16 @@ export async function pedirLinkDeSenha(_anterior: EstadoRecuperar, formData: For
   const email = String(formData.get("email") ?? "").trim().toLowerCase();
   if (!emailValido(email)) return { erro: "Confira o e-mail." };
 
+  // Sem o SITE_URL (ex.: esquecido na Vercel), o link do e-mail sairia quebrado.
+  const site = process.env.SITE_URL;
+  if (!site) throw new Error("Falta SITE_URL no .env.local (ou nas variáveis da Vercel)");
+
   const supabase = await criarClienteServidor();
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
     // Usado pelo modelo padrão do e-mail (link com "code", que só funciona no
     // mesmo navegador). O modelo do PAUTA usa o token_hash e leva direto para
     // /auth/confirmar, em qualquer navegador (ver ROADMAP, passo 3.4).
-    redirectTo: `${process.env.SITE_URL}/auth/confirmar?proximo=/redefinir-senha`,
+    redirectTo: `${site}/auth/confirmar?proximo=/redefinir-senha`,
   });
 
   if (error?.code === "over_email_send_rate_limit" || error?.code === "over_request_rate_limit") {

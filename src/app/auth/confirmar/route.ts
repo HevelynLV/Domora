@@ -16,11 +16,13 @@ import { criarClienteServidor } from "@/lib/supabase/server";
 
 const TIPOS_ACEITOS: EmailOtpType[] = ["recovery", "signup", "email", "email_change", "invite"];
 
-function caminhoInterno(proximo: string | null) {
-  if (!proximo || !proximo.startsWith("/") || proximo.startsWith("//") || proximo.includes("\\")) {
-    return null;
-  }
-  return proximo;
+// Confere o endereço já montado, não só o texto: o navegador apaga TAB e quebra
+// de linha, então "/%09/outro.com" viraria "//outro.com" (outro site).
+function caminhoInterno(proximo: string | null, origem: string) {
+  if (!proximo || !proximo.startsWith("/")) return null;
+  const url = new URL(proximo, origem);
+  if (url.origin !== origem) return null;
+  return url.pathname + url.search;
 }
 
 export async function GET(request: NextRequest) {
@@ -28,7 +30,7 @@ export async function GET(request: NextRequest) {
   const tokenHash = parametros.get("token_hash");
   const tipo = parametros.get("type") as EmailOtpType | null;
   const codigo = parametros.get("code");
-  const proximo = caminhoInterno(parametros.get("proximo")) ?? (tipo === "recovery" ? "/redefinir-senha" : "/entrar");
+  const proximo = caminhoInterno(parametros.get("proximo"), request.nextUrl.origin) ?? (tipo === "recovery" ? "/redefinir-senha" : "/entrar");
 
   const supabase = await criarClienteServidor();
   let erro = true;

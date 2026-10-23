@@ -127,4 +127,8 @@ test("link forjado não abre sessão nem leva para fora do PAUTA", async ({ page
   await page.goto("/auth/confirmar?token_hash=forjado&type=recovery&proximo=//exemplo.com");
   await expect(page).toHaveURL(/^http:\/\/localhost:3000\/redefinir-senha$/);
   await expect(page.getByRole("heading", { name: "Link vencido" })).toBeVisible();
+
+  // TAB escondido (%09): o navegador o apaga e "/\t/exemplo.com" viraria outro site.
+  await page.goto("/auth/confirmar?token_hash=forjado&type=recovery&proximo=/%09/exemplo.com");
+  await expect(page).toHaveURL(/^http:\/\/localhost:3000\/redefinir-senha$/);
 });

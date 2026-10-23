@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { RedirecionarLogado } from "@/components/RedirecionarLogado";
 import { Logo } from "@/components/ui/Logo";
 import type { PerfilCadastro } from "@/lib/validacao";
 
@@ -8,7 +9,7 @@ import { FormCadastro } from "./FormCadastro";
 // Moldura do cadastro. No celular segue Cadastro.dc.html e
 // CadastroImobiliaria.dc.html; no computador (a partir de 768 px),
 // SiteCadastro.dc.html (painel escuro à esquerda e o formulário à direita).
-// Não lê a sessão: a página fica pronta de antemão.
+// Só o RedirecionarLogado lê a sessão, num <Suspense>: o resto fica pronto de antemão.
 
 const textos = {
   proprietario: {
@@ -45,6 +46,7 @@ export function TelaCadastro({ perfil }: { perfil: PerfilCadastro }) {
 
   return (
     <div className="flex flex-1 flex-col bg-bg md:flex-row">
+      <RedirecionarLogado />
       {/* Painel escuro, só no computador (.split > .art do site.css) */}
       <aside className="hidden flex-1 flex-col justify-between gap-8 bg-ink p-12 text-white md:flex">
         <Logo claro />

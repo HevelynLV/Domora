@@ -68,6 +68,10 @@ const casos: [Conta | "visitante", string, RegExp][] = [
   ["admin", "/assinante", /\/admin$/],
   ["pendente", "/assinante/conta", /\/aguardando-ativacao$/],
   ["pendente", "/proprietario", /\/aguardando-ativacao$/],
+  // Quem já está logado não volta para entrar nem cadastra outra conta.
+  ["prop", "/entrar", /\/proprietario$/],
+  ["imob", "/cadastro", /\/assinante$/],
+  ["admin", "/cadastro/imobiliaria", /\/admin$/],
 ];
 
 for (const [conta, endereco, destino] of casos) {
@@ -178,4 +182,18 @@ test("a action de outra área, chamada direto, não muda nada", async ({ browser
   ] as const) {
     expect((await perfilPorEmail(email(conta)))?.nome, conta).toBe(nome);
   }
+});
+
+// Por último, porque encerra a sessão do admin. No celular ele não tem Minha
+// conta: o "Sair" fica no topo do painel (auditoria da Etapa 3).
+test("admin sai pelo painel no celular", async ({ browser }, info) => {
+  test.skip(info.project.name !== "celular", "no computador o Sair fica no menu lateral");
+  const contexto = await contextoDe(browser, "admin");
+  const pagina = await contexto.newPage();
+  await pagina.goto("/admin");
+  await pagina.getByRole("main").getByRole("button", { name: "Sair" }).click();
+  await expect(pagina).toHaveURL(`${ORIGEM}/`);
+  await pagina.goto("/admin");
+  await expect(pagina).toHaveURL(/\/entrar$/);
+  await contexto.close();
 });

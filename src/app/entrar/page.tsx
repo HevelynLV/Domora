@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
+import { RedirecionarLogado } from "@/components/RedirecionarLogado";
 import { TelaPublica } from "@/components/TelaPublica";
 
 import { FormEntrar } from "./FormEntrar";
@@ -12,6 +13,7 @@ export const metadata: Metadata = { title: "Entrar" };
 export default function Entrar() {
   return (
     <TelaPublica voltarPara="/">
+      <RedirecionarLogado />
       <div className="flex flex-col gap-1.5">
         <h1 className="font-display text-t1 font-bold leading-[1.1] tracking-[-0.02em] md:text-[36px]">Entrar</h1>
         <p className="text-ink2">Use o e-mail e a senha do seu cadastro.</p>

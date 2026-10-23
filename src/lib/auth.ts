@@ -75,9 +75,11 @@ const lerSessao = cache(async (): Promise<LeituraDaSessao> => {
     assinanteId: perfil.assinante_id,
   };
 
-  if (!ehAssinante(usuario.tipo) || !usuario.assinanteId) {
-    return { usuario, assinatura: null };
-  }
+  if (!ehAssinante(usuario.tipo)) return { usuario, assinatura: null };
+
+  // Assinante sem assinatura não deveria existir (o banco exige), mas, se
+  // existir, fica sem acesso em vez de passar.
+  if (!usuario.assinanteId) return { usuario, assinatura: { temAcesso: false, status: "pendente" } };
 
   // A regra do acesso fica só no banco (eh_assinante_ativo: ativo e não
   // bloqueado; o corretor segue a imobiliária). O status serve só para escolher
@@ -102,14 +104,23 @@ export async function usuarioAtual(): Promise<Usuario | null> {
   return (await lerSessao())?.usuario ?? null;
 }
 
-// A sessão foi aberta por um link de recuperação de senha? O token registra como
-// a pessoa entrou (amr). Só esse tipo de sessão troca a senha sem pedir a atual:
-// quem só está logado (ex.: celular de outra pessoa) não troca.
+// Quanto tempo depois de abrir o link de recuperação a senha ainda pode ser
+// trocada sem a atual (auditoria da Etapa 3).
+const PRAZO_DO_LINK_EM_SEGUNDOS = 15 * 60;
+
+// A sessão foi aberta por um link de recuperação de senha há pouco? O token
+// registra como e quando a pessoa entrou (amr). O link com token_hash grava
+// "otp", e o com code, "recovery"; o horário não muda quando o token é renovado.
+// Só esse tipo de sessão troca a senha sem pedir a atual: quem só está logado
+// (ex.: celular de outra pessoa) não troca, nem quem abriu o link e deixou para depois.
 export async function veioDeLinkDeRecuperacao() {
   const supabase = await criarClienteServidor();
   const { data } = await supabase.auth.getClaims();
-  const amr = data?.claims.amr as { method: string }[] | undefined;
-  return !!amr?.some((m) => m.method === "recovery" || m.method === "otp");
+  const amr = data?.claims.amr as { method: string; timestamp: number }[] | undefined;
+  const agora = Math.floor(Date.now() / 1000);
+  return !!amr?.some(
+    (m) => (m.method === "recovery" || m.method === "otp") && agora - m.timestamp <= PRAZO_DO_LINK_EM_SEGUNDOS,
+  );
 }
 
 // Assinatura de quem está logado (null para proprietário, admin ou sem login).
