@@ -7,7 +7,7 @@ import { classesBotao } from "@/components/ui/Botao";
 import { SeloStatus } from "@/components/ui/SeloStatus";
 import { exigirTipo } from "@/lib/auth";
 import { formatarPreco } from "@/lib/imovel";
-import { imovelDoDono } from "@/lib/imoveis";
+import { capaDoImovel, imovelDoDono } from "@/lib/imoveis";
 
 export const metadata: Metadata = { title: "Imóvel enviado" };
 
@@ -23,7 +23,7 @@ export default function ImovelEnviado({ params }: PageProps<"/proprietario/imove
 async function Conteudo({ params }: { params: Promise<{ id: string }> }) {
   const usuario = await exigirTipo("proprietario");
   const { id } = await params;
-  const imovel = await imovelDoDono(id, usuario.id);
+  const [imovel, capa] = await Promise.all([imovelDoDono(id, usuario.id), capaDoImovel(id)]);
   if (!imovel || imovel.status !== "pendente") notFound();
 
   return (
@@ -42,7 +42,11 @@ async function Conteudo({ params }: { params: Promise<{ id: string }> }) {
         </div>
 
         <div className="flex gap-3 rounded-cartao border border-line bg-card p-3">
-          <div aria-hidden="true" className="size-[88px] shrink-0 rounded-foto bg-[#BFD3CD]" />
+          <div
+            aria-hidden="true"
+            className="size-[88px] shrink-0 rounded-foto bg-[#BFD3CD] bg-cover bg-center"
+            style={capa ? { backgroundImage: `url("${capa}")` } : undefined}
+          />
           <div className="flex min-w-0 flex-1 flex-col gap-1">
             <SeloStatus status="pendente" />
             <b className="truncate">{imovel.titulo}</b>

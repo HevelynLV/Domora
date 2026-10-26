@@ -2923,6 +2923,270 @@ do $$ declare v text := ''; n int; i uuid; begin
 end $$;
 
 -- ---------------------------------------------------------------
+-- 5. Fotos no Storage e ordem (migration 20261026221116_fotos_storage)
+-- ---------------------------------------------------------------
+-- Os testes gravam direto em storage.objects, que é o que o Supabase Storage faz
+-- ao receber um arquivo, com as mesmas regras (nenhum arquivo de verdade é criado).
+
+create or replace function pg_temp.criar_arquivo(p_imovel uuid, p_nome text)
+returns void
+language sql
+as $$
+  insert into storage.objects (bucket_id, name) values ('fotos-imoveis', p_imovel || '/' || p_nome);
+$$;
+
+create or replace function pg_temp.arquivos_visiveis()
+returns text
+language sql
+as $$
+  select count(*)::text from storage.objects where bucket_id = 'fotos-imoveis';
+$$;
+
+do $$ declare v text; n int; i uuid; begin
+  begin
+    perform pg_temp.criar_proprietario('00000000-0000-4000-a000-000000000001');
+    i := pg_temp.criar_imovel('00000000-0000-4000-a000-000000000001', 'rascunho');
+    perform pg_temp.entrar_como('00000000-0000-4000-a000-000000000001');
+    perform pg_temp.criar_arquivo(i, 'casa.jpg');
+    perform pg_temp.criar_arquivo(i, 'casa-mini.jpg');
+    v := pg_temp.arquivos_visiveis();
+    raise exception using errcode = 'TR001';
+  exception when sqlstate 'TR001' then null;
+            when others then v := pg_temp.bloqueio(sqlstate, sqlerrm);
+  end;
+  insert into resultado (teste, esperado, obtido)
+  values ('Dono envia a foto e a miniatura para a pasta do próprio rascunho e as vê', '2', v);
+end $$;
+
+do $$ declare v text := ''; n int; i uuid; begin
+  begin
+    perform pg_temp.criar_proprietario('00000000-0000-4000-a000-000000000001');
+    perform pg_temp.criar_proprietario('00000000-0000-4000-a000-000000000002');
+    i := pg_temp.criar_imovel('00000000-0000-4000-a000-000000000002', 'pendente');
+    perform pg_temp.entrar_como('00000000-0000-4000-a000-000000000001');
+    begin
+      perform pg_temp.criar_arquivo(i, 'intrusa.jpg');
+      v := 'permitido';
+    exception when others then v := pg_temp.bloqueio(sqlstate, sqlerrm);
+    end;
+    reset role;
+    i := pg_temp.criar_imovel('00000000-0000-4000-a000-000000000001', 'vendido');
+    perform pg_temp.entrar_como('00000000-0000-4000-a000-000000000001');
+    begin
+      perform pg_temp.criar_arquivo(i, 'depois.jpg');
+      v := v || ' / permitido';
+    exception when others then v := v || ' / ' || pg_temp.bloqueio(sqlstate, sqlerrm);
+    end;
+    raise exception using errcode = 'TR001';
+  exception when sqlstate 'TR001' then null;
+            when others then v := pg_temp.bloqueio(sqlstate, sqlerrm);
+  end;
+  insert into resultado (teste, esperado, obtido)
+  values ('Proprietário não envia arquivo para imóvel de outro nem para imóvel vendido',
+          'bloqueado (42501) / bloqueado (42501)', v);
+end $$;
+
+do $$ declare v text := ''; n int; i uuid; begin
+  begin
+    perform pg_temp.criar_proprietario('00000000-0000-4000-a000-000000000001');
+    i := pg_temp.criar_imovel('00000000-0000-4000-a000-000000000001', 'rascunho');
+    perform pg_temp.entrar_como('00000000-0000-4000-a000-000000000001');
+    begin
+      perform pg_temp.criar_arquivo(i, 'programa.exe');
+      v := 'permitido';
+    exception when others then v := pg_temp.bloqueio(sqlstate, sqlerrm);
+    end;
+    begin
+      perform pg_temp.criar_arquivo(i, 'pasta/foto.jpg');
+      v := v || ' / permitido';
+    exception when others then v := v || ' / ' || pg_temp.bloqueio(sqlstate, sqlerrm);
+    end;
+    begin
+      insert into storage.objects (bucket_id, name) values ('fotos-imoveis', 'solta.jpg');
+      v := v || ' / permitido';
+    exception when others then v := v || ' / ' || pg_temp.bloqueio(sqlstate, sqlerrm);
+    end;
+    raise exception using errcode = 'TR001';
+  exception when sqlstate 'TR001' then null;
+            when others then v := pg_temp.bloqueio(sqlstate, sqlerrm);
+  end;
+  insert into resultado (teste, esperado, obtido)
+  values ('Arquivo com nome fora do formato, em subpasta ou fora da pasta de um imóvel é barrado',
+          'bloqueado (42501) / bloqueado (42501) / bloqueado (42501)', v);
+end $$;
+
+do $$ declare v text := ''; n int; i uuid; j uuid; begin
+  begin
+    perform pg_temp.criar_proprietario('00000000-0000-4000-a000-000000000001');
+    i := pg_temp.criar_imovel('00000000-0000-4000-a000-000000000001', 'rascunho');
+    j := pg_temp.criar_imovel('00000000-0000-4000-a000-000000000001', 'pendente');
+    perform pg_temp.criar_admin('00000000-0000-4000-a000-000000000009');
+    perform pg_temp.entrar_como('00000000-0000-4000-a000-000000000009');
+    begin
+      perform pg_temp.criar_arquivo(i, 'do-admin.jpg');
+      v := 'permitido';
+    exception when others then v := pg_temp.bloqueio(sqlstate, sqlerrm);
+    end;
+    perform pg_temp.criar_arquivo(j, 'do-admin.jpg');
+    v := v || ' / ' || pg_temp.arquivos_visiveis();
+    raise exception using errcode = 'TR001';
+  exception when sqlstate 'TR001' then null;
+            when others then v := pg_temp.bloqueio(sqlstate, sqlerrm);
+  end;
+  insert into resultado (teste, esperado, obtido)
+  values ('Admin não envia arquivo para rascunho; envia para pendente', 'bloqueado (42501) / 1', v);
+end $$;
+
+do $$ declare v text := ''; n int; i uuid; j uuid; begin
+  begin
+    perform pg_temp.criar_proprietario('00000000-0000-4000-a000-000000000001');
+    i := pg_temp.criar_imovel('00000000-0000-4000-a000-000000000001', 'disponivel');
+    j := pg_temp.criar_imovel('00000000-0000-4000-a000-000000000001', 'pendente');
+    perform pg_temp.criar_arquivo(i, 'disponivel.jpg');
+    perform pg_temp.criar_arquivo(j, 'pendente.jpg');
+    perform pg_temp.criar_assinante('00000000-0000-4000-a000-000000000031', 'ativo');
+    perform pg_temp.entrar_como('00000000-0000-4000-a000-000000000031');
+    v := pg_temp.arquivos_visiveis();
+    reset role;
+    perform pg_temp.mudar_status_do_assinante_de('00000000-0000-4000-a000-000000000031', 'bloqueado');
+    perform pg_temp.entrar_como('00000000-0000-4000-a000-000000000031');
+    v := v || ' / ' || pg_temp.arquivos_visiveis();
+    reset role;
+    perform pg_temp.mudar_status_do_assinante_de('00000000-0000-4000-a000-000000000031', 'vencido');
+    perform pg_temp.entrar_como('00000000-0000-4000-a000-000000000031');
+    v := v || ' / ' || pg_temp.arquivos_visiveis();
+    perform pg_temp.entrar_como_visitante();
+    v := v || ' / ' || pg_temp.arquivos_visiveis();
+    raise exception using errcode = 'TR001';
+  exception when sqlstate 'TR001' then null;
+            when others then v := pg_temp.bloqueio(sqlstate, sqlerrm);
+  end;
+  insert into resultado (teste, esperado, obtido)
+  values ('Arquivo: assinante ativo vê só o de disponível; bloqueado, vencido e visitante não veem nada',
+          '1 / 0 / 0 / 0', v);
+end $$;
+
+do $$ declare v text := ''; n int; i uuid; begin
+  begin
+    perform pg_temp.criar_proprietario('00000000-0000-4000-a000-000000000001');
+    i := pg_temp.criar_imovel('00000000-0000-4000-a000-000000000001', 'disponivel');
+    perform pg_temp.criar_arquivo(i, 'foto.jpg');
+    perform pg_temp.criar_assinante('00000000-0000-4000-a000-000000000031', 'ativo');
+    perform pg_temp.entrar_como('00000000-0000-4000-a000-000000000031');
+    update storage.objects set name = i || '/trocada.jpg' where bucket_id = 'fotos-imoveis';
+    get diagnostics n = row_count;
+    v := n::text;
+    perform pg_temp.entrar_como('00000000-0000-4000-a000-000000000001');
+    update storage.objects set name = i || '/trocada.jpg' where bucket_id = 'fotos-imoveis';
+    get diagnostics n = row_count;
+    v := v || ' / ' || n;
+    raise exception using errcode = 'TR001';
+  exception when sqlstate 'TR001' then null;
+            when others then v := pg_temp.bloqueio(sqlstate, sqlerrm);
+  end;
+  -- Apagar arquivo não dá para testar aqui: o Supabase barra todo delete direto em
+  -- storage.objects (gatilho storage.protect_delete). Quem apaga e quem não apaga
+  -- está no e2e/imovel-fotos.spec.ts, pela API do Storage.
+  insert into resultado (teste, esperado, obtido)
+  values ('Arquivo: nem assinante nem dono sobrescrevem ou renomeiam (0 linhas)', '0 / 0', v);
+end $$;
+
+-- Ordem das fotos ---------------------------------------------------------
+
+do $$ declare v text; n int; i uuid; a uuid; b uuid; c uuid; begin
+  begin
+    perform pg_temp.criar_proprietario('00000000-0000-4000-a000-000000000001');
+    i := pg_temp.criar_imovel('00000000-0000-4000-a000-000000000001', 'rascunho');
+    perform pg_temp.criar_foto(i, 1); perform pg_temp.criar_foto(i, 2); perform pg_temp.criar_foto(i, 3);
+    select id into a from public.fotos_imovel where imovel_id = i and ordem = 1;
+    select id into b from public.fotos_imovel where imovel_id = i and ordem = 2;
+    select id into c from public.fotos_imovel where imovel_id = i and ordem = 3;
+    perform pg_temp.entrar_como('00000000-0000-4000-a000-000000000001');
+    perform public.reordenar_fotos(i, array[c, a, b]);
+    select string_agg(regexp_replace(caminho, '^.*/', ''), ' ' order by ordem) into v
+      from public.fotos_imovel where imovel_id = i;
+    raise exception using errcode = 'TR001';
+  exception when sqlstate 'TR001' then null;
+            when others then v := pg_temp.bloqueio(sqlstate, sqlerrm);
+  end;
+  insert into resultado (teste, esperado, obtido)
+  values ('Dono muda a ordem das fotos (a terceira vira a capa)', 'foto-3.jpg foto-1.jpg foto-2.jpg', v);
+end $$;
+
+do $$ declare v text := ''; n int; i uuid; a uuid; b uuid; begin
+  begin
+    perform pg_temp.criar_proprietario('00000000-0000-4000-a000-000000000001');
+    i := pg_temp.criar_imovel('00000000-0000-4000-a000-000000000001', 'rascunho');
+    perform pg_temp.criar_foto(i, 1); perform pg_temp.criar_foto(i, 2);
+    select id into a from public.fotos_imovel where imovel_id = i and ordem = 1;
+    select id into b from public.fotos_imovel where imovel_id = i and ordem = 2;
+    perform pg_temp.entrar_como('00000000-0000-4000-a000-000000000001');
+    begin
+      perform public.reordenar_fotos(i, array[b]);
+      v := 'permitido';
+    exception when others then v := sqlstate || ' ' || sqlerrm;
+    end;
+    begin
+      perform public.reordenar_fotos(i, array[b, b, a]);
+      v := v || ' / permitido';
+    exception when others then v := v || ' / ' || sqlstate || ' ' || sqlerrm;
+    end;
+    raise exception using errcode = 'TR001';
+  exception when sqlstate 'TR001' then null;
+            when others then v := pg_temp.bloqueio(sqlstate, sqlerrm);
+  end;
+  insert into resultado (teste, esperado, obtido)
+  values ('Ordem com foto faltando ou repetida é barrada (código e mensagem)',
+          'P0001 A lista de fotos não confere com as fotos do imóvel. Abra de novo e confira. / P0001 A lista de fotos não confere com as fotos do imóvel. Abra de novo e confira.', v);
+end $$;
+
+do $$ declare v text := ''; n int; i uuid; a uuid; b uuid; begin
+  begin
+    perform pg_temp.criar_proprietario('00000000-0000-4000-a000-000000000001');
+    perform pg_temp.criar_proprietario('00000000-0000-4000-a000-000000000002');
+    i := pg_temp.criar_imovel('00000000-0000-4000-a000-000000000002', 'disponivel');
+    perform pg_temp.criar_foto(i, 1); perform pg_temp.criar_foto(i, 2);
+    select id into a from public.fotos_imovel where imovel_id = i and ordem = 1;
+    select id into b from public.fotos_imovel where imovel_id = i and ordem = 2;
+    perform pg_temp.criar_assinante('00000000-0000-4000-a000-000000000031', 'ativo');
+    foreach n in array array[1, 31] loop
+      perform pg_temp.entrar_como(('00000000-0000-4000-a000-0000000000' || lpad(n::text, 2, '0'))::uuid);
+      begin
+        perform public.reordenar_fotos(i, array[b, a]);
+        v := v || ' / permitido';
+      exception when others then v := v || ' / ' || sqlstate || ' ' || sqlerrm;
+      end;
+    end loop;
+    v := substr(v, 4);
+    raise exception using errcode = 'TR001';
+  exception when sqlstate 'TR001' then null;
+            when others then v := pg_temp.bloqueio(sqlstate, sqlerrm);
+  end;
+  insert into resultado (teste, esperado, obtido)
+  values ('Outro proprietário e assinante não mudam a ordem das fotos',
+          'P0001 Só o dono ou o admin muda a ordem das fotos / P0001 Só o dono ou o admin muda a ordem das fotos', v);
+end $$;
+
+do $$ declare v text; n int; i uuid; a uuid; b uuid; begin
+  begin
+    perform pg_temp.criar_proprietario('00000000-0000-4000-a000-000000000001');
+    i := pg_temp.criar_imovel('00000000-0000-4000-a000-000000000001', 'disponivel');
+    perform pg_temp.criar_foto(i, 1); perform pg_temp.criar_foto(i, 2);
+    select id into a from public.fotos_imovel where imovel_id = i and ordem = 1;
+    select id into b from public.fotos_imovel where imovel_id = i and ordem = 2;
+    perform pg_temp.entrar_como('00000000-0000-4000-a000-000000000001');
+    perform public.reordenar_fotos(i, array[b, a]);
+    reset role;
+    select count(*) || ' registros' into v from public.edicoes_imovel where imovel_id = i and campo = 'fotos';
+    raise exception using errcode = 'TR001';
+  exception when sqlstate 'TR001' then null;
+            when others then v := pg_temp.bloqueio(sqlstate, sqlerrm);
+  end;
+  insert into resultado (teste, esperado, obtido)
+  values ('Nova ordem das fotos de imóvel disponível vai para o registro de edições', '2 registros', v);
+end $$;
+
+-- ---------------------------------------------------------------
 -- Resultado
 -- ---------------------------------------------------------------
 select

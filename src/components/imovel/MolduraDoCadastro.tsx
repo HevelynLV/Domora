@@ -13,7 +13,8 @@ import { formatarPreco } from "@/lib/imovel";
 
 const PASSOS = ["Dados do imóvel", "Fotos", "Exclusividade e contato"] as const;
 
-export type Previa = { titulo: string; preco: number; quartos: number; vagas: number; area: number };
+// capa: link temporário da miniatura da primeira foto.
+export type Previa = { titulo: string; preco: number; quartos: number; vagas: number; area: number; capa?: string | null };
 
 export function MolduraDoCadastro({
   passo,
@@ -95,7 +96,10 @@ export function MolduraDoCadastro({
           <p className="text-tiny font-bold uppercase tracking-[0.08em] text-ink2">Como vai aparecer no catálogo</p>
           {previa && (
             <div className="flex flex-col overflow-hidden rounded-pcard border border-line bg-card">
-              <div className="flex h-[180px] items-start bg-[#BFD3CD] p-3">
+              <div
+                className="flex h-[180px] items-start bg-[#BFD3CD] bg-cover bg-center p-3"
+                style={previa.capa ? { backgroundImage: `url("${previa.capa}")` } : undefined}
+              >
                 <SeloStatus status="disponivel" />
               </div>
               <div className="flex flex-col gap-1 px-4 pb-4 pt-3.5">

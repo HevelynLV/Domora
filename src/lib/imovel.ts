@@ -129,6 +129,18 @@ export function numeroParaCampo(valor: number) {
   return valor.toLocaleString("pt-BR", { maximumFractionDigits: 2 });
 }
 
+// Fotos (RF09), com as regras do bucket (supabase/migrations/20261026221116_fotos_storage.sql).
+export const BUCKET_FOTOS = "fotos-imoveis";
+export const LIMITE_DE_FOTOS = 20;
+// O que a pessoa pode escolher; o navegador converte tudo para JPEG antes de enviar.
+export const TIPOS_DE_FOTO = ["image/jpeg", "image/png", "image/webp"];
+export const TAMANHO_MAXIMO_DA_FOTO = 10 * 1024 * 1024;
+
+// "abc/123.jpg" → "abc/123-mini.jpg" (a miniatura enviada junto com a foto).
+export function caminhoDaMiniatura(caminho: string) {
+  return caminho.replace(/\.jpg$/, "-mini.jpg");
+}
+
 // O id do imóvel vem do endereço (ou de um campo que a pessoa pode alterar):
 // confere o formato antes de perguntar ao banco.
 export function idDeImovelValido(id: string) {

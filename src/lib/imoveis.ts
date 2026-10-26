@@ -1,7 +1,7 @@
 import "server-only";
 
 import { criarClienteServidor } from "@/lib/supabase/server";
-import { idDeImovelValido } from "@/lib/imovel";
+import { BUCKET_FOTOS, caminhoDaMiniatura, idDeImovelValido } from "@/lib/imovel";
 
 // Leituras do imóvel no servidor, sempre com a sessão de quem está logado: o RLS
 // do banco decide o que cada um vê. Quem chama já passou pelo exigirTipo().
@@ -65,6 +65,37 @@ export async function imovelDoDono(id: string, donoId: string): Promise<ImovelDo
     bairro: nomeDaLista(bairros),
     fotos: fotos_imovel[0]?.count ?? 0,
   };
+}
+
+// Quanto tempo o link de uma foto vale. O bucket é privado: cada visita pede links
+// novos, e um link copiado para fora para de funcionar depois disso.
+const VALIDADE_DO_LINK_EM_SEGUNDOS = 60 * 60;
+
+export type FotoDoImovel = { id: string; ordem: number; caminho: string; miniatura: string | null };
+
+// Fotos do imóvel na ordem (a primeira é a capa), com links temporários das
+// miniaturas. O RLS decide se quem pergunta vê as fotos.
+export async function fotosDoImovel(imovelId: string): Promise<FotoDoImovel[]> {
+  if (!idDeImovelValido(imovelId)) return [];
+  const supabase = await criarClienteServidor();
+  const { data, error } = await supabase
+    .from("fotos_imovel")
+    .select("id, ordem, caminho")
+    .eq("imovel_id", imovelId)
+    .order("ordem");
+  if (error) throw error;
+  if (data.length === 0) return [];
+
+  const { data: links } = await supabase.storage
+    .from(BUCKET_FOTOS)
+    .createSignedUrls(data.map((foto) => caminhoDaMiniatura(foto.caminho)), VALIDADE_DO_LINK_EM_SEGUNDOS);
+  // Sem link (arquivo que não existe mais), a tela mostra o quadro vazio.
+  return data.map((foto, i) => ({ ...foto, miniatura: links?.[i]?.signedUrl ?? null }));
+}
+
+// Link temporário da miniatura da capa (a foto 1), ou null sem fotos.
+export async function capaDoImovel(imovelId: string) {
+  return (await fotosDoImovel(imovelId))[0]?.miniatura ?? null;
 }
 
 // Nome do tipo ou do bairro ligado ao imóvel. Sem os tipos gerados do banco, o

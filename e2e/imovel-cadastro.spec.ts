@@ -4,7 +4,7 @@ import { apagarContas, clienteAdmin, cookiesDeSessao, criarConta } from "./apoio
 
 // RF07: cadastro do imóvel pelo proprietário, passo 4.2. O imóvel nasce em
 // rascunho (passo 1), e o aceite do termo (passo 3) o manda para a aprovação.
-// O envio das fotos (passo 2) chega no 4.3: aqui a foto entra direto no banco.
+// O envio das fotos pela tela (passo 2) está no e2e/imovel-fotos.spec.ts: aqui a foto entra direto no banco.
 
 const PREFIXO = "e2e-imovel-";
 const email = (nome: string) => `${PREFIXO}${nome}@exemplo.com`;
@@ -39,7 +39,7 @@ async function imoveisDa(conta: Conta) {
   return data;
 }
 
-// Põe uma foto no imóvel direto no banco (o envio pela tela é o passo 4.3).
+// Põe uma foto no imóvel direto no banco (o envio pela tela está no imovel-fotos.spec.ts).
 async function porFoto(imovelId: string) {
   const { error } = await clienteAdmin()
     .from("fotos_imovel")
@@ -74,8 +74,10 @@ test("proprietária cadastra o imóvel, aceita o termo e ele fica pendente", asy
   let [imovel] = (await imoveisDa("dona")).filter((i) => i.id === imovelId);
   expect(imovel).toMatchObject({ titulo, status: "rascunho", preco: 1890000, area: 220.5, quartos: 4, termo_versao: null });
 
-  // Passo 2: a foto (pela tela, no 4.3).
+  // Passo 2: a foto entra direto no banco.
   await porFoto(imovelId);
+  // Sem foto a tela não mostra o "Continuar": recarrega para ela ver a foto nova.
+  await pagina.reload();
   await pagina.getByRole("link", { name: "Continuar para o termo" }).click();
   await expect(pagina).toHaveURL(new RegExp(`/${imovelId}/termo$`));
 
