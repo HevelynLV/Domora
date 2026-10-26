@@ -138,7 +138,7 @@ O projeto recomeça do zero num repositório `PAUTA` e num projeto Supabase novo
 | 1. Setup | Repositório `pauta`, Next.js, Supabase novo, Vercel | A página abre em localhost e conecta ao Supabase | — |
 | 2. Banco | Tabelas e RLS do modelo novo | `testar_rls.sql` passa: assinante bloqueado não vê nada | — |
 | 3. Login e perfis | Cadastro, login, áreas separadas | Cada tipo de usuário só abre a própria área | — |
-| 4. Imóvel | Cadastro com fotos e termo; captação pelo admin; aprovar ou reprovar | Imóvel do proprietário fica pendente; o do admin entra disponível | Texto do termo de exclusividade |
+| 4. Imóvel | Cadastro com fotos e termo; captação pelo admin; aprovar ou reprovar | Imóvel do proprietário fica pendente; o do admin entra disponível | — (usa um termo provisório) |
 | 5. Assinantes | Ativação pelo admin, convite de corretores, autônomo | Corretor convidado entra vinculado e ativo | — |
 | 6. Catálogo | Filtros, status disponível ou em negociação | Assinante ativo filtra no celular; bloqueado não vê nada | Quais filtros |
 | 7. Visita | Pedido e confirmação | O corretor vê a resposta do proprietário | — |
@@ -147,7 +147,11 @@ O projeto recomeça do zero num repositório `PAUTA` e num projeto Supabase novo
 | 10. Avisos | Lista no app e WhatsApp | Cada evento gera aviso nos dois canais | Provedor do WhatsApp |
 | 11. Cobrança | Asaas em ambiente de testes | Assinante vencido perde o acesso sozinho | Preço da mensalidade |
 | 12. Exclusividade | Aviso de vencimento e renovação | Sem renovação, o imóvel sai do catálogo sozinho | Antecedência do aviso |
-| 13. PWA, testes e deploy | SMTP, PWA, roteiro completo, Vercel | O app abre no celular de outra pessoa pelo endereço público | Termo de assinatura |
+| 13. PWA, testes e deploy | SMTP, PWA, roteiro completo, Vercel | O app abre no celular de outra pessoa pelo endereço público | Texto final dos dois termos |
+
+## Decisões tomadas em 26/10/2026
+
+- Os textos do termo de exclusividade e do termo de assinatura ficam para depois e não travam a Etapa 4. A Etapa 4 constrói o aceite com um texto provisório, com uma versão marcada como provisória e guardada no aceite (data e versão), como num termo de verdade. Quando o texto final estiver pronto, ele entra no projeto como uma versão nova, antes do piloto (Etapa 13). Aceites da versão provisória valem só para teste: nenhum proprietário real aceita o termo provisório.
 
 ## Decisões tomadas em 22/10/2026 (plano da Etapa 3)
 
@@ -223,7 +227,7 @@ Estes pontos travam requisitos acima e precisam de resposta antes de virar códi
 - [ ] Exclusividade: com quanto tempo de antecedência sai o aviso de vencimento, e a renovação é por mais 6 meses?
 - [ ] WhatsApp: qual provedor da API oficial (Meta direto ou um intermediário como Twilio ou Z-API) e o custo por mensagem
 
-**Termos**
+**Termos** (não travam a Etapa 4, que usa um texto provisório; o texto final entra antes do piloto, na Etapa 13. Decidido em 26/10/2026)
 
 - [ ] Texto do termo de exclusividade que o proprietário aceita no cadastro
 - [ ] Termo de assinatura do corretor e da imobiliária, com a cláusula contra desintermediação e a responsabilidade da imobiliária pelos corretores que ela convida. O risco aumenta quando o proprietário mostra o contato

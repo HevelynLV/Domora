@@ -2,8 +2,12 @@
 
 ## Onde paramos
 
-Última atualização: 23/10/2026 · por Hevelyn
-Etapa atual: 3. Login e perfis, **concluída** na branch `etapa-3-login` (passo 3.7 feito), falta o push e o Pull Request. Depois vem a Etapa 4 (imóvel). A Etapa 2 foi aceita na `main` (Pull Request #2)
+Última atualização: 26/10/2026 · por Hevelyn
+Etapa atual: 3. Login e perfis, **concluída e aceita na `main`** (Pull Request #3). Próxima: Etapa 4 (imóvel), ainda não começada
+
+26/10/2026:
+- O commit do README da Etapa 3, que ficou de fora do Pull Request #3, foi levado para a `main` pela branch `docs-readme-e-termos`
+- Decidido: os textos dos termos (exclusividade e assinatura) ficam para depois e **não travam a Etapa 4**. A Etapa 4 usa um termo de exclusividade provisório, com versão marcada como provisória; o texto final entra como versão nova antes do piloto (Etapa 13). Registrado na Visão geral ("Decisões tomadas em 26/10/2026"), no CLAUDE.md e no `docs/prompts.md`
 
 Etapa 3 (concluída em 23/10/2026):
 - 3.1 feito (22/10/2026): plano aprovado. Passos: **3.2a** (novo, antes do 3.2: confirmar com um `signUp` real se o código do erro do gatilho chega ao app; migration com CRECI normalizado, `creci_disponivel()`, `convite_valido()`, limpeza do `raw_user_meta_data` e os testes que faltam da auditoria da Etapa 2), 3.2 (`exigirTipo()`, áreas e `src/proxy.ts`), 3.3 (cadastro), 3.4 (login, saída, senha e `criar_admin.sql`), 3.5 (testes das áreas separadas, usando a tela "Minha conta" de cada área como a action de outra área). Decisões: a área do assinante fica em `/assinante` (as outras em `/proprietario` e `/admin`); login sempre conectado; CRECI só o número, UF SC fixa; link de recuperação com `token_hash` (trocar o modelo do e-mail no painel do Supabase); termo de assinatura só no 13.4 (Visão geral, "Decisões tomadas em 22/10/2026 (plano da Etapa 3)"). Ainda não se sabe se a confirmação de e-mail está ligada no Supabase compartilhado: conferir no 3.2a
@@ -112,8 +116,8 @@ Etapa 1 (concluída em 21/10/2026):
 Próximo passo exato:
 - Contar ao Gabriel as decisões de 22/10/2026 (Visão geral, as duas seções "Decisões tomadas em 22/10/2026") e a mudança do bloqueio (o "Atenção" abaixo)
 - Feito em 23/10/2026 no painel do Supabase: "Site URL" `http://localhost:3000` e "Redirect URLs" `http://localhost:3000/**`. **Não deu para trocar o modelo do e-mail**: o plano gratuito do Supabase só deixa editar os modelos com SMTP próprio. Até a Etapa 13, o e-mail de recuperação usa o modelo padrão (em inglês, link com `code`), que a rota `/auth/confirmar` já aceita, mas que só funciona no mesmo navegador em que a senha nova foi pedida. Testar à mão: pedir uma senha nova em `/recuperar-senha` com o próprio e-mail e abrir o link **no mesmo navegador**
-- Enviar a Etapa 3: `git push -u origin etapa-3-login` e abrir o Pull Request para a `main`. Depois que ele for aceito, criar a branch `etapa-4-imovel` a partir da `main` atualizada
-- **Antes da Etapa 4**: decidir com o Gabriel o texto do termo de exclusividade (prompt "Antes da Etapa 1: decisões em aberto" do `docs/prompts.md`) e as outras pendências da Etapa 4 abaixo. Depois, o passo 4.1 numa sessão nova (`/clear` e modo de planejamento)
+- Criar a branch `etapa-4-imovel` a partir da `main` atualizada (depois que o Pull Request da branch `docs-readme-e-termos` for aceito)
+- **Antes da Etapa 4**: decidir com o Gabriel as pendências da Etapa 4 abaixo (editar imóvel pendente ou em negociação, listas de tipos e bairros, limite das fotos). O texto do termo não trava mais: a etapa usa um provisório. Depois, o passo 4.1 numa sessão nova (`/clear` e modo de planejamento)
 
 Antes da Etapa 1 (fazer à mão, cada pessoa pelo próprio painel):
 - [ ] Avisar o Gabriel do replanejamento e da troca do nome para PAUTA, e combinar o arquivamento
@@ -133,7 +137,7 @@ Pendências e decisões em aberto (cada uma precisa estar resolvida antes da eta
   - (auditoria da Etapa 2) **(banco)** `termo_versao` aceita qualquer texto (conferir contra uma tabela de versões do termo); tipo e bairro com `ativo = false` continuam aceitos no imóvel; `revisado_por` e `revisado_em` são livres para o admin (preencher por gatilho com `auth.uid()` e `now()`); a versão e o registro de edições usam listas de campos diferentes, que podem divergir (`20261022221614_imoveis.sql:218-224` e `:253-255`)
   - (auditoria da Etapa 2) O proprietário não liga nem desliga `mostrar_contato` num imóvel pendente (o RF13 em "Meus imóveis"): decidir junto com "editar imóvel pendente", abaixo
   - (auditoria da Etapa 2) Testes que faltam: apagar imóvel reprovado com fotos; não apagar vendido nem expirado; editar reprovado deixa o status `reprovado`; proprietário não envia `termo_aceito_em`, `captado_pelo_admin` nem `status` no insert e não muda `termo_versao` depois; assinante bloqueado não vê fotos; assinante não grava em `tipos_imovel` nem em `bairros` e não lê `edicoes_imovel`. As regras do banco usam todas o código `P0001`: nos testes novos, conferir também a mensagem
-  - Texto do termo de exclusividade que o proprietário aceita no cadastro
+  - Termo de exclusividade provisório (decidido em 26/10/2026): o plano do 4.1 define onde o texto fica e como a versão provisória é marcada, de um jeito que a versão final entre depois sem mudar o fluxo (ligar com a pendência do `termo_versao` acima)
   - O proprietário pode editar imóvel pendente de aprovação? Se puder, a edição é registrada?
   - O proprietário pode editar imóvel em negociação (ex.: mudar o preço com propostas aceitas)? Vale a mesma regra de "edição de imóvel disponível"?
   - Conteúdo das listas de tipos de imóvel (hoje: casa, apartamento, cobertura, terreno, sala comercial) e de bairros de Florianópolis (hoje só 6 no protótipo). Que são listas fixas no banco já foi decidido em 22/10/2026
@@ -180,6 +184,7 @@ Pendências e decisões em aberto (cada uma precisa estar resolvida antes da eta
   - (auditoria da Etapa 3) No roteiro completo (13.5), rodar também no computador os testes "cada tipo entra e cai na tela certa" e "link de recuperação cria a senha nova" (hoje só no celular, pelo limite de logins): a tela SiteEntrar não tem login testado
   - (auditoria da Etapa 3) Com a confirmação de e-mail religada, o link de confirmação do cadastro também abre uma sessão `otp`, que troca a senha sem a atual por 15 minutos (`veioDeLinkDeRecuperacao()`). É aceitável (a pessoa acabou de provar que é dona do e-mail), mas conferir junto com o modelo de e-mail
   - Religar a confirmação de e-mail no Supabase (Authentication → Sign In / Providers → Email → "Confirm email"): desligada em 22/10/2026 (passo 3.2a) porque o SMTP padrão só entrega para a equipe do projeto. Com ela ligada, o cadastro passa a mostrar "confira seu e-mail" em vez de entrar logado
+  - Texto final do termo de exclusividade, que substitui o provisório da Etapa 4 como versão nova. Conferir que nenhum imóvel real ficou com o aceite da versão provisória
   - Termo de assinatura do corretor e da imobiliária, com a cláusula contra desintermediação e a responsabilidade da imobiliária pelos corretores convidados (o protótipo pede o aceite já no cadastro)
   - Tirar do app as páginas de teste da Etapa 1: `src/app/teste-conexao/` e `src/app/amostra/` (desde a auditoria da Etapa 1 elas já respondem 404 em produção, mas o código continua no app)
   - PWA no iPhone: colocar `viewportFit: "cover"` no `viewport` do `src/app/layout.tsx`. O menu de baixo já reserva o espaço da barra do iPhone (`env(safe-area-inset-bottom)`), mas isso só vale com essa opção ligada; ligar junto com o resto do PWA para conferir também o topo da tela
@@ -258,3 +263,4 @@ PAUTA (antes, Domora):
 - 21/10/2026 · Hevelyn · Etapa 1 concluída: app Next.js 16 conectado ao Supabase do PAUTA, migrations com `supabase db push`, comandos `/auditar-etapa` e `/atualizar-roadmap`, Playwright (4 testes) e visual do protótipo no Tailwind. Auditoria sem itens críticos; achados corrigidos ou levados para "Pendências"
 - 22/10/2026 · Hevelyn · Etapa 2 concluída: banco do MVP para contas e imóveis (perfis, assinantes, convites, listas, imóveis, fotos e registro de edições), com RLS, permissões por coluna e `contato_do_proprietario()`. 4 migrations e `testar_rls.sql` com 107 testes passando. Auditoria sem itens críticos; o bloqueio do admin foi separado do status do pagamento e o teste de aprovação foi corrigido; o resto foi para "Pendências"
 - 23/10/2026 · Hevelyn · Etapa 3 concluída: cadastro de proprietário, imobiliária e autônomo, login, saída, recuperação de senha, `exigirTipo()`, áreas separadas com menus e Minha conta. 2 migrations, `testar_rls.sql` com 120 testes e e2e com 67 passando. Auditoria sem itens críticos; corrigidos o redirecionamento para fora do site em `/auth/confirmar`, o "Sair" do admin no celular, o prazo da sessão do link de senha e o redirecionamento de quem já está logado; o resto foi para "Pendências"
+- 26/10/2026 · Hevelyn · README da Etapa 3 levado para a `main`. Decidido que os textos dos termos ficam para depois: a Etapa 4 usa um termo de exclusividade provisório e o texto final entra antes do piloto

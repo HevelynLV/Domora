@@ -1,6 +1,6 @@
 # PAUTA — Roadmap de prompts
 
-Última revisão: 20/10/2026
+Última revisão: 26/10/2026
 
 Os prompts para construir o MVP do PAUTA com o Claude Code, da Etapa 0 à Etapa 13. Siga na ordem, de cima para baixo: cada etapa usa as anteriores, e dentro de cada etapa os prompts já estão na sequência certa, do primeiro (abrir a etapa) ao último (fechar e enviar). As etapas e os critérios de "pronto" são os do [ROADMAP.md](../ROADMAP.md); as regras do produto são as da [docs/visao-geral.md](visao-geral.md).
 
@@ -32,13 +32,13 @@ Me dê 2 ou 3 opções, com o impacto de cada uma no código, no custo e no pilo
 | Decisão | Trava a etapa |
 | --- | --- |
 | ~~Como aplicar as migrations~~: decidido em 20/10/2026, `supabase db push` | 1 |
-| Texto do termo de exclusividade | 4 |
+| Texto do termo de exclusividade: a Etapa 4 usa um texto provisório (decidido em 26/10/2026); o final entra antes do piloto | 13 |
 | Filtros do catálogo | 6 |
 | % da comissão do PAUTA | 9 |
 | Provedor do WhatsApp e custo por mensagem | 10 |
 | Preço da mensalidade | 11 |
 | Antecedência do aviso e prazo da renovação | 12 |
-| Termo de assinatura das imobiliárias e corretores | 13 |
+| Termo de assinatura das imobiliárias e corretores (o aceite entra no 13.4) | 13 |
 
 ---
 
@@ -278,7 +278,7 @@ Depois confira o "Pronto quando" da Etapa 3, item por item. Se estiver tudo cert
 
 **Pronto quando:** imóvel do proprietário, com fotos e termo aceito, aparece como pendente; imóvel captado pelo admin entra disponível e vinculado ao dono.
 **Telas do protótipo:** ProImoveis, ProNovo, ProFotos, ProTermo, ProEnviado, AdmPainel, AdmAprovar, AdmCaptar e AdmEdicoes, e as versões Site de cada uma.
-**Decidir antes:** texto do termo de exclusividade.
+**Decidir antes:** nada do termo: a etapa usa um texto provisório do termo de exclusividade, com versão marcada como provisória (decidido em 26/10/2026). Veja as outras pendências da Etapa 4 no ROADMAP.md.
 
 **4.1 Abrir a etapa** *(`/clear` + modo de planejamento)*
 
@@ -291,7 +291,7 @@ Me entregue o plano em passos pequenos, as mudanças no banco, os riscos e as su
 **4.2 Cadastro do imóvel**
 
 ```text
-Faça o cadastro do imóvel pelo proprietário (RF07): título, descrição, tipo, endereço, bairro, preço, quartos, banheiros, vagas, área e o aceite do termo de exclusividade (texto em <onde está o texto>). Guarde quando e qual versão do termo foi aceita. O imóvel nasce pendente.
+Faça o cadastro do imóvel pelo proprietário (RF07): título, descrição, tipo, endereço, bairro, preço, quartos, banheiros, vagas, área e o aceite do termo de exclusividade (por enquanto, o texto provisório combinado no 4.1; o final entra antes do piloto). Guarde quando e qual versão do termo foi aceita. O imóvel nasce pendente.
 Valide tudo também no servidor, não só no formulário. No fim, teste Playwright e npm run test:e2e.
 ```
 

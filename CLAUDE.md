@@ -43,7 +43,7 @@ Estas decisões ainda não foram tomadas. Se uma tarefa depender delas, PERGUNTE
 - Com quanto tempo de antecedência sai o aviso de vencimento da exclusividade, e se a renovação é por mais 6 meses
 - Provedor da API oficial do WhatsApp e custo por mensagem
 - Quais filtros o catálogo terá
-- Texto do termo de exclusividade e do termo de assinatura das imobiliárias
+- Texto do termo de exclusividade e do termo de assinatura das imobiliárias (não trava a Etapa 4: ver "Decisões tomadas")
 
 ## Decisões tomadas
 
@@ -66,6 +66,7 @@ Estas decisões ainda não foram tomadas. Se uma tarefa depender delas, PERGUNTE
 - Migrations aplicadas com a Supabase CLI: criar com `npx supabase migration new <nome>` e aplicar com `npx supabase db push`, sempre depois de `git pull`. Nunca rodar `npx supabase config push` (o `supabase/config.toml` é só para uso local) nem `npx supabase db reset --linked`. A senha do banco é digitada pela pessoa no terminal, nunca escrita em arquivo nem colada no chat. Decidido em 20/10/2026
 - Cache Components do Next.js 16 fica ligado (`cacheComponents` e `partialPrefetching` em `next.config.ts`, como o Next 16.4 cria). Nada é cacheado sem `"use cache"`; tudo o que lê a sessão (cookies) fica dentro de um `<Suspense>`, e a sessão nunca é lida no topo de um layout. Todo arquivo que lê a sessão começa com `import "server-only"` (ou importa um arquivo que tem, como `src/lib/supabase/server.ts`), para o build falhar se ele for parar no navegador. Decidido em 20/10/2026, porque o Next vai tornar isso obrigatório na próxima versão grande
 - Login sempre conectado até a pessoa sair, sem "manter conectado". O cadastro pede só o número do CRECI (UF sempre SC) e a comparação de CRECI repetido ignora pontos, traços e espaços. O link de recuperação de senha usa `token_hash` e funciona em qualquer navegador. O aceite do termo de assinatura no cadastro só entra no passo 13.4. Decidido em 22/10/2026 (plano da Etapa 3)
+- Os textos dos termos ficam para depois: a Etapa 4 usa um termo de exclusividade provisório, com versão marcada como provisória e guardada no aceite. O texto final entra como versão nova antes do piloto (Etapa 13); aceite da versão provisória é só de teste. Decidido em 26/10/2026
 - Fotos e PDFs não passam por Server Action (o limite padrão é 1 MB): o navegador envia direto para o Supabase Storage, com permissão dada pelo servidor (Etapas 4 e 9)
 
 ## Fora do escopo do MVP
