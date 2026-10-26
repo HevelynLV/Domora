@@ -3,7 +3,7 @@
 ## Onde paramos
 
 Última atualização: 26/10/2026 · por Hevelyn
-Etapa atual: 4. Imóvel, na branch `etapa-4-imovel`. Passos 4.1 a 4.4 feitos; próximo: 4.5 (aprovar e reprovar)
+Etapa atual: 4. Imóvel, na branch `etapa-4-imovel`. Passos 4.1 a 4.5 feitos; próximo: 4.6 (editar e reenviar)
 
 Etapa 4:
 - 4.1 feito (26/10/2026): plano aprovado. Decisões registradas na Visão geral ("Decisões tomadas em 26/10/2026 (plano da Etapa 4)") e no CLAUDE.md: status `rascunho` para o cadastro seguir a ordem do protótipo (dados, fotos, termo); dono edita imóvel pendente sem registro; página mínima do imóvel do proprietário com a escolha do contato; listas de tipos e bairros (lista oficial de Florianópolis, conferir a fonte); fotos JPG/PNG/WebP até 10 MB, de 1 a 20; termo numa tabela de versões (`2026-10-provisorio`). Migrations previstas: `imoveis_etapa_4` (4.2: termos, rascunho, edição de pendente, listas e os itens da auditoria da Etapa 2), `fotos_storage` (4.3: bucket privado `fotos-imoveis`) e `captacao` (4.7: `captar_imovel`, `aceitar_termo_captado`, `buscar_proprietarios`). Os testes que faltam da auditoria da Etapa 2 entram no 4.2
@@ -25,7 +25,16 @@ Etapa 4:
   - Actions `apagarImovel` e `mudarContato` (`src/app/proprietario/imoveis/acoes.ts`), com `exigirTipo()`. Componentes novos: `Interruptor` (também no passo do termo) e `BotaoApagarImovel`
   - `e2e/imovel-lista.spec.ts`: lista com os 5 status e sem o imóvel de outra pessoa, "Apagar" só onde pode, apagar pendente com 2 fotos (os 4 arquivos saem do bucket), imóvel aprovado não apagado nem trocando o id na requisição gravada da action, outra proprietária não apaga, e o contato ligado na página do imóvel (gravado e registrado como edição). Telas conferidas por foto no celular e no computador
   - Bateria completa (`npm run test:e2e`): 90 passando, 3 pulados de propósito e 1 falhando por queda de conexão do teste com o Supabase (`fetch failed` no `linkDeRecuperacao`, teste da Etapa 3); rodado de novo, passou. Nada ficou no banco nem no bucket. Lint e build passam
-- Próximo: 4.5 (aprovar e reprovar, pelo admin)
+- 4.5 feito (26/10/2026), sem migration (o banco já tinha `aprovar_imovel` e `reprovar_imovel` desde a Etapa 2):
+  - Como a aprovação percebe que o imóvel mudou (RF14): `imoveis.versao` sobe a cada mudança de conteúdo, pelos gatilhos (cada campo e cada foto acrescentada, tirada ou trocada de lugar). A tela guarda a versão que mostrou e manda junto com o "Aprovar"; `aprovar_imovel` só aprova `where status = 'pendente' and versao = <a que o admin viu>`, num comando só. Se o dono mudou algo no meio, nada é aprovado, a tela avisa e recarrega com os dados novos
+  - `/admin/imoveis` (AdmAprovar no celular, um imóvel por vez com "1 de N na fila"; SiteAdmAprovar no computador, fila à esquerda e o imóvel escolhido por `?id=`): galeria (cada foto abre a versão grande, para conferir a qualidade), dados, descrição, dono com telefone e e-mail (`contato_do_proprietario()`), data e versão do termo aceito e se o contato está visível. Reprovar abre a folha do motivo (de 5 a 1.000 letras); a resposta "Imóvel aprovado" mostra até quando vai a exclusividade. A aba "Imóveis" do admin abre sem o menu de baixo, como no protótipo
+  - `/admin` (AdmPainel): os números "Imóveis para aprovar" e "Edições para revisar" (a tela das edições entra no 4.6). Os outros cartões do protótipo chegam com as etapas deles
+  - Actions `aprovarImovel` e `reprovarImovel` (`src/app/admin/imoveis/acoes.ts`) com `exigirTipo("admin")`; leituras do admin em `src/lib/imoveisAdmin.ts`
+  - `e2e/imovel-aprovar.spec.ts`: aprovar (disponível, 6 meses de exclusividade, sai da fila), aprovação barrada depois de a dona mudar o preço com a tela aberta (e aprovada depois de recarregar), reprovar sem motivo barrado e com motivo visto pela dona, dona sem acesso à tela e sem efeito ao reenviar a requisição gravada do "Aprovar", e o número do painel. Telas conferidas por foto
+  - O teste "cada tipo entra e cai na tela certa" (`login.spec.ts`) procurava "Olá, Admin Login" no painel provisório; o painel novo segue o AdmPainel ("Equipe PAUTA"), e o teste agora procura "Imóveis para aprovar"
+  - Bateria completa: 78 passando, 3 pulados e 2 falhando: o `areas.spec.ts` não começou por queda de conexão com o Supabase (`fetch failed`), e o caso do admin no `login.spec.ts` (corrigido acima). Rodados de novo: `login.spec.ts` 12 passando e 2 pulados; `areas.spec.ts` passando. Nada ficou no banco nem no bucket. Lint e build passam
+  - Atenção: as quedas de conexão (`fetch failed`) dos testes com o Supabase estão aparecendo em quase toda bateria completa (cerca de 10 minutos). Sempre em chamadas dos ajudantes do teste (`e2e/apoio`), nunca do app. Se continuar, vale fazer os ajudantes tentarem de novo uma vez
+- Próximo: 4.6 (editar e reenviar, e a revisão das edições pelo admin)
 
 26/10/2026:
 - O commit do README da Etapa 3, que ficou de fora do Pull Request #3, foi levado para a `main` pela branch `docs-readme-e-termos`

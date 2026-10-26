@@ -129,6 +129,13 @@ export function formatarData(iso: string) {
   return new Date(iso).toLocaleDateString("pt-BR", { timeZone: "America/Sao_Paulo" });
 }
 
+// "12/10/2026 às 18:40", no horário de Florianópolis.
+export function formatarDataHora(iso: string) {
+  const data = new Date(iso);
+  const hora = data.toLocaleTimeString("pt-BR", { timeZone: "America/Sao_Paulo", hour: "2-digit", minute: "2-digit" });
+  return `${formatarData(iso)} às ${hora}`;
+}
+
 // Para voltar ao formulário: 1890000 vira "1.890.000"; 75.5 vira "75,5".
 export function numeroParaCampo(valor: number) {
   return valor.toLocaleString("pt-BR", { maximumFractionDigits: 2 });

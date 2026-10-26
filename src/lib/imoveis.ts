@@ -127,11 +127,11 @@ export async function imoveisDoDono(donoId: string): Promise<ImovelNaLista[]> {
 // novos, e um link copiado para fora para de funcionar depois disso.
 const VALIDADE_DO_LINK_EM_SEGUNDOS = 60 * 60;
 
-export type FotoDoImovel = { id: string; ordem: number; caminho: string; miniatura: string | null };
+export type FotoDoImovel = { id: string; ordem: number; caminho: string; miniatura: string | null; grande?: string | null };
 
 // Fotos do imóvel na ordem (a primeira é a capa), com links temporários das
-// miniaturas. O RLS decide se quem pergunta vê as fotos.
-export async function fotosDoImovel(imovelId: string): Promise<FotoDoImovel[]> {
+// miniaturas (e das fotos grandes, se pedir). O RLS decide se quem pergunta vê as fotos.
+export async function fotosDoImovel(imovelId: string, { grandes = false } = {}): Promise<FotoDoImovel[]> {
   if (!idDeImovelValido(imovelId)) return [];
   const supabase = await criarClienteServidor();
   const { data, error } = await supabase
@@ -142,11 +142,17 @@ export async function fotosDoImovel(imovelId: string): Promise<FotoDoImovel[]> {
   if (error) throw error;
   if (data.length === 0) return [];
 
+  const caminhos = data.map((foto) => caminhoDaMiniatura(foto.caminho));
+  if (grandes) caminhos.push(...data.map((foto) => foto.caminho));
   const { data: links } = await supabase.storage
     .from(BUCKET_FOTOS)
-    .createSignedUrls(data.map((foto) => caminhoDaMiniatura(foto.caminho)), VALIDADE_DO_LINK_EM_SEGUNDOS);
+    .createSignedUrls(caminhos, VALIDADE_DO_LINK_EM_SEGUNDOS);
   // Sem link (arquivo que não existe mais), a tela mostra o quadro vazio.
-  return data.map((foto, i) => ({ ...foto, miniatura: links?.[i]?.signedUrl ?? null }));
+  return data.map((foto, i) => ({
+    ...foto,
+    miniatura: links?.[i]?.signedUrl ?? null,
+    ...(grandes && { grande: links?.[data.length + i]?.signedUrl ?? null }),
+  }));
 }
 
 // Link temporário da miniatura da capa (a foto 1), ou null sem fotos.

@@ -44,7 +44,7 @@ export const menuAdmin: MenusDaArea = {
   rotulo: "Menu do admin",
   celular: [
     { href: "/admin", rotulo: "Painel", icone: "painel" },
-    { href: "/admin/imoveis", rotulo: "Imóveis", icone: "imoveis" }, // Etapa 4
+    { href: "/admin/imoveis", rotulo: "Imóveis", icone: "imoveis", semMenuInferior: true },
     { href: "/admin/assinantes", rotulo: "Assinantes", icone: "assinantes" }, // Etapa 5
     { href: "/admin/contratos", rotulo: "Contratos", icone: "contratos" }, // Etapa 9
   ],
