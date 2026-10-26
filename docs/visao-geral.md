@@ -154,7 +154,7 @@ O projeto recomeça do zero num repositório `PAUTA` e num projeto Supabase novo
 - O cadastro do imóvel segue a ordem do protótipo (dados, fotos, termo). Para isso existe o status `rascunho`: o passo 1 cria o imóvel em rascunho, o passo 2 envia as fotos e o aceite do termo no passo 3 o passa para pendente. O rascunho só o dono vê, edita e apaga; ele não entra na fila do admin.
 - O proprietário edita o imóvel pendente de aprovação (dados, fotos e a escolha de mostrar o contato). Essa edição não vai para o registro de edições, porque o imóvel ainda não está no catálogo; a versão do imóvel sobe, e a aprovação feita numa tela aberta antes da edição falha.
 - A escolha de mostrar o contato fica numa página do imóvel do proprietário, criada já na Etapa 4 sem as abas de visitas e propostas (que entram nas Etapas 7 e 8).
-- Tipos de imóvel: casa, apartamento, cobertura, terreno e sala comercial. Bairros: a lista oficial de Florianópolis (a fonte é conferida antes da migration).
+- Tipos de imóvel: casa, apartamento, cobertura, terreno e sala comercial. Bairros: os 56 bairros oficiais de Florianópolis do Decreto municipal nº 29.142 (abril de 2026), tirados da lista por região publicada sobre o decreto; falta conferir contra o texto do próprio decreto (ver Pendências da Etapa 4 no ROADMAP).
 - Fotos do imóvel: JPG, PNG ou WebP, até 10 MB cada, reduzidas no navegador antes do envio; no mínimo 1 para enviar para aprovação e no máximo 20 por imóvel.
 - O termo de exclusividade fica numa tabela de versões no banco; o imóvel guarda qual versão foi aceita, e só a versão vigente pode ser aceita. O texto final (Etapa 13) entra como uma versão nova.
 

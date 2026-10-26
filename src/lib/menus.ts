@@ -10,7 +10,7 @@ export const menuProprietario: MenusDaArea = {
   rotulo: "Menu do proprietário",
   celular: [
     { href: "/proprietario", rotulo: "Imóveis", icone: "imoveis" },
-    { href: "/proprietario/imoveis/novo", rotulo: "Novo imóvel", icone: "novo" }, // Etapa 4
+    { href: "/proprietario/imoveis/novo", rotulo: "Novo imóvel", icone: "novo", semMenuInferior: true },
     { href: "/proprietario/avisos", rotulo: "Avisos", icone: "avisos" }, // Etapa 10
     { href: "/proprietario/conta", rotulo: "Conta", icone: "conta" }, // passo 3.5
   ],

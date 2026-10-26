@@ -3,11 +3,16 @@
 ## Onde paramos
 
 Última atualização: 26/10/2026 · por Hevelyn
-Etapa atual: 4. Imóvel, na branch `etapa-4-imovel`. Passo 4.1 feito; próximo: 4.2
+Etapa atual: 4. Imóvel, na branch `etapa-4-imovel`. Passos 4.1 e 4.2 feitos; próximo: 4.3 (fotos)
 
 Etapa 4:
 - 4.1 feito (26/10/2026): plano aprovado. Decisões registradas na Visão geral ("Decisões tomadas em 26/10/2026 (plano da Etapa 4)") e no CLAUDE.md: status `rascunho` para o cadastro seguir a ordem do protótipo (dados, fotos, termo); dono edita imóvel pendente sem registro; página mínima do imóvel do proprietário com a escolha do contato; listas de tipos e bairros (lista oficial de Florianópolis, conferir a fonte); fotos JPG/PNG/WebP até 10 MB, de 1 a 20; termo numa tabela de versões (`2026-10-provisorio`). Migrations previstas: `imoveis_etapa_4` (4.2: termos, rascunho, edição de pendente, listas e os itens da auditoria da Etapa 2), `fotos_storage` (4.3: bucket privado `fotos-imoveis`) e `captacao` (4.7: `captar_imovel`, `aceitar_termo_captado`, `buscar_proprietarios`). Os testes que faltam da auditoria da Etapa 2 entram no 4.2
-- Próximo: 4.2 (cadastro do imóvel), começando pela migration `imoveis_etapa_4`
+- 4.2 feito (26/10/2026):
+  - Migrations `20261026200718_imoveis_rascunho` e `20261026200726_imoveis_etapa_4` aplicadas (ver "Atenção"). Antes de aplicar, a migration e o `testar_rls.sql` rodaram juntos numa transação desfeita, para achar erros sem mexer no banco. `testar_rls.sql`: 146 de 146 (26 testes novos, inclusive os que faltavam da auditoria da Etapa 2, conferindo código e mensagem)
+  - Telas: `/proprietario/imoveis/novo` (passo 1, cria o rascunho), `[id]/dados` (corrige o rascunho), `[id]/fotos` (passo 2, provisório até o 4.3: só mostra quantas fotos há), `[id]/termo` (passo 3: resumo, texto do termo vigente com o selo "Versão provisória", interruptor do contato e aceite) e `[id]/enviado` (ProEnviado). No computador, a moldura do SiteProNovo (caminho, os 3 passos e a prévia do card). Actions `salvarDadosDoImovel` e `enviarParaAprovacao` (`src/app/proprietario/imoveis/acoes.ts`), com `exigirTipo()`, validação no servidor (`src/lib/imovel.ts`: preço e área no formato brasileiro, "1.890.000" e "220,5") e erros do banco pelo código
+  - Novos: `CampoSelecao` e `CampoTextoLongo` (em `Campo.tsx`), `src/lib/imoveis.ts` (leituras com `server-only`), `MolduraDoCadastro`, e `src/app/not-found.tsx` em português (o imóvel de outra pessoa mostra "Página não encontrada"; o status fica 200 porque a página já está em streaming, como diz o guia do Next)
+  - `e2e/imovel-cadastro.spec.ts`: caminho certo até pendente (versão e data do aceite e contato gravados), dados errados, rascunho sem foto, e outra proprietária sem acesso às telas e sem efeito ao reenviar as requisições gravadas das duas actions. A foto entra direto no banco até o 4.3. `apagarContas` agora apaga os imóveis da conta antes. `npm run test:e2e`: 75 passando e 3 pulados de propósito; lint e build passam
+- Próximo: 4.3 (fotos: bucket privado, envio direto ao Storage, ordem)
 
 26/10/2026:
 - O commit do README da Etapa 3, que ficou de fora do Pull Request #3, foi levado para a `main` pela branch `docs-readme-e-termos`
@@ -136,10 +141,9 @@ Pendências e decisões em aberto (cada uma precisa estar resolvida antes da eta
 
 - Etapa 4:
   - (auditoria da Etapa 2) Os gatilhos confiam em `current_user = 'authenticated'` ou em `auth.uid()`: quem usar a chave secreta (`admin.ts`, criado no 4.7 ou no 5.2) pula a regra de status do assinante, a data do aceite do termo e o registro de edições. Escrever isso no `admin.ts` e nunca usá-lo para editar imóvel ou status
-  - (auditoria da Etapa 2) **(banco)** `fotos_imovel.caminho` aceita qualquer texto, inclusive o arquivo de outro imóvel: exigir que comece com o id do imóvel (`check (caminho like imovel_id::text || '/%')`), alinhado com as políticas do bucket
   - (auditoria da Etapa 2) Captação (4.7): o gatilho de cadastro exige tipo, nome e telefone no momento em que a conta é criada; o `admin.createUser` do dono precisa mandar esses dados no metadata
-  - (auditoria da Etapa 2) **(banco)** `termo_versao` aceita qualquer texto (conferir contra uma tabela de versões do termo); tipo e bairro com `ativo = false` continuam aceitos no imóvel; `revisado_por` e `revisado_em` são livres para o admin (preencher por gatilho com `auth.uid()` e `now()`); a versão e o registro de edições usam listas de campos diferentes, que podem divergir (`20261022221614_imoveis.sql:218-224` e `:253-255`)
-  - (auditoria da Etapa 2) Testes que faltam: apagar imóvel reprovado com fotos; não apagar vendido nem expirado; editar reprovado deixa o status `reprovado`; proprietário não envia `termo_aceito_em`, `captado_pelo_admin` nem `status` no insert e não muda `termo_versao` depois; assinante bloqueado não vê fotos; assinante não grava em `tipos_imovel` nem em `bairros` e não lê `edicoes_imovel`. As regras do banco usam todas o código `P0001`: nos testes novos, conferir também a mensagem
+  - Bairros (4.2): os 56 da migration `imoveis_etapa_4` vêm da lista por região publicada sobre o Decreto municipal nº 29.142 (abril de 2026), não do texto do decreto. Conferir contra o decreto; correção é migration nova (ou o admin desativa e acrescenta). No protótipo aparece "Jurerê Internacional"; na lista, "Jurerê"
+  - Next.js 16.4.2 (só no `npm run dev`): enviar o formulário do cadastro sem JavaScript (antes de a página carregar) dá `InvariantError: Received an underlying cookies object that does not match either cookies or mutableCookies`, que o próprio Next chama de bug dele. Com JavaScript (o normal), funciona. Conferir de novo com o `npm run build` + `npm start` e, se continuar, abrir um aviso no Next
   - O proprietário pode editar imóvel em negociação (ex.: mudar o preço com propostas aceitas)? Vale a mesma regra de "edição de imóvel disponível"? Na Etapa 4 ainda não há propostas: a sugestão do plano é manter a regra do disponível e rever na Etapa 8
   - Captação (4.7): e se o dono do imóvel captado nunca aceitar o termo? Sugestão do plano: o admin vê "termo não aceito" no painel e decide
   - Rascunhos de imóvel abandonados: apagar sozinhos depois de alguns dias? Sugestão do plano: deixar para a Etapa 13
@@ -212,6 +216,8 @@ Atenção (algo que a próxima pessoa precisa saber):
 - Os documentos saíram de `PAUTA-docs/` e agora ficam na raiz (`README.md`, `ROADMAP.md`, `CLAUDE.md`) e em `docs/`. O protótipo está em `docs/prototipo/`
 - O app Next.js existe a partir da branch `etapa-1-setup`: depois de baixar, rode `npm install` (se já tinha rodado antes, rode de novo: entrou o pacote `@next/env`)
 - Migrations agora são aplicadas com `npx supabase db push`: antes da Etapa 2, cada pessoa faz a preparação do README (passo 5: `supabase login` e `supabase link`). Nunca rode `npx supabase config push`
+- **Migrations novas da Etapa 4** (`20261026200718_imoveis_rascunho` e `20261026200726_imoveis_etapa_4`): já aplicadas no Supabase compartilhado. Depois do `git pull`, confira com `npx supabase migration list`. Mudou: o imóvel do proprietário nasce `rascunho` e vai para `pendente` só por `enviar_imovel(id, versao_do_termo)`; o app não manda mais `termo_versao` no insert; o termo fica na tabela `termos_exclusividade` (versão vigente `2026-10-provisorio`); as listas de tipos (5) e bairros (56) já estão no banco. O `testar_rls.sql` agora usa a versão provisória no lugar de `termo-teste`
+- Mudou no 4.2: o menu de baixo do celular só aparece nas telas das abas (como no protótipo); telas de dentro, com botão de voltar, ficam sem ele. Item de menu que abre um passo a passo usa `semMenuInferior` (`src/lib/menus.ts`)
 - **Migrations novas da Etapa 3** (`20261022231442_cadastro_etapa_3` e `20261022232122_limpar_metadata_do_cadastro`): já aplicadas no Supabase compartilhado. Depois do `git pull`, confira com `npx supabase migration list` (Local e Remote iguais). O CRECI repetido agora é conferido pelo `creci_normalizado`
 - **A confirmação de e-mail foi desligada** no painel do Supabase em 22/10/2026, até a Etapa 13: o cadastro entra logado direto
 - **E-mail de recuperação de senha** (passo 3.4): o modelo do PAUTA fica em `supabase/modelos-email/recuperar-senha.html`, mas só pode ser colado no painel com SMTP próprio (Etapa 13). Até lá vale o modelo padrão do Supabase: o link só funciona no mesmo navegador em que a senha nova foi pedida, e o SMTP padrão só entrega e-mail para quem é da equipe do projeto
@@ -232,6 +238,8 @@ Toda migration nova entra aqui assim que for aplicada e o `testar_rls.sql` passa
 - `20261022224630_bloqueio_separado_do_pagamento` · 22/10/2026 · Hevelyn · correção da auditoria (item 1): bloqueio do admin numa coluna própria (`bloqueado_pelo_admin`), status só `pendente`/`ativo`/`vencido`, e o acesso exige ativo e não bloqueado. `testar_rls.sql`: 107 de 107 passando
 - `20261022231442_cadastro_etapa_3` · 22/10/2026 · Hevelyn · CRECI normalizado (`normalizar_creci()`, `creci_normalizado` com `unique`), `creci_disponivel()` e `convite_valido()` sem login, e limpeza do metadata no gatilho de cadastro. `testar_rls.sql`: 119 de 119 passando
 - `20261022232122_limpar_metadata_do_cadastro` · 22/10/2026 · Hevelyn · correção: gatilho `before update` em `auth.users` que tira os dados copiados do metadata, porque o Supabase Auth regravava o metadata depois do cadastro. `testar_rls.sql`: 120 de 120 passando
+- `20261026200718_imoveis_rascunho` · 26/10/2026 · Hevelyn · status `rascunho` no enum do imóvel (sozinho, porque o Postgres não usa um valor novo de enum na mesma transação)
+- `20261026200726_imoveis_etapa_4` · 26/10/2026 · Hevelyn · termo em versões (`termos_exclusividade`), rascunho e `enviar_imovel()`, dono edita pendente, fotos (caminho na pasta do imóvel, até 20), tipo e bairro fora de uso recusados, revisão preenchida pelo banco, lista única de campos de conteúdo, 5 tipos e 56 bairros. `testar_rls.sql`: 146 de 146 passando
 
 ## Etapas do MVP
 

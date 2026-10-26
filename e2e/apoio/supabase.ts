@@ -87,12 +87,16 @@ export async function cookiesDeSessao(email: string, senha = SENHA_TESTE) {
 }
 
 // Apaga as contas de teste cujo e-mail começa com o prefixo. Assinante só pode
-// ser excluído pendente (RF16): antes, volta o status para pendente.
+// ser excluído pendente (RF16): antes, volta o status para pendente. Os imóveis
+// da conta vão antes (imoveis.proprietario_id não apaga em cascata); as fotos
+// saem junto com o imóvel.
 export async function apagarContas(prefixo: string) {
   const admin = clienteAdmin();
   const { data, error } = await admin.auth.admin.listUsers({ perPage: 1000 });
   if (error) throw error;
   for (const conta of data.users.filter((u) => u.email?.startsWith(prefixo))) {
+    const { error: erroImoveis } = await admin.from("imoveis").delete().eq("proprietario_id", conta.id);
+    if (erroImoveis) throw new Error(`apagarContas(${conta.email}), imóveis: ${erroImoveis.message}`);
     await admin
       .from("assinantes")
       .update({ status: "pendente", bloqueado_pelo_admin: false })
