@@ -55,7 +55,7 @@ Estas decisões ainda não foram tomadas. Se uma tarefa depender delas, PERGUNTE
 - O admin pode reprovar imóvel. O proprietário edita o imóvel reprovado e o reenvia por um passo explícito; editar não reenvia sozinho
 - Edição de imóvel disponível vale na hora, sem nova aprovação. Cada campo alterado, inclusive fotos, fica registrado para o admin revisar. Edição feita pelo admin não é registrada
 - A aprovação de imóvel falha se o imóvel mudou depois que o admin abriu a tela
-- O proprietário só apaga imóvel pendente de aprovação ou reprovado
+- O proprietário só apaga imóvel em rascunho, pendente de aprovação ou reprovado
 - A exclusividade de 6 meses conta da aprovação do admin; imóvel captado conta do cadastro. Decidido em 22/10/2026
 - Mostrar o contato aos corretores é uma escolha por imóvel, não da conta. O contato é o telefone e o e-mail da conta, e só chega ao corretor pela função `contato_do_proprietario()`, nunca por uma coluna do imóvel. Decidido em 22/10/2026
 - Tipos de imóvel e bairros de Florianópolis são listas fixas no banco, que só o admin altera. Decidido em 22/10/2026
@@ -67,6 +67,7 @@ Estas decisões ainda não foram tomadas. Se uma tarefa depender delas, PERGUNTE
 - Cache Components do Next.js 16 fica ligado (`cacheComponents` e `partialPrefetching` em `next.config.ts`, como o Next 16.4 cria). Nada é cacheado sem `"use cache"`; tudo o que lê a sessão (cookies) fica dentro de um `<Suspense>`, e a sessão nunca é lida no topo de um layout. Todo arquivo que lê a sessão começa com `import "server-only"` (ou importa um arquivo que tem, como `src/lib/supabase/server.ts`), para o build falhar se ele for parar no navegador. Decidido em 20/10/2026, porque o Next vai tornar isso obrigatório na próxima versão grande
 - Login sempre conectado até a pessoa sair, sem "manter conectado". O cadastro pede só o número do CRECI (UF sempre SC) e a comparação de CRECI repetido ignora pontos, traços e espaços. O link de recuperação de senha usa `token_hash` e funciona em qualquer navegador. O aceite do termo de assinatura no cadastro só entra no passo 13.4. Decidido em 22/10/2026 (plano da Etapa 3)
 - Os textos dos termos ficam para depois: a Etapa 4 usa um termo de exclusividade provisório, com versão marcada como provisória e guardada no aceite. O texto final entra como versão nova antes do piloto (Etapa 13); aceite da versão provisória é só de teste. Decidido em 26/10/2026
+- Cadastro do imóvel na ordem do protótipo (dados, fotos, termo) com o status `rascunho`: o passo 1 cria o rascunho, o aceite do termo no passo 3 o passa para pendente. Rascunho só o dono vê, edita e apaga, e não entra na fila do admin. O dono também edita o imóvel pendente (dados, fotos e contato), sem registro de edições; a versão sobe e a aprovação de uma tela antiga falha. O termo fica numa tabela de versões e só a vigente pode ser aceita. Tipos: casa, apartamento, cobertura, terreno e sala comercial; bairros: a lista oficial de Florianópolis. Fotos: JPG, PNG ou WebP, até 10 MB, reduzidas no navegador, de 1 a 20 por imóvel. A escolha do contato fica na página do imóvel do proprietário. Decidido em 26/10/2026 (plano da Etapa 4)
 - Fotos e PDFs não passam por Server Action (o limite padrão é 1 MB): o navegador envia direto para o Supabase Storage, com permissão dada pelo servidor (Etapas 4 e 9)
 
 ## Fora do escopo do MVP

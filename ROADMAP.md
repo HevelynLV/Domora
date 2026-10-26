@@ -3,7 +3,11 @@
 ## Onde paramos
 
 Última atualização: 26/10/2026 · por Hevelyn
-Etapa atual: 3. Login e perfis, **concluída e aceita na `main`** (Pull Request #3). Próxima: Etapa 4 (imóvel), ainda não começada
+Etapa atual: 4. Imóvel, na branch `etapa-4-imovel`. Passo 4.1 feito; próximo: 4.2
+
+Etapa 4:
+- 4.1 feito (26/10/2026): plano aprovado. Decisões registradas na Visão geral ("Decisões tomadas em 26/10/2026 (plano da Etapa 4)") e no CLAUDE.md: status `rascunho` para o cadastro seguir a ordem do protótipo (dados, fotos, termo); dono edita imóvel pendente sem registro; página mínima do imóvel do proprietário com a escolha do contato; listas de tipos e bairros (lista oficial de Florianópolis, conferir a fonte); fotos JPG/PNG/WebP até 10 MB, de 1 a 20; termo numa tabela de versões (`2026-10-provisorio`). Migrations previstas: `imoveis_etapa_4` (4.2: termos, rascunho, edição de pendente, listas e os itens da auditoria da Etapa 2), `fotos_storage` (4.3: bucket privado `fotos-imoveis`) e `captacao` (4.7: `captar_imovel`, `aceitar_termo_captado`, `buscar_proprietarios`). Os testes que faltam da auditoria da Etapa 2 entram no 4.2
+- Próximo: 4.2 (cadastro do imóvel), começando pela migration `imoveis_etapa_4`
 
 26/10/2026:
 - O commit do README da Etapa 3, que ficou de fora do Pull Request #3, foi levado para a `main` pela branch `docs-readme-e-termos`
@@ -116,8 +120,8 @@ Etapa 1 (concluída em 21/10/2026):
 Próximo passo exato:
 - Contar ao Gabriel as decisões de 22/10/2026 (Visão geral, as duas seções "Decisões tomadas em 22/10/2026") e a mudança do bloqueio (o "Atenção" abaixo)
 - Feito em 23/10/2026 no painel do Supabase: "Site URL" `http://localhost:3000` e "Redirect URLs" `http://localhost:3000/**`. **Não deu para trocar o modelo do e-mail**: o plano gratuito do Supabase só deixa editar os modelos com SMTP próprio. Até a Etapa 13, o e-mail de recuperação usa o modelo padrão (em inglês, link com `code`), que a rota `/auth/confirmar` já aceita, mas que só funciona no mesmo navegador em que a senha nova foi pedida. Testar à mão: pedir uma senha nova em `/recuperar-senha` com o próprio e-mail e abrir o link **no mesmo navegador**
-- Criar a branch `etapa-4-imovel` a partir da `main` atualizada (depois que o Pull Request da branch `docs-readme-e-termos` for aceito)
-- **Antes da Etapa 4**: decidir com o Gabriel as pendências da Etapa 4 abaixo (editar imóvel pendente ou em negociação, listas de tipos e bairros, limite das fotos). O texto do termo não trava mais: a etapa usa um provisório. Depois, o passo 4.1 numa sessão nova (`/clear` e modo de planejamento)
+- Contar ao Gabriel as decisões do plano da Etapa 4 (Visão geral, "Decisões tomadas em 26/10/2026 (plano da Etapa 4)")
+- Passo 4.2 (cadastro do imóvel) na branch `etapa-4-imovel`
 
 Antes da Etapa 1 (fazer à mão, cada pessoa pelo próprio painel):
 - [ ] Avisar o Gabriel do replanejamento e da troca do nome para PAUTA, e combinar o arquivamento
@@ -135,13 +139,10 @@ Pendências e decisões em aberto (cada uma precisa estar resolvida antes da eta
   - (auditoria da Etapa 2) **(banco)** `fotos_imovel.caminho` aceita qualquer texto, inclusive o arquivo de outro imóvel: exigir que comece com o id do imóvel (`check (caminho like imovel_id::text || '/%')`), alinhado com as políticas do bucket
   - (auditoria da Etapa 2) Captação (4.7): o gatilho de cadastro exige tipo, nome e telefone no momento em que a conta é criada; o `admin.createUser` do dono precisa mandar esses dados no metadata
   - (auditoria da Etapa 2) **(banco)** `termo_versao` aceita qualquer texto (conferir contra uma tabela de versões do termo); tipo e bairro com `ativo = false` continuam aceitos no imóvel; `revisado_por` e `revisado_em` são livres para o admin (preencher por gatilho com `auth.uid()` e `now()`); a versão e o registro de edições usam listas de campos diferentes, que podem divergir (`20261022221614_imoveis.sql:218-224` e `:253-255`)
-  - (auditoria da Etapa 2) O proprietário não liga nem desliga `mostrar_contato` num imóvel pendente (o RF13 em "Meus imóveis"): decidir junto com "editar imóvel pendente", abaixo
   - (auditoria da Etapa 2) Testes que faltam: apagar imóvel reprovado com fotos; não apagar vendido nem expirado; editar reprovado deixa o status `reprovado`; proprietário não envia `termo_aceito_em`, `captado_pelo_admin` nem `status` no insert e não muda `termo_versao` depois; assinante bloqueado não vê fotos; assinante não grava em `tipos_imovel` nem em `bairros` e não lê `edicoes_imovel`. As regras do banco usam todas o código `P0001`: nos testes novos, conferir também a mensagem
-  - Termo de exclusividade provisório (decidido em 26/10/2026): o plano do 4.1 define onde o texto fica e como a versão provisória é marcada, de um jeito que a versão final entre depois sem mudar o fluxo (ligar com a pendência do `termo_versao` acima)
-  - O proprietário pode editar imóvel pendente de aprovação? Se puder, a edição é registrada?
-  - O proprietário pode editar imóvel em negociação (ex.: mudar o preço com propostas aceitas)? Vale a mesma regra de "edição de imóvel disponível"?
-  - Conteúdo das listas de tipos de imóvel (hoje: casa, apartamento, cobertura, terreno, sala comercial) e de bairros de Florianópolis (hoje só 6 no protótipo). Que são listas fixas no banco já foi decidido em 22/10/2026
-  - Limite das fotos: o protótipo usa JPG ou PNG de até 10 MB cada
+  - O proprietário pode editar imóvel em negociação (ex.: mudar o preço com propostas aceitas)? Vale a mesma regra de "edição de imóvel disponível"? Na Etapa 4 ainda não há propostas: a sugestão do plano é manter a regra do disponível e rever na Etapa 8
+  - Captação (4.7): e se o dono do imóvel captado nunca aceitar o termo? Sugestão do plano: o admin vê "termo não aceito" no painel e decide
+  - Rascunhos de imóvel abandonados: apagar sozinhos depois de alguns dias? Sugestão do plano: deixar para a Etapa 13
 - Etapa 5:
   - (auditoria da Etapa 2) Convite por e-mail: o `inviteUserByEmail` do Supabase cria a conta antes de o corretor informar nome e telefone, e o gatilho de cadastro recusa. Decidir no plano da etapa (ex.: o e-mail só leva o link do app, e o cadastro normal usa o código)
   - (auditoria da Etapa 2) O `token_hash` do convite é sha256 sem sal, escolhido por quem cria o convite: gerar o código no servidor com pelo menos 128 bits aleatórios, ou criar o convite por uma função do banco que gera o código
