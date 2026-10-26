@@ -124,6 +124,11 @@ export function formatarPreco(valor: number) {
   });
 }
 
+// "2027-04-13T18:40:00Z" → "13/04/2027", no horário de Florianópolis.
+export function formatarData(iso: string) {
+  return new Date(iso).toLocaleDateString("pt-BR", { timeZone: "America/Sao_Paulo" });
+}
+
 // Para voltar ao formulário: 1890000 vira "1.890.000"; 75.5 vira "75,5".
 export function numeroParaCampo(valor: number) {
   return valor.toLocaleString("pt-BR", { maximumFractionDigits: 2 });

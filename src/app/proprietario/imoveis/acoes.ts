@@ -3,7 +3,7 @@
 import { redirect } from "next/navigation";
 
 import { exigirTipo } from "@/lib/auth";
-import { idDeImovelValido, lerDadosDoImovel, type CampoImovel } from "@/lib/imovel";
+import { BUCKET_FOTOS, idDeImovelValido, lerDadosDoImovel, type CampoImovel } from "@/lib/imovel";
 import { criarClienteServidor } from "@/lib/supabase/server";
 
 // Cadastro do imóvel pelo proprietário (RF07), na ordem do protótipo:
@@ -72,6 +72,53 @@ function erroDoBanco(error: { code?: string; message: string }, valores: EstadoD
     return { erros: {}, valores, erroGeral: "Escolha o tipo e o bairro nas listas." };
   }
   return { erros: {}, valores, erroGeral: "Não foi possível salvar. Confira os dados e tente de novo." };
+}
+
+// Apagar o imóvel com as fotos (RF12): só em rascunho, pendente ou reprovado.
+// Primeiro o imóvel, numa operação só no banco (se o admin aprovar no mesmo
+// instante, o banco recusa e nada some); depois os arquivos, que quem enviou ainda
+// pode apagar (migration 20261026225310_apagar_imovel_com_fotos).
+export async function apagarImovel(id: string): Promise<{ erro?: string }> {
+  const usuario = await exigirTipo("proprietario");
+  if (!idDeImovelValido(id)) return { erro: "Imóvel não encontrado." };
+
+  const supabase = await criarClienteServidor();
+  const balde = supabase.storage.from(BUCKET_FOTOS);
+  // A lista dos arquivos sai antes: sem o imóvel, a pasta não pode mais ser listada.
+  const { data: arquivos } = await balde.list(id, { limit: 1000 });
+
+  const { data, error } = await supabase
+    .from("imoveis")
+    .delete()
+    .eq("id", id)
+    .eq("proprietario_id", usuario.id)
+    .in("status", ["rascunho", "pendente", "reprovado"])
+    .select("id");
+  if (error) return { erro: "Não foi possível apagar. Tente de novo." };
+  if (data.length === 0) {
+    return { erro: "Só dá para apagar imóvel em cadastro, aguardando aprovação ou reprovado." };
+  }
+
+  // Se falhar, os arquivos ficam soltos no bucket, sem ninguém ver (limpeza na Etapa 13).
+  if (arquivos?.length) await balde.remove(arquivos.map((arquivo) => `${id}/${arquivo.name}`));
+  redirect("/proprietario?apagado=1");
+}
+
+// Mostrar ou não o contato aos corretores, neste imóvel (RF13). Em imóvel
+// disponível, a troca vai para o registro de edições, como qualquer campo.
+export async function mudarContato(id: string, mostrar: boolean): Promise<{ erro?: string; mostrar?: boolean }> {
+  const usuario = await exigirTipo("proprietario");
+  if (!idDeImovelValido(id) || typeof mostrar !== "boolean") return { erro: "Imóvel não encontrado." };
+
+  const supabase = await criarClienteServidor();
+  const { data, error } = await supabase
+    .from("imoveis")
+    .update({ mostrar_contato: mostrar })
+    .eq("id", id)
+    .eq("proprietario_id", usuario.id)
+    .select("mostrar_contato");
+  if (error || data.length === 0) return { erro: "Não foi possível mudar agora. Tente de novo." };
+  return { mostrar: data[0].mostrar_contato };
 }
 
 export type EstadoEnvio = { erro?: string; termoMudou?: boolean };

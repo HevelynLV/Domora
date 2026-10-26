@@ -5,6 +5,7 @@ import { startTransition, useActionState, useState } from "react";
 
 import { BarraDoPasso } from "@/components/imovel/MolduraDoCadastro";
 import { Botao, classesBotao } from "@/components/ui/Botao";
+import { Interruptor } from "@/components/ui/Interruptor";
 
 import { enviarParaAprovacao, type EstadoEnvio } from "../../acoes";
 
@@ -85,19 +86,7 @@ export function FormTermo({
                 : "Visitas e propostas passam só pelo app. Você pode mudar depois."}
             </span>
           </div>
-          {/* .toggle do protótipo, como um interruptor acessível. */}
-          <button
-            type="button"
-            role="switch"
-            aria-checked={contato}
-            aria-labelledby="contato-rotulo"
-            onClick={() => setContato(!contato)}
-            className={`flex h-8 w-[52px] shrink-0 cursor-pointer rounded-2xl border-0 p-[3px] ${
-              contato ? "justify-end bg-mar" : "bg-line"
-            }`}
-          >
-            <span className="size-[26px] rounded-full bg-white shadow-[0_1px_2px_rgba(0,0,0,.2)]" />
-          </button>
+          <Interruptor ligado={contato} aoTrocar={setContato} rotuladoPor="contato-rotulo" />
         </div>
 
         <label className="flex items-start gap-3 text-sm">

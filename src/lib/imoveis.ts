@@ -24,6 +24,23 @@ export type ImovelDoDono = {
   area: number;
   mostrar_contato: boolean;
   status: StatusImovel;
+  motivo_reprovacao: string | null;
+  exclusividade_fim: string | null;
+  fotos: number;
+};
+
+// Imóvel na lista "Meus imóveis", com o link da miniatura da capa.
+export type ImovelNaLista = {
+  id: string;
+  titulo: string;
+  status: StatusImovel;
+  preco: number;
+  quartos: number;
+  area: number;
+  bairro: string;
+  motivo_reprovacao: string | null;
+  exclusividade_fim: string | null;
+  capa: string | null;
   fotos: number;
 };
 
@@ -47,7 +64,7 @@ export async function imovelDoDono(id: string, donoId: string): Promise<ImovelDo
   const { data, error } = await supabase
     .from("imoveis")
     .select(
-      "id, titulo, descricao, tipo_id, endereco, bairro_id, preco, quartos, banheiros, vagas, area, mostrar_contato, status, tipos_imovel(nome), bairros(nome), fotos_imovel(count)",
+      "id, titulo, descricao, tipo_id, endereco, bairro_id, preco, quartos, banheiros, vagas, area, mostrar_contato, status, motivo_reprovacao, exclusividade_fim, tipos_imovel(nome), bairros(nome), fotos_imovel(count)",
     )
     .eq("id", id)
     .eq("proprietario_id", donoId)
@@ -65,6 +82,45 @@ export async function imovelDoDono(id: string, donoId: string): Promise<ImovelDo
     bairro: nomeDaLista(bairros),
     fotos: fotos_imovel[0]?.count ?? 0,
   };
+}
+
+// "Meus imóveis": os imóveis do proprietário logado, os mais novos primeiro, com
+// a miniatura da capa (um pedido só de links para todas).
+export async function imoveisDoDono(donoId: string): Promise<ImovelNaLista[]> {
+  const supabase = await criarClienteServidor();
+  const { data, error } = await supabase
+    .from("imoveis")
+    .select(
+      "id, titulo, status, preco, quartos, area, motivo_reprovacao, exclusividade_fim, bairros(nome), fotos_imovel(caminho, ordem)",
+    )
+    .eq("proprietario_id", donoId)
+    .order("criado_em", { ascending: false });
+  if (error) throw error;
+
+  const capas = data.map((imovel) => {
+    const fotos = (imovel.fotos_imovel as { caminho: string; ordem: number }[]) ?? [];
+    const capa = fotos.reduce<{ caminho: string; ordem: number } | null>((a, b) => (!a || b.ordem < a.ordem ? b : a), null);
+    return capa ? caminhoDaMiniatura(capa.caminho) : null;
+  });
+  const caminhos = capas.filter((c): c is string => c !== null);
+  const { data: links } = caminhos.length
+    ? await supabase.storage.from(BUCKET_FOTOS).createSignedUrls(caminhos, VALIDADE_DO_LINK_EM_SEGUNDOS)
+    : { data: [] };
+  const linkDe = new Map((links ?? []).map((link) => [link.path, link.signedUrl]));
+
+  return data.map((imovel, i) => ({
+    id: imovel.id,
+    titulo: imovel.titulo,
+    status: imovel.status as StatusImovel,
+    preco: Number(imovel.preco),
+    quartos: imovel.quartos,
+    area: Number(imovel.area),
+    bairro: nomeDaLista(imovel.bairros),
+    motivo_reprovacao: imovel.motivo_reprovacao,
+    exclusividade_fim: imovel.exclusividade_fim,
+    capa: (capas[i] && linkDe.get(capas[i])) || null,
+    fotos: ((imovel.fotos_imovel as unknown[]) ?? []).length,
+  }));
 }
 
 // Quanto tempo o link de uma foto vale. O bucket é privado: cada visita pede links

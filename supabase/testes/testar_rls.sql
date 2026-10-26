@@ -3187,6 +3187,76 @@ do $$ declare v text; n int; i uuid; a uuid; b uuid; begin
 end $$;
 
 -- ---------------------------------------------------------------
+-- 6. Arquivos de imóvel apagado (migration 20261026225310_apagar_imovel_com_fotos)
+-- ---------------------------------------------------------------
+-- owner_id é quem enviou o arquivo (o Storage grava sozinho; aqui o teste grava).
+
+create or replace function pg_temp.criar_arquivo_de(p_imovel uuid, p_nome text, p_quem uuid)
+returns void
+language sql
+as $$
+  insert into storage.objects (bucket_id, name, owner_id)
+  values ('fotos-imoveis', p_imovel || '/' || p_nome, p_quem::text);
+$$;
+
+do $$ declare v text; n int; i uuid; begin
+  begin
+    perform pg_temp.criar_proprietario('00000000-0000-4000-a000-000000000001');
+    perform pg_temp.criar_proprietario('00000000-0000-4000-a000-000000000002');
+    perform pg_temp.criar_admin('00000000-0000-4000-a000-000000000009');
+    i := pg_temp.criar_imovel('00000000-0000-4000-a000-000000000001', 'pendente');
+    perform pg_temp.criar_arquivo_de(i, 'do-dono.jpg', '00000000-0000-4000-a000-000000000001');
+    perform pg_temp.criar_arquivo_de(i, 'do-admin.jpg', '00000000-0000-4000-a000-000000000009');
+    perform pg_temp.entrar_como('00000000-0000-4000-a000-000000000001');
+    delete from public.imoveis where id = i;
+    v := pg_temp.arquivos_visiveis();
+    perform pg_temp.entrar_como('00000000-0000-4000-a000-000000000002');
+    v := v || ' / ' || pg_temp.arquivos_visiveis();
+    perform pg_temp.entrar_como('00000000-0000-4000-a000-000000000009');
+    v := v || ' / ' || pg_temp.arquivos_visiveis();
+    raise exception using errcode = 'TR001';
+  exception when sqlstate 'TR001' then null;
+            when others then v := pg_temp.bloqueio(sqlstate, sqlerrm);
+  end;
+  insert into resultado (teste, esperado, obtido)
+  values ('Imóvel apagado: cada um vê só o arquivo que enviou (dono / outro proprietário / admin)',
+          '1 / 0 / 1', v);
+end $$;
+
+do $$ declare v text; n int; i uuid; begin
+  begin
+    perform pg_temp.criar_proprietario('00000000-0000-4000-a000-000000000001');
+    perform pg_temp.criar_proprietario('00000000-0000-4000-a000-000000000002');
+    -- Arquivo com owner_id da 0001 na pasta de um imóvel (que existe) da 0002.
+    i := pg_temp.criar_imovel('00000000-0000-4000-a000-000000000002', 'pendente');
+    perform pg_temp.criar_arquivo_de(i, 'foto.jpg', '00000000-0000-4000-a000-000000000001');
+    perform pg_temp.entrar_como('00000000-0000-4000-a000-000000000001');
+    v := pg_temp.arquivos_visiveis();
+    raise exception using errcode = 'TR001';
+  exception when sqlstate 'TR001' then null;
+            when others then v := pg_temp.bloqueio(sqlstate, sqlerrm);
+  end;
+  insert into resultado (teste, esperado, obtido)
+  values ('Enquanto o imóvel existe, ter enviado o arquivo não dá acesso a ele (vale a regra do imóvel)', '0', v);
+end $$;
+
+do $$ declare v text; n int; begin
+  begin
+    perform pg_temp.entrar_como_visitante();
+    begin
+      perform public.pasta_sem_imovel('00000000-0000-4000-a000-000000000000/foto.jpg');
+      v := 'permitido';
+    exception when others then v := pg_temp.bloqueio(sqlstate, sqlerrm);
+    end;
+    raise exception using errcode = 'TR001';
+  exception when sqlstate 'TR001' then null;
+            when others then v := pg_temp.bloqueio(sqlstate, sqlerrm);
+  end;
+  insert into resultado (teste, esperado, obtido)
+  values ('Visitante sem login não chama pasta_sem_imovel()', 'bloqueado (42501)', v);
+end $$;
+
+-- ---------------------------------------------------------------
 -- Resultado
 -- ---------------------------------------------------------------
 select
