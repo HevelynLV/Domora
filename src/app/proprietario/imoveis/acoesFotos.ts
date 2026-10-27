@@ -134,6 +134,10 @@ export async function removerFoto(imovelId: string, fotoId: string): Promise<Res
     .eq("id", fotoId)
     .eq("imovel_id", imovelId)
     .select("caminho");
+  if (error?.code === "P0001") {
+    // Gatilho conferir_ultima_foto: pendente e disponível não ficam sem foto.
+    return { fotos: await fotosDoImovel(imovelId), erro: "O imóvel precisa de pelo menos uma foto. Envie outra antes de tirar esta." };
+  }
   if (error || data.length === 0) return { fotos: await fotosDoImovel(imovelId), erro: "Não foi possível tirar a foto." };
 
   // Depois da linha, os arquivos. Se falhar, sobra um arquivo sem foto no banco

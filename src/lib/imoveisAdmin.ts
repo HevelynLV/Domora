@@ -1,7 +1,7 @@
 import "server-only";
 
 import { criarClienteServidor } from "@/lib/supabase/server";
-import { idDeImovelValido } from "@/lib/imovel";
+import { formatarPreco, idDeImovelValido } from "@/lib/imovel";
 import { fotosDoImovel, type FotoDoImovel } from "@/lib/imoveis";
 
 // Leituras do admin sobre imóveis, com a sessão dele: o RLS deixa o admin ver
@@ -86,6 +86,97 @@ export async function imovelParaAprovar(id: string): Promise<ImovelParaAprovar |
     contato: (contato.data as { telefone: string; email: string }[] | null)?.[0] ?? null,
     fotos,
   };
+}
+
+export type EdicaoParaRevisar = {
+  id: number;
+  imovel: string;
+  campo: string;
+  antes: string;
+  depois: string;
+  quem: string;
+  editadoEm: string;
+  revisada: boolean;
+};
+
+const ROTULO_DO_CAMPO: Record<string, string> = {
+  titulo: "Título",
+  descricao: "Descrição",
+  tipo_id: "Tipo",
+  endereco: "Endereço",
+  bairro_id: "Bairro",
+  preco: "Preço",
+  quartos: "Quartos",
+  banheiros: "Banheiros",
+  vagas: "Vagas",
+  area: "Área",
+  mostrar_contato: "Contato para corretores",
+  fotos: "Fotos",
+};
+
+// O registro guarda o valor como texto do banco ("550000.00", "true", o número do
+// tipo, "abc/123.jpg (posição 2)"); aqui ele vira o que a pessoa lê.
+function valorLegivel(campo: string, valor: string | null, nomes: { tipos: Map<string, string>; bairros: Map<string, string> }) {
+  if (valor === null) return campo === "fotos" ? "" : "(vazio)";
+  switch (campo) {
+    case "preco":
+      return formatarPreco(Number(valor));
+    case "area":
+      return `${Number(valor).toLocaleString("pt-BR")} m²`;
+    case "tipo_id":
+      return nomes.tipos.get(valor) ?? valor;
+    case "bairro_id":
+      return nomes.bairros.get(valor) ?? valor;
+    case "mostrar_contato":
+      return valor === "true" ? "Mostrar" : "Esconder";
+    case "fotos":
+      return `foto na posição ${valor.match(/\(posição (\d+)\)$/)?.[1] ?? "?"}`;
+    default:
+      return valor;
+  }
+}
+
+// Foto: uma linha do registro é uma foto nova, tirada ou trocada de lugar.
+function textoDaFoto(antes: string | null, depois: string | null, legivel: (v: string | null) => string) {
+  if (antes === null) return { antes: "—", depois: `Foto nova (${legivel(depois)})` };
+  if (depois === null) return { antes: `Foto tirada (${legivel(antes)})`, depois: "—" };
+  return { antes: legivel(antes), depois: legivel(depois) };
+}
+
+// Edições do dono em imóvel disponível (RF17, RNF11): todas as que faltam revisar
+// e as 20 revisadas mais recentes.
+export async function edicoesParaRevisar(): Promise<EdicaoParaRevisar[]> {
+  const supabase = await criarClienteServidor();
+  const campos = "id, campo, valor_antigo, valor_novo, editado_em, revisado_em, imoveis(titulo), perfis!edicoes_imovel_editado_por_fkey(nome)";
+  const [pendentes, revisadas, tipos, bairros] = await Promise.all([
+    supabase.from("edicoes_imovel").select(campos).is("revisado_em", null).order("editado_em", { ascending: false }),
+    supabase.from("edicoes_imovel").select(campos).not("revisado_em", "is", null).order("revisado_em", { ascending: false }).limit(20),
+    supabase.from("tipos_imovel").select("id, nome"),
+    supabase.from("bairros").select("id, nome"),
+  ]);
+  if (pendentes.error) throw pendentes.error;
+  if (revisadas.error) throw revisadas.error;
+  const nomes = {
+    tipos: new Map((tipos.data ?? []).map((t) => [String(t.id), t.nome as string])),
+    bairros: new Map((bairros.data ?? []).map((b) => [String(b.id), b.nome as string])),
+  };
+
+  return [...pendentes.data, ...revisadas.data].map((edicao) => {
+    const legivel = (valor: string | null) => valorLegivel(edicao.campo, valor, nomes);
+    const valores =
+      edicao.campo === "fotos"
+        ? textoDaFoto(edicao.valor_antigo, edicao.valor_novo, legivel)
+        : { antes: legivel(edicao.valor_antigo), depois: legivel(edicao.valor_novo) };
+    return {
+      id: edicao.id,
+      imovel: campoDaLigacao(edicao.imoveis as { titulo: string } | { titulo: string }[] | null)?.titulo ?? "",
+      campo: ROTULO_DO_CAMPO[edicao.campo] ?? edicao.campo,
+      ...valores,
+      quem: campoDaLigacao(edicao.perfis as { nome: string } | { nome: string }[] | null)?.nome ?? "(conta apagada)",
+      editadoEm: edicao.editado_em,
+      revisada: edicao.revisado_em !== null,
+    };
+  });
 }
 
 // Números do painel do admin (AdmPainel): o que está esperando por ele.

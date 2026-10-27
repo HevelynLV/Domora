@@ -3257,6 +3257,95 @@ do $$ declare v text; n int; begin
 end $$;
 
 -- ---------------------------------------------------------------
+-- 7. Última foto (migration 20261026235505_foto_minima)
+-- ---------------------------------------------------------------
+
+do $$ declare v text := ''; n int; s text; i uuid; begin
+  begin
+    perform pg_temp.criar_proprietario('00000000-0000-4000-a000-000000000001');
+    foreach s in array array['pendente', 'disponivel'] loop
+      i := pg_temp.criar_imovel('00000000-0000-4000-a000-000000000001', s);
+      perform pg_temp.criar_foto(i, 1);
+      perform pg_temp.entrar_como('00000000-0000-4000-a000-000000000001');
+      begin
+        delete from public.fotos_imovel where imovel_id = i;
+        v := v || ' / permitido';
+      exception when others then v := v || ' / ' || sqlstate || ' ' || sqlerrm;
+      end;
+      reset role;
+    end loop;
+    v := substr(v, 4);
+    raise exception using errcode = 'TR001';
+  exception when sqlstate 'TR001' then null;
+            when others then v := pg_temp.bloqueio(sqlstate, sqlerrm);
+  end;
+  insert into resultado (teste, esperado, obtido)
+  values ('Dono não tira a última foto de imóvel pendente nem de disponível (código e mensagem)',
+          'P0001 O imóvel precisa de pelo menos uma foto / P0001 O imóvel precisa de pelo menos uma foto', v);
+end $$;
+
+do $$ declare v text := ''; n int; s text; i uuid; begin
+  begin
+    perform pg_temp.criar_proprietario('00000000-0000-4000-a000-000000000001');
+    foreach s in array array['rascunho', 'reprovado'] loop
+      i := pg_temp.criar_imovel('00000000-0000-4000-a000-000000000001', s);
+      perform pg_temp.criar_foto(i, 1);
+      perform pg_temp.entrar_como('00000000-0000-4000-a000-000000000001');
+      delete from public.fotos_imovel where imovel_id = i;
+      get diagnostics n = row_count;
+      v := v || ' / ' || n;
+      reset role;
+    end loop;
+    v := substr(v, 4);
+    raise exception using errcode = 'TR001';
+  exception when sqlstate 'TR001' then null;
+            when others then v := pg_temp.bloqueio(sqlstate, sqlerrm);
+  end;
+  insert into resultado (teste, esperado, obtido)
+  values ('Rascunho e reprovado podem ficar sem foto (linhas tiradas)', '1 / 1', v);
+end $$;
+
+do $$ declare v text; n int; i uuid; begin
+  begin
+    perform pg_temp.criar_proprietario('00000000-0000-4000-a000-000000000001');
+    i := pg_temp.criar_imovel('00000000-0000-4000-a000-000000000001', 'disponivel');
+    perform pg_temp.criar_foto(i, 1);
+    perform pg_temp.criar_foto(i, 2);
+    perform pg_temp.entrar_como('00000000-0000-4000-a000-000000000001');
+    delete from public.fotos_imovel where imovel_id = i and ordem = 2;
+    get diagnostics n = row_count;
+    v := n::text;
+    reset role;
+    select v || ' / ' || count(*) || ' foto' into v from public.fotos_imovel where imovel_id = i;
+    raise exception using errcode = 'TR001';
+  exception when sqlstate 'TR001' then null;
+            when others then v := pg_temp.bloqueio(sqlstate, sqlerrm);
+  end;
+  insert into resultado (teste, esperado, obtido)
+  values ('Disponível com duas fotos: o dono tira uma e fica a outra', '1 / 1 foto', v);
+end $$;
+
+do $$ declare v text; n int; i uuid; begin
+  begin
+    perform pg_temp.criar_proprietario('00000000-0000-4000-a000-000000000001');
+    i := pg_temp.criar_imovel('00000000-0000-4000-a000-000000000001', 'pendente');
+    perform pg_temp.criar_foto(i, 1);
+    perform pg_temp.criar_foto(i, 2);
+    perform pg_temp.entrar_como('00000000-0000-4000-a000-000000000001');
+    delete from public.imoveis where id = i;
+    get diagnostics n = row_count;
+    v := case when n = 1 then 'apagado' else 'não apagou' end;
+    reset role;
+    select v || ' / ' || count(*) || ' fotos' into v from public.fotos_imovel where imovel_id = i;
+    raise exception using errcode = 'TR001';
+  exception when sqlstate 'TR001' then null;
+            when others then v := pg_temp.bloqueio(sqlstate, sqlerrm);
+  end;
+  insert into resultado (teste, esperado, obtido)
+  values ('Apagar imóvel pendente com fotos continua funcionando (as fotos saem em cascata)', 'apagado / 0 fotos', v);
+end $$;
+
+-- ---------------------------------------------------------------
 -- Resultado
 -- ---------------------------------------------------------------
 select

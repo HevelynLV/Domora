@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 import { Suspense } from "react";
 
+import { classesBotao } from "@/components/ui/Botao";
 import { SeloStatus, type Status } from "@/components/ui/SeloStatus";
 import { exigirTipo } from "@/lib/auth";
 import { formatarData, formatarPreco } from "@/lib/imovel";
@@ -13,7 +14,7 @@ import { ContatoDoImovel } from "./ContatoDoImovel";
 export const metadata: Metadata = { title: "Imóvel" };
 
 // Página do imóvel do proprietário (ProImovel e SiteProImovel), por enquanto sem as
-// abas de visitas e propostas (Etapas 7 e 8) e sem o "Editar" (passo 4.6): a foto
+// abas de visitas e propostas (Etapas 7 e 8): o "Editar", a foto
 // de capa, os dados, a exclusividade e a escolha de mostrar o contato (RF13).
 export default function PaginaDoImovel({ params }: PageProps<"/proprietario/imoveis/[id]">) {
   return (
@@ -55,7 +56,7 @@ async function Conteudo({ params }: { params: Promise<{ id: string }> }) {
 
       <div className="flex w-full max-w-[760px] flex-col md:mt-4 md:gap-5">
         <div
-          className="flex h-[200px] items-start bg-[#BFD3CD] bg-cover bg-center px-5 py-4 md:h-[320px] md:rounded-pcard"
+          className="flex h-[200px] items-start justify-between bg-[#BFD3CD] bg-cover bg-center px-5 py-4 md:h-[320px] md:justify-end md:rounded-pcard"
           style={capa ? { backgroundImage: `url("${capa}")` } : undefined}
         >
           <Link
@@ -67,6 +68,11 @@ async function Conteudo({ params }: { params: Promise<{ id: string }> }) {
               <path d="m15 18-6-6 6-6" />
             </svg>
           </Link>
+          {podeMudarContato && (
+            <Link href={`/proprietario/imoveis/${id}/editar`} className={classesBotao({ variante: "secundario", tamanho: "pequeno" })}>
+              {imovel.status === "reprovado" ? "Editar e reenviar" : "Editar"}
+            </Link>
+          )}
         </div>
 
         <div className="flex flex-col gap-4 px-5 pt-[18px] md:px-0 md:pt-0">

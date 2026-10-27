@@ -117,9 +117,20 @@ function CartaoDoImovel({ imovel }: { imovel: ImovelNaLista }) {
         )}
         {imovel.status === "vendido" && <span className="text-tiny text-ink2">Não aparece mais no catálogo.</span>}
 
-        {podeApagar(imovel.status) && (
-          <div className="relative z-10 flex gap-3.5 self-start">
-            <BotaoApagarImovel id={imovel.id} titulo={imovel.titulo} fotos={imovel.fotos} />
+        {(imovel.status === "pendente" || imovel.status === "reprovado" || imovel.status === "rascunho") && (
+          <div className="relative z-10 flex flex-wrap gap-x-3.5 self-start">
+            {imovel.status !== "rascunho" && (
+              <Link href={`/proprietario/imoveis/${imovel.id}/editar`} className="flex min-h-11 items-center text-small font-bold text-mar no-underline">
+                Editar
+              </Link>
+            )}
+            {/* O reenvio é um passo explícito, na tela de edição (editar não reenvia sozinho). */}
+            {imovel.status === "reprovado" && (
+              <Link href={`/proprietario/imoveis/${imovel.id}/editar`} className="flex min-h-11 items-center text-small font-bold text-mar no-underline">
+                Reenviar
+              </Link>
+            )}
+            {podeApagar(imovel.status) && <BotaoApagarImovel id={imovel.id} titulo={imovel.titulo} fotos={imovel.fotos} />}
           </div>
         )}
       </div>

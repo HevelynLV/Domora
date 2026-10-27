@@ -3,7 +3,8 @@
 import { redirect } from "next/navigation";
 
 import { exigirTipo } from "@/lib/auth";
-import { BUCKET_FOTOS, idDeImovelValido, lerDadosDoImovel, type CampoImovel } from "@/lib/imovel";
+import { BUCKET_FOTOS, formatarPreco, idDeImovelValido, lerDadosDoImovel, type CampoImovel } from "@/lib/imovel";
+import { imovelDoDono, listasDoImovel } from "@/lib/imoveis";
 import { criarClienteServidor } from "@/lib/supabase/server";
 
 // Cadastro do imóvel pelo proprietário (RF07), na ordem do protótipo:
@@ -72,6 +73,89 @@ function erroDoBanco(error: { code?: string; message: string }, valores: EstadoD
     return { erros: {}, valores, erroGeral: "Escolha o tipo e o bairro nas listas." };
   }
   return { erros: {}, valores, erroGeral: "Não foi possível salvar. Confira os dados e tente de novo." };
+}
+
+// Editar imóvel já enviado (RF10, RF11). Pendente e reprovado: a edição não vai
+// para o registro (o imóvel não está no catálogo). Disponível: vale na hora, sem
+// nova aprovação, e o banco registra cada campo para o admin (RNF11). Salvar
+// nunca reenvia: o reprovado só volta para a fila pelo botão "Reenviar", que
+// manda acao=reenviar (salva e reenvia num clique só, explícito).
+export type EstadoEdicao = EstadoDadosImovel & {
+  mudancas?: { campo: string; antes: string; depois: string }[];
+  reenviado?: boolean;
+};
+
+const ROTULOS: Record<CampoImovel, string> = {
+  titulo: "Título",
+  tipo_id: "Tipo",
+  preco: "Preço",
+  endereco: "Endereço",
+  bairro_id: "Bairro",
+  quartos: "Quartos",
+  banheiros: "Banheiros",
+  vagas: "Vagas",
+  area: "Área",
+  descricao: "Descrição",
+};
+
+export async function editarImovel(id: string, _anterior: EstadoEdicao, formData: FormData): Promise<EstadoEdicao> {
+  const usuario = await exigirTipo("proprietario");
+  const leitura = lerDadosDoImovel(formData);
+  if (!leitura.ok) return { erros: leitura.erros, valores: leitura.valores };
+  const { dados, valores } = leitura;
+  if (!idDeImovelValido(id)) return { erros: {}, valores, erroGeral: "Imóvel não encontrado." };
+
+  const [atual, listas] = await Promise.all([imovelDoDono(id, usuario.id), listasDoImovel()]);
+  if (!atual || !["pendente", "reprovado", "disponivel"].includes(atual.status)) {
+    return { erros: {}, valores, erroGeral: "Este imóvel não pode ser editado agora." };
+  }
+
+  const supabase = await criarClienteServidor();
+  const { data, error } = await supabase
+    .from("imoveis")
+    .update(dados)
+    .eq("id", id)
+    .eq("proprietario_id", usuario.id)
+    .in("status", ["pendente", "reprovado", "disponivel"])
+    .select("id");
+  if (error) return erroDoBanco(error, valores);
+  if (data.length === 0) return { erros: {}, valores, erroGeral: "Este imóvel não pode ser editado agora." };
+
+  // O que mudou, em texto para a pessoa conferir (ProEditar: "O que mudou").
+  const nomeNaLista = (lista: { valor: string; rotulo: string }[], valor: number) =>
+    lista.find((opcao) => opcao.valor === String(valor))?.rotulo ?? String(valor);
+  const comoTexto = (campo: CampoImovel, valor: string | number) => {
+    if (campo === "preco") return formatarPreco(Number(valor));
+    if (campo === "area") return `${Number(valor).toLocaleString("pt-BR")} m²`;
+    if (campo === "tipo_id") return nomeNaLista(listas.tipos, Number(valor));
+    if (campo === "bairro_id") return nomeNaLista(listas.bairros, Number(valor));
+    return String(valor);
+  };
+  const mudancas = (Object.keys(ROTULOS) as CampoImovel[])
+    .filter((campo) => String(atual[campo]) !== String(dados[campo]))
+    .map((campo) =>
+      campo === "descricao"
+        ? { campo: ROTULOS[campo], antes: "(texto anterior)", depois: "(texto novo)" }
+        : { campo: ROTULOS[campo], antes: comoTexto(campo, atual[campo]), depois: comoTexto(campo, dados[campo]) },
+    );
+
+  if (formData.get("acao") === "reenviar" && atual.status === "reprovado") {
+    const { error: erroReenvio } = await supabase.rpc("reenviar_imovel", { p_imovel: id });
+    if (erroReenvio) {
+      const semFoto = erroReenvio.code === "P0001" && erroReenvio.message.includes("foto");
+      return {
+        erros: {},
+        valores,
+        mudancas,
+        erroGeral: semFoto
+          ? "As mudanças foram salvas, mas o imóvel precisa de pelo menos uma foto para ser reenviado."
+          : "As mudanças foram salvas, mas não foi possível reenviar. Tente de novo.",
+      };
+    }
+    return { erros: {}, valores, mudancas, reenviado: true };
+  }
+
+  return { erros: {}, valores, mudancas };
 }
 
 // Apagar o imóvel com as fotos (RF12): só em rascunho, pendente ou reprovado.

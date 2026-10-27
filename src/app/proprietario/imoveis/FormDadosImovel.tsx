@@ -2,9 +2,9 @@
 
 import { startTransition, useActionState } from "react";
 
+import { CamposDoImovel } from "@/components/imovel/CamposDoImovel";
 import { BarraDoPasso } from "@/components/imovel/MolduraDoCadastro";
 import { Botao } from "@/components/ui/Botao";
-import { Campo, CampoSelecao, CampoTextoLongo } from "@/components/ui/Campo";
 import type { CampoImovel } from "@/lib/imovel";
 
 import { salvarDadosDoImovel, type EstadoDadosImovel } from "./acoes";
@@ -28,7 +28,6 @@ export function FormDadosImovel({
     erros: {},
     valores: iniciais,
   } satisfies EstadoDadosImovel);
-  const { erros, valores } = estado;
 
   return (
     <form
@@ -44,57 +43,7 @@ export function FormDadosImovel({
       className="flex flex-1 flex-col gap-[18px] md:flex-none md:gap-4 md:rounded-cartao md:border md:border-line md:bg-card md:p-6"
     >
       <div className="flex flex-col gap-3.5 px-5 md:gap-4 md:px-0">
-        <Campo name="titulo" rotulo="Título do anúncio" maxLength={120} defaultValue={valores.titulo} erro={erros.titulo} />
-        <div className="grid grid-cols-2 gap-2.5 md:gap-4">
-          <CampoSelecao
-            name="tipo_id"
-            rotulo="Tipo"
-            opcoes={tipos}
-            vazio="Escolha"
-            defaultValue={valores.tipo_id ?? ""}
-            erro={erros.tipo_id}
-          />
-          <Campo
-            name="preco"
-            rotulo="Preço (R$)"
-            inputMode="decimal"
-            placeholder="1.890.000"
-            defaultValue={valores.preco}
-            erro={erros.preco}
-          />
-        </div>
-        <div className="grid gap-3.5 md:grid-cols-2 md:gap-4">
-          <Campo
-            name="endereco"
-            rotulo="Endereço"
-            dica="Assinantes ativos veem o endereço para marcar a visita."
-            autoComplete="street-address"
-            maxLength={200}
-            defaultValue={valores.endereco}
-            erro={erros.endereco}
-          />
-          <CampoSelecao
-            name="bairro_id"
-            rotulo="Bairro"
-            opcoes={bairros}
-            vazio="Escolha o bairro"
-            defaultValue={valores.bairro_id ?? ""}
-            erro={erros.bairro_id}
-          />
-        </div>
-        <div className="grid grid-cols-4 gap-2 md:gap-4">
-          <Campo name="quartos" rotulo="Quartos" inputMode="numeric" maxLength={2} defaultValue={valores.quartos} erro={erros.quartos} />
-          <Campo name="banheiros" rotulo="Banheiros" inputMode="numeric" maxLength={2} defaultValue={valores.banheiros} erro={erros.banheiros} />
-          <Campo name="vagas" rotulo="Vagas" inputMode="numeric" maxLength={2} defaultValue={valores.vagas} erro={erros.vagas} />
-          <Campo name="area" rotulo="Área m²" inputMode="decimal" defaultValue={valores.area} erro={erros.area} />
-        </div>
-        <CampoTextoLongo
-          name="descricao"
-          rotulo="Descrição"
-          maxLength={5000}
-          defaultValue={valores.descricao}
-          erro={erros.descricao}
-        />
+        <CamposDoImovel tipos={tipos} bairros={bairros} valores={estado.valores} erros={estado.erros} />
 
         {estado.erroGeral && (
           <p role="alert" className="rounded-[14px] bg-erro-soft px-3.5 py-3 text-small text-erro-texto">
