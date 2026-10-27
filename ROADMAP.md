@@ -2,8 +2,8 @@
 
 ## Onde paramos
 
-Última atualização: 26/10/2026 · por Hevelyn
-Etapa atual: 4. Imóvel, na branch `etapa-4-imovel`. Passos 4.1 a 4.7 feitos; próximo: 4.8 (auditoria, numa sessão nova)
+Última atualização: 27/10/2026 · por Hevelyn
+Etapa atual: 4. Imóvel, concluída na branch `etapa-4-imovel` (passos 4.1 a 4.9 feitos). Próximo: `git push -u origin etapa-4-imovel`, o Pull Request da Etapa 4 e, depois do merge, a Etapa 5 (passo 5.1)
 
 Etapa 4:
 - 4.1 feito (26/10/2026): plano aprovado. Decisões registradas na Visão geral ("Decisões tomadas em 26/10/2026 (plano da Etapa 4)") e no CLAUDE.md: status `rascunho` para o cadastro seguir a ordem do protótipo (dados, fotos, termo); dono edita imóvel pendente sem registro; página mínima do imóvel do proprietário com a escolha do contato; listas de tipos e bairros (lista oficial de Florianópolis, conferir a fonte); fotos JPG/PNG/WebP até 10 MB, de 1 a 20; termo numa tabela de versões (`2026-10-provisorio`). Migrations previstas: `imoveis_etapa_4` (4.2: termos, rascunho, edição de pendente, listas e os itens da auditoria da Etapa 2), `fotos_storage` (4.3: bucket privado `fotos-imoveis`) e `captacao` (4.7: `captar_imovel`, `aceitar_termo_captado`, `buscar_proprietarios`). Os testes que faltam da auditoria da Etapa 2 entram no 4.2
@@ -50,7 +50,16 @@ Etapa 4:
   - `e2e/imovel-captar.spec.ts`: captação pela tela (busca, dados, foto) até o aceite da dona, conferindo que o corretor ativo não vê o captado e vê depois do aceite, e os 6 meses a partir do aceite; busca que não acha assinante; admin apaga o captado com os arquivos; dona sem acesso à captação; outra proprietária sem acesso ao aceite e sem efeito ao reenviar a requisição gravada. Rodado contra o build de produção (`npx next start -p 3000`), por causa da pouca memória
   - Bateria completa contra o build de produção: 115 passando, 3 pulados e 2 falhando (os dois "o app conecta ao Supabase", porque `/teste-conexao` dá 404 em produção, de propósito). Nada ficou no banco nem no bucket. Lint e build passam
   - Lição: parar o `npx next start` pelo terminal do Claude fecha só o terminal; o servidor continuou de pé na porta 3000 com o build antigo, e os testes rodaram contra ele. Antes de testar, conferir quem está na porta 3000
-- Próximo: 4.8 (auditoria, numa sessão nova: `/clear` e `/auditar-etapa 4`)
+- 4.8 feito (27/10/2026): auditoria numa sessão nova (`/auditar-etapa 4`). 1 item crítico (foto trocada ou apagada direto pelo Storage), 1 importante (aceite do captado sem conferir a versão) e melhorias
+- 4.9 feito (27/10/2026): correções da auditoria:
+  - Crítico: pela API do Storage, o dono conseguia apagar o arquivo de uma foto já registrada de um imóvel disponível ou pendente e enviar outra imagem com o mesmo nome. A troca não ia para o registro de edições, a versão do imóvel não subia (a aprovação do admin não percebia) e o imóvel podia ficar com foto que não abre. Migration `20261027165415_fotos_registradas_protegidas`: enviar e apagar no bucket só valem para arquivo que **não** é de uma foto registrada em `fotos_imovel` (a miniatura `-mini.jpg` conta como parte da foto), também para o admin, pela função `arquivo_de_foto_registrada()`. O app já seguia essa ordem (tirar foto: apaga a linha e depois os arquivos; enviar: arquivos e depois a linha; apagar imóvel: o imóvel antes)
+  - Importante: o admin podia mudar dados e fotos do captado enquanto o dono lia o termo, e o aceite valia para a versão nova. Migration `20261027165423_aceite_captado_com_versao`: `aceitar_termo_captado(imovel, versao, termo_versao, mostrar_contato)` só aceita se a versão do imóvel ainda for a que a tela mostrou. Se mudou, a tela avisa "A equipe PAUTA mudou este imóvel enquanto você lia", recarrega com os dados novos e o aceite precisa ser marcado de novo (como na aprovação do admin)
+  - Melhoria: na tela de aceitar o termo do captado, o botão desligado diz "Aceite o termo para continuar" (no cadastro normal continua "Aceite o termo para enviar")
+  - `testar_rls.sql`: 176 de 176 (5 testes novos; o apagar agora também é testado no banco, ligando `storage.allow_delete_query` como a API do Storage faz). `e2e/imovel-fotos.spec.ts`: pela API, a dona não apaga nem sobrescreve a foto registrada nem envia a miniatura dela, e a versão do imóvel não muda; arquivo solto ela apaga. `e2e/imovel-captar.spec.ts`: teste novo do aceite barrado depois de o admin mudar o preço, e aceito depois de recarregar
+  - Lint e build passam. Bateria completa contra o build de produção (`npx next start -p 3000`): 115 passando, 3 pulados e 4 falhando: os dois "o app conecta ao Supabase" (de propósito nesse modo) e o teste novo do captado, que achava também o aviso de rota do Next como "alert"; corrigido o teste, as specs de captação e fotos passaram inteiras (16 de 16)
+  - Outros achados foram para "Pendências" (Etapa 13), marcados "auditoria da Etapa 4"
+  - "Pronto quando" conferido: imóvel do proprietário com fotos e termo aceito aparece como pendente (`imovel-cadastro.spec.ts`, caminho certo até pendente com versão e data do aceite; `imovel-fotos.spec.ts`, fotos até "Imóvel enviado"); imóvel captado fica vinculado ao dono (status `captado`, `proprietario_id` da dona) e entra disponível quando ela aceita o termo, com o corretor ativo vendo só depois do aceite e 6 meses a partir do aceite (`imovel-captar.spec.ts` e seção 8 do `testar_rls.sql`)
+- Próximo: `git push -u origin etapa-4-imovel` e o Pull Request da Etapa 4; depois do merge, `/clear` e o passo 5.1 numa branch `etapa-5-assinantes` criada da `main` atualizada
 
 26/10/2026:
 - O commit do README da Etapa 3, que ficou de fora do Pull Request #3, foi levado para a `main` pela branch `docs-readme-e-termos`
@@ -163,8 +172,8 @@ Etapa 1 (concluída em 21/10/2026):
 Próximo passo exato:
 - Contar ao Gabriel as decisões de 22/10/2026 (Visão geral, as duas seções "Decisões tomadas em 22/10/2026") e a mudança do bloqueio (o "Atenção" abaixo)
 - Feito em 23/10/2026 no painel do Supabase: "Site URL" `http://localhost:3000` e "Redirect URLs" `http://localhost:3000/**`. **Não deu para trocar o modelo do e-mail**: o plano gratuito do Supabase só deixa editar os modelos com SMTP próprio. Até a Etapa 13, o e-mail de recuperação usa o modelo padrão (em inglês, link com `code`), que a rota `/auth/confirmar` já aceita, mas que só funciona no mesmo navegador em que a senha nova foi pedida. Testar à mão: pedir uma senha nova em `/recuperar-senha` com o próprio e-mail e abrir o link **no mesmo navegador**
-- Contar ao Gabriel as decisões do plano da Etapa 4 (Visão geral, "Decisões tomadas em 26/10/2026 (plano da Etapa 4)")
-- Passo 4.2 (cadastro do imóvel) na branch `etapa-4-imovel`
+- Contar ao Gabriel as decisões do plano da Etapa 4 (Visão geral, "Decisões tomadas em 26/10/2026 (plano da Etapa 4)") e as da captação (Visão geral, "Decisões tomadas em 27/10/2026 (passo 4.7, captação)")
+- Enviar a branch `etapa-4-imovel` e abrir o Pull Request da Etapa 4; depois do merge, passo 5.1
 
 Antes da Etapa 1 (fazer à mão, cada pessoa pelo próprio painel):
 - [ ] Avisar o Gabriel do replanejamento e da troca do nome para PAUTA, e combinar o arquivamento
@@ -216,6 +225,15 @@ Pendências e decisões em aberto (cada uma precisa estar resolvida antes da eta
   - Com quanto tempo de antecedência sai o aviso de vencimento da exclusividade, e se a renovação é por mais 6 meses
   - **(banco)** O que acontece com as propostas aceitas se a exclusividade vencer com o imóvel em negociação
 - Etapa 13:
+  - (auditoria da Etapa 4) O texto provisório do termo diz que a exclusividade conta "da aprovação" (cláusula 1, na migration `20261026200726_imoveis_etapa_4`), mas no imóvel captado ela conta do aceite do dono. O texto final precisa cobrir os dois casos
+  - (auditoria da Etapa 4) O bucket `fotos-imoveis` confere só o tipo que o navegador declara: qualquer arquivo marcado como `image/jpeg` entra. Ao registrar a foto, conferir o começo do arquivo (assinatura do JPEG)
+  - (auditoria da Etapa 4) Revisão de edições (RF17): a tela do admin mostra só "Foto nova (posição N)", sem a imagem (`src/lib/imoveisAdmin.ts`, por volta das linhas 132-144). E tirar uma foto gera uma linha de registro para cada foto que mudou de posição
+  - (auditoria da Etapa 4) Diferenças de tela em relação ao protótipo:
+    - ProEnviado: o aviso está sem o ícone de informação
+    - SiteProNovo: o título "Como vai aparecer no catálogo" aparece sem o cartão de prévia
+    - Aceitar o termo do captado: não tem o botão "Voltar", e o dono vê só a capa ("1 foto"), sem poder abrir as outras fotos antes de aceitar
+    - Editar imóvel disponível: não mostra o "Antes: valor" embaixo do campo alterado (conferir se aparece enquanto digita)
+    - Painel do admin e Captados: o botão "Captar imóvel" está sem o ícone "+"
   - (passo 4.3) Arquivos soltos no bucket `fotos-imoveis`: a foto enviada cuja gravação no banco falhou (rede caiu), a foto tirada cujo arquivo não saiu do Storage, e arquivos que um proprietário mande direto pela API para a pasta do próprio imóvel (o limite de 20 vale para as fotos no banco, não para os arquivos). Ninguém vê esses arquivos na tela, mas ocupam espaço: fazer uma limpeza periódica dos arquivos sem linha em `fotos_imovel`
   - (auditoria da Etapa 2) LGPD: `imoveis.proprietario_id` não tem `on delete` e só assinante pendente pode ser excluído, então proprietário com imóvel e assinante ativo não podem ser apagados. Planejar a anonimização no 13.4
   - (auditoria da Etapa 2) Dois cadastros com o mesmo convite e duas aprovações do mesmo imóvel ao mesmo tempo estão protegidos pela leitura do código (`for update` no convite, `where versao = ...` na aprovação), mas não há teste com duas conexões. Incluir no roteiro completo (13.5)
@@ -253,6 +271,7 @@ Atenção (algo que a próxima pessoa precisa saber):
 - Os documentos saíram de `PAUTA-docs/` e agora ficam na raiz (`README.md`, `ROADMAP.md`, `CLAUDE.md`) e em `docs/`. O protótipo está em `docs/prototipo/`
 - O app Next.js existe a partir da branch `etapa-1-setup`: depois de baixar, rode `npm install` (se já tinha rodado antes, rode de novo: entrou o pacote `@next/env`)
 - Migrations agora são aplicadas com `npx supabase db push`: antes da Etapa 2, cada pessoa faz a preparação do README (passo 5: `supabase login` e `supabase link`). Nunca rode `npx supabase config push`
+- **Migrations novas da auditoria da Etapa 4** (`20261027165415_fotos_registradas_protegidas` e `20261027165423_aceite_captado_com_versao`, de 27/10/2026): já aplicadas no Supabase compartilhado. Depois do `git pull`, confira com `npx supabase migration list` (Local e Remote iguais). Mudou: arquivo de foto registrada em `fotos_imovel` não é apagado nem reenviado pelo Storage (apague primeiro a linha, depois o arquivo); `aceitar_termo_captado` agora recebe também a versão do imóvel (`p_versao`)
 - **Migrations novas da Etapa 4** (`20261026200718_imoveis_rascunho`, `20261026200726_imoveis_etapa_4`, `20261026221116_fotos_storage`, `20261026225310_apagar_imovel_com_fotos`, `20261026235505_foto_minima`, `20261027160122_imoveis_captado` e `20261027160130_captacao`): já aplicadas. A última cria o bucket privado `fotos-imoveis` no Storage, com as regras de acesso no Supabase compartilhado. Depois do `git pull`, confira com `npx supabase migration list`. Mudou: o imóvel do proprietário nasce `rascunho` e vai para `pendente` só por `enviar_imovel(id, versao_do_termo)`; o app não manda mais `termo_versao` no insert; o termo fica na tabela `termos_exclusividade` (versão vigente `2026-10-provisorio`); as listas de tipos (5) e bairros (56) já estão no banco. O `testar_rls.sql` agora usa a versão provisória no lugar de `termo-teste`
 - Mudou no 4.2: o menu de baixo do celular só aparece nas telas das abas (como no protótipo); telas de dentro, com botão de voltar, ficam sem ele. Item de menu que abre um passo a passo usa `semMenuInferior` (`src/lib/menus.ts`)
 - **Migrations novas da Etapa 3** (`20261022231442_cadastro_etapa_3` e `20261022232122_limpar_metadata_do_cadastro`): já aplicadas no Supabase compartilhado. Depois do `git pull`, confira com `npx supabase migration list` (Local e Remote iguais). O CRECI repetido agora é conferido pelo `creci_normalizado`
@@ -282,6 +301,8 @@ Toda migration nova entra aqui assim que for aplicada e o `testar_rls.sql` passa
 - `20261026235505_foto_minima` · 26/10/2026 · Hevelyn · a última foto de imóvel pendente ou disponível não sai (gatilho `conferir_ultima_foto`). `testar_rls.sql`: 163 de 163 passando
 - `20261027160122_imoveis_captado` · 27/10/2026 · Hevelyn · status `captado` no enum do imóvel (sozinho, por causa do enum)
 - `20261027160130_captacao` · 27/10/2026 · Hevelyn · captação pelo admin: `buscar_proprietarios()`, `captar_imovel()`, `aceitar_termo_captado()` e o admin apaga o captado. `testar_rls.sql`: 171 de 171 passando
+- `20261027165415_fotos_registradas_protegidas` · 27/10/2026 · Hevelyn · correção da auditoria da Etapa 4: enviar e apagar no bucket só para arquivo que não é de foto registrada (`arquivo_de_foto_registrada()`). `testar_rls.sql`: 176 de 176 passando (junto com a próxima)
+- `20261027165423_aceite_captado_com_versao` · 27/10/2026 · Hevelyn · correção da auditoria da Etapa 4: `aceitar_termo_captado()` confere a versão do imóvel que o dono viu. `testar_rls.sql`: 176 de 176 passando
 
 ## Etapas do MVP
 
@@ -289,7 +310,7 @@ Toda migration nova entra aqui assim que for aplicada e o `testar_rls.sql` passa
 - [x] 1. Setup — Pronto quando: a página abre em localhost, conecta ao Supabase novo e o código está no repositório `PAUTA`
 - [x] 2. Banco de dados — Pronto quando: o `testar_rls.sql` passa e um assinante bloqueado não vê nenhum imóvel
 - [x] 3. Login e perfis — Pronto quando: cada tipo de usuário só abre a própria área
-- [ ] 4. Imóvel — Pronto quando: imóvel do proprietário, com fotos e termo aceito, aparece como pendente; imóvel captado pelo admin fica vinculado ao dono e entra disponível quando ele aceita o termo
+- [x] 4. Imóvel — Pronto quando: imóvel do proprietário, com fotos e termo aceito, aparece como pendente; imóvel captado pelo admin fica vinculado ao dono e entra disponível quando ele aceita o termo
 - [ ] 5. Assinantes — Pronto quando: o admin ativa imobiliária e autônomo, e o corretor convidado entra já vinculado e ativo
 - [ ] 6. Catálogo — Pronto quando: assinante ativo filtra pelo celular e vê "disponível" ou "em negociação"; bloqueado não vê nada; vendido não aparece
 - [ ] 7. Visita — Pronto quando: o corretor pede visita, o proprietário confirma ou recusa e o corretor vê a resposta
@@ -315,3 +336,4 @@ PAUTA (antes, Domora):
 - 22/10/2026 · Hevelyn · Etapa 2 concluída: banco do MVP para contas e imóveis (perfis, assinantes, convites, listas, imóveis, fotos e registro de edições), com RLS, permissões por coluna e `contato_do_proprietario()`. 4 migrations e `testar_rls.sql` com 107 testes passando. Auditoria sem itens críticos; o bloqueio do admin foi separado do status do pagamento e o teste de aprovação foi corrigido; o resto foi para "Pendências"
 - 23/10/2026 · Hevelyn · Etapa 3 concluída: cadastro de proprietário, imobiliária e autônomo, login, saída, recuperação de senha, `exigirTipo()`, áreas separadas com menus e Minha conta. 2 migrations, `testar_rls.sql` com 120 testes e e2e com 67 passando. Auditoria sem itens críticos; corrigidos o redirecionamento para fora do site em `/auth/confirmar`, o "Sair" do admin no celular, o prazo da sessão do link de senha e o redirecionamento de quem já está logado; o resto foi para "Pendências"
 - 26/10/2026 · Hevelyn · README da Etapa 3 levado para a `main`. Decidido que os textos dos termos ficam para depois: a Etapa 4 usa um termo de exclusividade provisório e o texto final entra antes do piloto
+- 27/10/2026 · Hevelyn · Etapa 4 concluída: cadastro do imóvel em 3 passos (dados, fotos, termo provisório), fotos no Storage com ordem e miniatura, Meus imóveis com apagar e contato, aprovar e reprovar pelo admin com conferência de versão, editar e reenviar com registro das edições e revisão pelo admin, e captação pelo admin com aceite do dono. 9 migrations, `testar_rls.sql` com 176 testes e e2e com 115 passando. Auditoria: corrigidos a troca de foto direto pelo Storage (crítico) e o aceite do captado sem conferir a versão; o resto foi para "Pendências"
