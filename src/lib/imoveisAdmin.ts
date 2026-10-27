@@ -179,12 +179,38 @@ export async function edicoesParaRevisar(): Promise<EdicaoParaRevisar[]> {
   });
 }
 
+export type CaptadoAguardando = { id: string; titulo: string; dono: string; captadoEm: string; dias: number; fotos: number };
+
+// Imóveis captados que ainda esperam o dono aceitar o termo (passo 4.7).
+export async function captadosAguardando(): Promise<CaptadoAguardando[]> {
+  const supabase = await criarClienteServidor();
+  const { data, error } = await supabase
+    .from("imoveis")
+    .select("id, titulo, criado_em, perfis!imoveis_proprietario_id_fkey(nome), fotos_imovel(count)")
+    .eq("status", "captado")
+    .order("criado_em", { ascending: true });
+  if (error) throw error;
+  return data.map((imovel) => ({
+    id: imovel.id,
+    titulo: imovel.titulo,
+    dono: campoDaLigacao(imovel.perfis as { nome: string } | { nome: string }[] | null)?.nome ?? "",
+    captadoEm: imovel.criado_em,
+    dias: Math.floor((Date.now() - new Date(imovel.criado_em).getTime()) / 864e5),
+    fotos: (imovel.fotos_imovel as { count: number }[])[0]?.count ?? 0,
+  }));
+}
+
 // Números do painel do admin (AdmPainel): o que está esperando por ele.
 export async function numerosDoPainel() {
   const supabase = await criarClienteServidor();
-  const [imoveis, edicoes] = await Promise.all([
+  const [imoveis, edicoes, captados] = await Promise.all([
     supabase.from("imoveis").select("id", { count: "exact", head: true }).eq("status", "pendente"),
     supabase.from("edicoes_imovel").select("id", { count: "exact", head: true }).is("revisado_em", null),
+    supabase.from("imoveis").select("id", { count: "exact", head: true }).eq("status", "captado"),
   ]);
-  return { imoveisParaAprovar: imoveis.count ?? 0, edicoesParaRevisar: edicoes.count ?? 0 };
+  return {
+    imoveisParaAprovar: imoveis.count ?? 0,
+    edicoesParaRevisar: edicoes.count ?? 0,
+    captadosAguardando: captados.count ?? 0,
+  };
 }

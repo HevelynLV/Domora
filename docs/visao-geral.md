@@ -37,7 +37,7 @@ O app tem três tipos de usuário, cada um com a própria área, que os outros n
 
 | Perfil | O que faz | Como entra |
 | --- | --- | --- |
-| Proprietário | Cadastra o imóvel, confirma visitas, aceita ou recusa propostas, escolhe se mostra o contato | Cadastro pelo app, com telefone obrigatório, ou conta vinculada pelo admin ao imóvel captado |
+| Proprietário | Cadastra o imóvel, confirma visitas, aceita ou recusa propostas, escolhe se mostra o contato | Cadastro pelo app, com telefone obrigatório (também o dono de imóvel captado: o admin vincula o imóvel a essa conta) |
 | Imobiliária / corretor / corretor autônomo | Assinante: vê o catálogo, pede visitas, envia propostas e envia o contrato assinado | Imobiliária e corretor autônomo: cadastro pelo app com CRECI (e o nome da imobiliária), entram como pendentes até o admin ativar. Corretor de imobiliária: por convite do responsável |
 | Admin | Cadastra imóveis captados, aprova ou reprova imóveis, ativa ou bloqueia assinantes, revisa edições, confere contratos | Criado à mão no banco, nunca pelo app |
 
@@ -75,7 +75,7 @@ O que o app faz. Todos os 32 estão a construir no repositório novo (RF01 a RF0
 | RF05 | Contas | O responsável pela imobiliária convida corretores por e-mail ou link; o corretor cria a conta pelo convite e já entra vinculado e ativo, sem nova conferência do admin | A construir |
 | RF06 | Contas | Corretor autônomo se cadastra com o próprio CRECI e assina sem imobiliária | A construir |
 | RF07 | Imóvel | Proprietário cadastra imóvel (título, descrição, tipo, endereço, bairro, preço, quartos, banheiros, vagas, área) e aceita o termo de exclusividade | A construir |
-| RF08 | Imóvel | Admin cadastra imóvel captado e o vincula à conta de proprietário do dono real; esse imóvel não passa por validação | A construir |
+| RF08 | Imóvel | Admin cadastra imóvel captado (dados e fotos) e o vincula à conta que o dono real já criou no app; esse imóvel não passa por validação e entra no catálogo quando o dono aceita o termo de exclusividade | A construir |
 | RF09 | Imóvel | Enviar fotos do imóvel e definir a ordem | A construir |
 | RF10 | Imóvel | Editar imóvel disponível sem nova aprovação, registrando cada campo alterado para o admin | A construir |
 | RF11 | Imóvel | Editar e reenviar imóvel reprovado para aprovação | A construir |
@@ -138,7 +138,7 @@ O projeto recomeça do zero num repositório `PAUTA` e num projeto Supabase novo
 | 1. Setup | Repositório `pauta`, Next.js, Supabase novo, Vercel | A página abre em localhost e conecta ao Supabase | — |
 | 2. Banco | Tabelas e RLS do modelo novo | `testar_rls.sql` passa: assinante bloqueado não vê nada | — |
 | 3. Login e perfis | Cadastro, login, áreas separadas | Cada tipo de usuário só abre a própria área | — |
-| 4. Imóvel | Cadastro com fotos e termo; captação pelo admin; aprovar ou reprovar | Imóvel do proprietário fica pendente; o do admin entra disponível | — (usa um termo provisório) |
+| 4. Imóvel | Cadastro com fotos e termo; captação pelo admin; aprovar ou reprovar | Imóvel do proprietário fica pendente; o do admin entra disponível quando o dono aceita o termo | — (usa um termo provisório) |
 | 5. Assinantes | Ativação pelo admin, convite de corretores, autônomo | Corretor convidado entra vinculado e ativo | — |
 | 6. Catálogo | Filtros, status disponível ou em negociação | Assinante ativo filtra no celular; bloqueado não vê nada | Quais filtros |
 | 7. Visita | Pedido e confirmação | O corretor vê a resposta do proprietário | — |
@@ -148,6 +148,14 @@ O projeto recomeça do zero num repositório `PAUTA` e num projeto Supabase novo
 | 11. Cobrança | Asaas em ambiente de testes | Assinante vencido perde o acesso sozinho | Preço da mensalidade |
 | 12. Exclusividade | Aviso de vencimento e renovação | Sem renovação, o imóvel sai do catálogo sozinho | Antecedência do aviso |
 | 13. PWA, testes e deploy | SMTP, PWA, roteiro completo, Vercel | O app abre no celular de outra pessoa pelo endereço público | Texto final dos dois termos |
+
+## Decisões tomadas em 27/10/2026 (passo 4.7, captação)
+
+Substituem as decisões de 22/10/2026 sobre o imóvel captado (marcadas abaixo).
+
+- O dono de imóvel captado precisa ter conta no PAUTA, criada por ele mesmo pelo app (cadastro de proprietário). O admin não cria conta de ninguém: na captação, ele procura a conta do dono e vincula o imóvel a ela. Se o dono ainda não tem conta, a equipe pede que ele se cadastre antes.
+- O admin cadastra os dados e as fotos do imóvel captado. O imóvel fica fora do catálogo ("aguardando o aceite do dono") até o dono ler e aceitar o termo de exclusividade daquele imóvel no app (como no cadastro feito pelo proprietário, o aceite é por imóvel, com data e versão guardadas). O aceite exige pelo menos uma foto. Enquanto espera, o admin muda as fotos ou apaga o imóvel; o dono só aceita.
+- Os 6 meses de exclusividade do imóvel captado contam do aceite do dono, quando ele entra no catálogo.
 
 ## Decisões tomadas em 26/10/2026 (plano da Etapa 4)
 
@@ -177,13 +185,13 @@ Decididas antes do passo 2.1, porque mudam tabelas ou status do banco.
 - A assinatura tem três status: pendente, ativo e vencido (pagamento atrasado no Asaas). O bloqueio é decisão do admin e fica à parte do status (coluna `bloqueado_pelo_admin`, desde a auditoria da Etapa 2), para o admin não tirar ninguém do vencido sem pagamento. Bloqueado e vencido perdem o acesso. Desbloquear não libera quem está vencido: só o pagamento libera.
 - O corretor convidado segue a assinatura da imobiliária: se a imobiliária for bloqueada ou vencer, os corretores dela perdem o acesso na hora.
 - O corretor autônomo se cadastra pela tela pública, com o próprio CRECI, e entra pendente até o admin ativar, como a imobiliária. O cadastro pelo app passa a ser como proprietário, imobiliária ou corretor autônomo.
-- As ações do admin que mexem no login das pessoas (excluir a imobiliária pendente com o usuário dela, mandar o convite por e-mail, criar a conta do dono de imóvel captado) usam uma chave secreta de produção, separada das chaves pessoais de teste, só no servidor (`src/lib/supabase/admin.ts`, com `server-only`, sem `NEXT_PUBLIC_`). Ela só é usada depois de conferir que quem pede é admin, ou ao aceitar um convite válido.
+- As ações do admin que mexem no login das pessoas (excluir a imobiliária pendente com o usuário dela, mandar o convite por e-mail) usam uma chave secreta de produção, separada das chaves pessoais de teste, só no servidor (`src/lib/supabase/admin.ts`, com `server-only`, sem `NEXT_PUBLIC_`). Ela só é usada depois de conferir que quem pede é admin, ou ao aceitar um convite válido.
 
 **Imóvel**
-- Os 6 meses de exclusividade começam a contar na aprovação do admin. Imóvel captado pelo admin começa a contar no cadastro, porque já entra disponível.
+- Os 6 meses de exclusividade começam a contar na aprovação do admin. ~~Imóvel captado pelo admin começa a contar no cadastro, porque já entra disponível.~~ (Substituída em 27/10/2026: o captado conta do aceite do dono.)
 - A escolha de mostrar o contato aos corretores vale para cada imóvel, não para a conta toda. O contato mostrado é o telefone e o e-mail da conta do proprietário.
 - Tipos de imóvel e bairros de Florianópolis ficam em listas fixas no banco, que só o admin altera.
-- Imóvel captado cujo dono ainda não tem conta: o admin cria a conta do dono (nome, e-mail e telefone), o dono recebe um e-mail para criar a senha e aceita o termo de exclusividade no app, no primeiro acesso, com data e versão guardadas. O imóvel já entra disponível.
+- ~~Imóvel captado cujo dono ainda não tem conta: o admin cria a conta do dono (nome, e-mail e telefone), o dono recebe um e-mail para criar a senha e aceita o termo de exclusividade no app, no primeiro acesso, com data e versão guardadas. O imóvel já entra disponível.~~ (Substituída em 27/10/2026: o dono cria a própria conta e o captado só entra no catálogo depois do aceite.)
 
 **Visita e proposta**
 - A visita não é obrigatória antes da proposta.

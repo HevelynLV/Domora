@@ -158,6 +158,35 @@ export async function editarImovel(id: string, _anterior: EstadoEdicao, formData
   return { erros: {}, valores, mudancas };
 }
 
+// O dono aceita o termo do imóvel que a equipe PAUTA captou para ele (passo 4.7):
+// o imóvel entra no catálogo e os 6 meses de exclusividade começam agora. Quem
+// confere dono, status, foto e versão do termo é a função aceitar_termo_captado().
+export async function aceitarTermoCaptado(id: string, _anterior: EstadoEnvio, formData: FormData): Promise<EstadoEnvio> {
+  await exigirTipo("proprietario");
+  if (!idDeImovelValido(id)) return { erro: "Imóvel não encontrado." };
+  if (formData.get("aceito") !== "sim") return { erro: "Aceite o termo de exclusividade para publicar." };
+
+  const supabase = await criarClienteServidor();
+  const { error } = await supabase.rpc("aceitar_termo_captado", {
+    p_imovel: id,
+    p_termo_versao: String(formData.get("termo_versao") ?? ""),
+    p_mostrar_contato: formData.get("mostrar_contato") === "sim",
+  });
+  if (error) {
+    if (error.code === "P0001" && error.message.includes("fotos")) {
+      return { erro: "O imóvel ainda não tem fotos. Fale com a equipe PAUTA." };
+    }
+    if (error.code === "P0001" && error.message.includes("vigente")) {
+      return { erro: "O termo de exclusividade foi atualizado. Leia a versão nova e aceite de novo.", termoMudou: true };
+    }
+    if (error.code === "P0001" && error.message.includes("Só o dono")) {
+      return { erro: "Este imóvel não está esperando o seu aceite." };
+    }
+    return { erro: "Não foi possível publicar. Tente de novo." };
+  }
+  redirect(`/proprietario/imoveis/${id}?publicado=1`);
+}
+
 // Apagar o imóvel com as fotos (RF12): só em rascunho, pendente ou reprovado.
 // Primeiro o imóvel, numa operação só no banco (se o admin aprovar no mesmo
 // instante, o banco recusa e nada some); depois os arquivos, que quem enviou ainda

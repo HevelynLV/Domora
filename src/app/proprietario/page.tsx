@@ -71,6 +71,7 @@ const seloDo: Record<ImovelNaLista["status"], Status> = {
   rascunho: "rascunho",
   pendente: "pendente",
   reprovado: "reprovado",
+  captado: "captado",
   disponivel: "disponivel",
   vendido: "vendido",
   expirado: "expirado",
@@ -80,8 +81,13 @@ const podeApagar = (status: ImovelNaLista["status"]) => ["rascunho", "pendente",
 
 function CartaoDoImovel({ imovel }: { imovel: ImovelNaLista }) {
   // O rascunho continua o cadastro (a partir das fotos); os outros abrem a página do imóvel.
+  // O captado abre o aceite do termo (passo 4.7).
   const destino =
-    imovel.status === "rascunho" ? `/proprietario/imoveis/${imovel.id}/fotos` : `/proprietario/imoveis/${imovel.id}`;
+    imovel.status === "rascunho"
+      ? `/proprietario/imoveis/${imovel.id}/fotos`
+      : imovel.status === "captado"
+        ? `/proprietario/imoveis/${imovel.id}/aceitar`
+        : `/proprietario/imoveis/${imovel.id}`;
   const resumo = [formatarPreco(imovel.preco), imovel.bairro, imovel.quartos > 0 ? `${imovel.quartos} ${imovel.quartos === 1 ? "quarto" : "quartos"}` : `${imovel.area.toLocaleString("pt-BR")} m²`]
     .filter(Boolean)
     .join(" · ");
@@ -93,12 +99,12 @@ function CartaoDoImovel({ imovel }: { imovel: ImovelNaLista }) {
         style={imovel.capa ? { backgroundImage: `url("${imovel.capa}")` } : undefined}
       >
         <span className="hidden md:inline-flex">
-          <SeloStatus status={seloDo[imovel.status]} />
+          <SeloStatus status={seloDo[imovel.status]}>{imovel.status === "captado" ? "Aguardando seu aceite" : undefined}</SeloStatus>
         </span>
       </div>
       <div className="flex min-w-0 flex-1 flex-col gap-1 md:px-4 md:pb-4 md:pt-3.5">
         <span className="md:hidden">
-          <SeloStatus status={seloDo[imovel.status]} />
+          <SeloStatus status={seloDo[imovel.status]}>{imovel.status === "captado" ? "Aguardando seu aceite" : undefined}</SeloStatus>
         </span>
         {/* O link cobre o cartão inteiro (after:inset-0); os botões ficam por cima. */}
         <Link href={destino} className="font-bold text-ink no-underline after:absolute after:inset-0 after:content-['']">
@@ -107,6 +113,9 @@ function CartaoDoImovel({ imovel }: { imovel: ImovelNaLista }) {
         <span className="text-small text-ink2">{resumo}</span>
 
         {imovel.status === "rascunho" && <span className="text-tiny font-bold text-mar">Continuar o cadastro</span>}
+        {imovel.status === "captado" && (
+          <span className="text-tiny font-bold text-mar">Cadastrado pela equipe PAUTA · Ler e aceitar o termo</span>
+        )}
         {imovel.status === "reprovado" && imovel.motivo_reprovacao && (
           <span className="rounded-[10px] bg-erro-soft px-2.5 py-2 text-tiny text-erro-texto">
             Motivo: {imovel.motivo_reprovacao}

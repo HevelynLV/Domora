@@ -1,18 +1,23 @@
 "use server";
 
-import { exigirTipo } from "@/lib/auth";
+import { exigirTipo, type Usuario } from "@/lib/auth";
 import { BUCKET_FOTOS, caminhoDaMiniatura, idDeImovelValido, LIMITE_DE_FOTOS } from "@/lib/imovel";
 import { fotosDoImovel, type FotoDoImovel } from "@/lib/imoveis";
 import { criarClienteServidor } from "@/lib/supabase/server";
 
-// Fotos do imóvel pelo proprietário (RF09). Os arquivos não passam por aqui (o
+// Fotos do imóvel (RF09): pelo proprietário, e pelo admin no imóvel captado
+// (passo 4.7), antes de o dono aceitar o termo. Os arquivos não passam por aqui (o
 // limite de uma Server Action é 1 MB): o servidor confere quem pede e dá links de
 // envio assinados; o navegador manda os arquivos direto para o Supabase Storage;
 // depois o servidor confere que eles chegaram e grava as fotos no banco.
 // Quem pode mexer em quê está nas regras do bucket e de fotos_imovel
 // (supabase/migrations/20261026221116_fotos_storage.sql).
 
-const STATUS_QUE_ACEITAM_FOTOS = ["rascunho", "pendente", "reprovado", "disponivel"];
+// Onde cada um mexe nas fotos por estas telas (o banco confere de novo).
+const STATUS_QUE_ACEITAM_FOTOS = {
+  proprietario: ["rascunho", "pendente", "reprovado", "disponivel"],
+  admin: ["captado"],
+} as const;
 const NOME_DE_ARQUIVO = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
 
 export type ResultadoFotos = { fotos?: FotoDoImovel[]; erro?: string };
@@ -22,24 +27,22 @@ export type LinksDeEnvio = {
   envios?: { nome: string; grande: { caminho: string; token: string }; mini: { caminho: string; token: string } }[];
 };
 
-// Confere que o imóvel é do proprietário logado e ainda aceita fotos. Devolve
-// quantas fotos ele já tem, ou null.
-async function fotosJaEnviadas(imovelId: string, donoId: string) {
+// Confere que quem está logado pode mexer nas fotos deste imóvel agora (o dono, no
+// próprio imóvel; o admin, no captado). Devolve quantas fotos ele já tem, ou null.
+async function fotosJaEnviadas(imovelId: string, usuario: Usuario) {
   if (!idDeImovelValido(imovelId)) return null;
   const supabase = await criarClienteServidor();
-  const { data } = await supabase
-    .from("imoveis")
-    .select("status, fotos_imovel(count)")
-    .eq("id", imovelId)
-    .eq("proprietario_id", donoId)
-    .maybeSingle();
-  if (!data || !STATUS_QUE_ACEITAM_FOTOS.includes(data.status)) return null;
+  let consulta = supabase.from("imoveis").select("status, fotos_imovel(count)").eq("id", imovelId);
+  if (usuario.tipo === "proprietario") consulta = consulta.eq("proprietario_id", usuario.id);
+  const { data } = await consulta.maybeSingle();
+  const permitidos: readonly string[] = usuario.tipo === "admin" ? STATUS_QUE_ACEITAM_FOTOS.admin : STATUS_QUE_ACEITAM_FOTOS.proprietario;
+  if (!data || !permitidos.includes(data.status)) return null;
   return (data.fotos_imovel as { count: number }[])[0]?.count ?? 0;
 }
 
 export async function pedirEnvioDeFotos(imovelId: string, quantidade: number): Promise<LinksDeEnvio> {
-  const usuario = await exigirTipo("proprietario");
-  const jaTem = await fotosJaEnviadas(imovelId, usuario.id);
+  const usuario = await exigirTipo(["proprietario", "admin"]);
+  const jaTem = await fotosJaEnviadas(imovelId, usuario);
   if (jaTem === null) return { erro: "Este imóvel não aceita fotos agora." };
   if (!Number.isInteger(quantidade) || quantidade < 1) return { erro: "Escolha pelo menos uma foto." };
   if (jaTem + quantidade > LIMITE_DE_FOTOS) {
@@ -70,8 +73,8 @@ export async function pedirEnvioDeFotos(imovelId: string, quantidade: number): P
 
 // Grava no banco as fotos que chegaram ao Storage, depois das que já existem.
 export async function registrarFotos(imovelId: string, nomes: string[]): Promise<ResultadoFotos> {
-  const usuario = await exigirTipo("proprietario");
-  const jaTem = await fotosJaEnviadas(imovelId, usuario.id);
+  const usuario = await exigirTipo(["proprietario", "admin"]);
+  const jaTem = await fotosJaEnviadas(imovelId, usuario);
   if (jaTem === null) return { erro: "Este imóvel não aceita fotos agora." };
   if (!Array.isArray(nomes) || nomes.length > LIMITE_DE_FOTOS || !nomes.every((n) => NOME_DE_ARQUIVO.test(n))) {
     return { erro: "Não foi possível gravar as fotos." };
@@ -112,8 +115,8 @@ export async function registrarFotos(imovelId: string, nomes: string[]): Promise
 
 // Nova ordem: a lista de todas as fotos do imóvel, a primeira é a capa.
 export async function reordenarFotos(imovelId: string, ids: string[]): Promise<ResultadoFotos> {
-  const usuario = await exigirTipo("proprietario");
-  if ((await fotosJaEnviadas(imovelId, usuario.id)) === null) return { erro: "Este imóvel não aceita mudanças nas fotos agora." };
+  const usuario = await exigirTipo(["proprietario", "admin"]);
+  if ((await fotosJaEnviadas(imovelId, usuario)) === null) return { erro: "Este imóvel não aceita mudanças nas fotos agora." };
 
   const supabase = await criarClienteServidor();
   const { error } = await supabase.rpc("reordenar_fotos", { p_imovel: imovelId, p_fotos: ids });
@@ -124,8 +127,8 @@ export async function reordenarFotos(imovelId: string, ids: string[]): Promise<R
 }
 
 export async function removerFoto(imovelId: string, fotoId: string): Promise<ResultadoFotos> {
-  const usuario = await exigirTipo("proprietario");
-  if ((await fotosJaEnviadas(imovelId, usuario.id)) === null) return { erro: "Este imóvel não aceita mudanças nas fotos agora." };
+  const usuario = await exigirTipo(["proprietario", "admin"]);
+  if ((await fotosJaEnviadas(imovelId, usuario)) === null) return { erro: "Este imóvel não aceita mudanças nas fotos agora." };
 
   const supabase = await criarClienteServidor();
   const { data, error } = await supabase

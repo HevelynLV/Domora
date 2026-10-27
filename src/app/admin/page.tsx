@@ -3,12 +3,14 @@ import type { Metadata } from "next";
 import { Suspense, type ReactNode } from "react";
 
 import { BotaoSair } from "@/components/BotaoSair";
+import { classesBotao } from "@/components/ui/Botao";
 import { exigirTipo } from "@/lib/auth";
 import { numerosDoPainel } from "@/lib/imoveisAdmin";
 
 export const metadata: Metadata = { title: "Painel" };
 
-// Painel do admin (AdmPainel e SiteAdmPainel): o que está esperando por ele. Os
+// Painel do admin (AdmPainel e SiteAdmPainel): o que está esperando por ele (e os
+// captados que esperam o dono, passo 4.7). Os
 // outros cartões chegam com as etapas de cada assunto (assinantes na 5,
 // exclusividade vencendo na 12, contratos e comissões na 9).
 export default function Painel() {
@@ -30,9 +32,14 @@ async function Conteudo() {
           <span className="text-small text-ink2">Equipe PAUTA</span>
           <h1 className="font-display text-t1 font-bold leading-[1.1] tracking-[-0.02em] md:text-[34px]">Painel</h1>
         </div>
-        {/* No celular o admin não tem Minha conta: o "Sair" fica no topo do
-            painel, como no AdmPainel. No computador ele está no menu lateral. */}
-        <BotaoSair className="md:hidden" />
+        <div className="flex items-center gap-3">
+          {/* No celular o admin não tem Minha conta: o "Sair" fica no topo do
+              painel, como no AdmPainel. No computador ele está no menu lateral. */}
+          <BotaoSair className="md:hidden" />
+          <Link href="/admin/imoveis/captar" className={classesBotao({ tamanho: "pequeno" })}>
+            Captar imóvel
+          </Link>
+        </div>
       </div>
 
       <p className="text-tiny font-bold uppercase tracking-[0.08em] text-ink2">Para fazer</p>
@@ -43,6 +50,13 @@ async function Conteudo() {
           numero={numeros.edicoesParaRevisar}
           rotulo="Edições para revisar"
           icone={<path d="M4 20h4L19 9l-4-4L4 16z" />}
+          cinza
+        />
+        <Tile
+          href="/admin/imoveis/captados"
+          numero={numeros.captadosAguardando}
+          rotulo="Captados aguardando o dono"
+          icone={<path d="M12 5v14M5 12h14" />}
           cinza
         />
       </div>

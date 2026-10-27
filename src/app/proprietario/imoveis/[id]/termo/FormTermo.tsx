@@ -7,7 +7,7 @@ import { BarraDoPasso } from "@/components/imovel/MolduraDoCadastro";
 import { Botao, classesBotao } from "@/components/ui/Botao";
 import { Interruptor } from "@/components/ui/Interruptor";
 
-import { enviarParaAprovacao, type EstadoEnvio } from "../../acoes";
+import type { EstadoEnvio } from "../../acoes";
 
 const PONTOS = [
   "Durante 6 meses, o imóvel só é vendido pelo PAUTA. Nesse prazo você não tira o imóvel de venda.",
@@ -15,19 +15,25 @@ const PONTOS = [
   "Antes do vencimento você recebe um aviso para renovar. Sem renovação, o imóvel sai do catálogo.",
 ];
 
-// Passo 3 do cadastro (ProTermo e SiteProNovo): o resumo da exclusividade, o
-// texto do termo, a escolha de mostrar o contato e o aceite. A versão do termo
-// que está na tela vai junto com o envio.
+// O aceite do termo de exclusividade (ProTermo e SiteProNovo): o resumo da
+// exclusividade, o texto do termo, a escolha de mostrar o contato e o aceite. A
+// versão do termo que está na tela vai junto com o envio. Serve ao passo 3 do
+// cadastro (acao = enviarParaAprovacao) e ao aceite do imóvel captado
+// (acao = aceitarTermoCaptado), com o id do imóvel já preso na action (bind).
 export function FormTermo({
-  id,
   termo,
   mostrarContato,
+  acao,
+  rotuloEnviar = "Enviar para aprovação",
+  voltar,
 }: {
-  id: string;
   termo: { versao: string; texto: string; provisorio: boolean };
   mostrarContato: boolean;
+  acao: (anterior: EstadoEnvio, formData: FormData) => Promise<EstadoEnvio>;
+  rotuloEnviar?: string;
+  voltar?: string;
 }) {
-  const [estado, enviar, enviando] = useActionState(enviarParaAprovacao.bind(null, id), {} satisfies EstadoEnvio);
+  const [estado, enviar, enviando] = useActionState(acao, {} satisfies EstadoEnvio);
   const [contato, setContato] = useState(mostrarContato);
   const [aceito, setAceito] = useState(false);
 
@@ -105,7 +111,7 @@ export function FormTermo({
           <p role="alert" className="rounded-[14px] bg-erro-soft px-3.5 py-3 text-small text-erro-texto">
             {estado.erro}{" "}
             {estado.termoMudou && (
-              <a href={`/proprietario/imoveis/${id}/termo`} className="font-bold text-erro-texto">
+              <a href="" className="font-bold text-erro-texto">
                 Abrir a versão nova
               </a>
             )}
@@ -114,11 +120,13 @@ export function FormTermo({
       </div>
 
       <BarraDoPasso>
-        <Link href={`/proprietario/imoveis/${id}/fotos`} className={`${classesBotao({ variante: "secundario" })} hidden md:inline-flex`}>
-          Voltar
-        </Link>
+        {voltar && (
+          <Link href={voltar} className={`${classesBotao({ variante: "secundario" })} hidden md:inline-flex`}>
+            Voltar
+          </Link>
+        )}
         <Botao type="submit" disabled={!aceito || enviando}>
-          {enviando ? "Enviando…" : aceito ? "Enviar para aprovação" : "Aceite o termo para enviar"}
+          {enviando ? "Enviando…" : aceito ? rotuloEnviar : "Aceite o termo para enviar"}
         </Botao>
       </BarraDoPasso>
     </form>

@@ -16,10 +16,10 @@ export const metadata: Metadata = { title: "Imóvel" };
 // Página do imóvel do proprietário (ProImovel e SiteProImovel), por enquanto sem as
 // abas de visitas e propostas (Etapas 7 e 8): o "Editar", a foto
 // de capa, os dados, a exclusividade e a escolha de mostrar o contato (RF13).
-export default function PaginaDoImovel({ params }: PageProps<"/proprietario/imoveis/[id]">) {
+export default function PaginaDoImovel({ params, searchParams }: PageProps<"/proprietario/imoveis/[id]">) {
   return (
     <Suspense fallback={<p className="px-5 pt-[22px] text-ink2">Carregando…</p>}>
-      <Conteudo params={params} />
+      <Conteudo params={params} searchParams={searchParams} />
     </Suspense>
   );
 }
@@ -28,18 +28,27 @@ const seloDo: Record<StatusImovel, Status> = {
   rascunho: "rascunho",
   pendente: "pendente",
   reprovado: "reprovado",
+  captado: "captado",
   disponivel: "disponivel",
   vendido: "vendido",
   expirado: "expirado",
 };
 
-async function Conteudo({ params }: { params: Promise<{ id: string }> }) {
+async function Conteudo({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ id: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
   const usuario = await exigirTipo("proprietario");
-  const { id } = await params;
+  const [{ id }, { publicado }] = await Promise.all([params, searchParams]);
   const [imovel, capa] = await Promise.all([imovelDoDono(id, usuario.id), capaDoImovel(id)]);
   if (!imovel) notFound();
   // O rascunho ainda está no cadastro: segue de onde parou.
   if (imovel.status === "rascunho") redirect(`/proprietario/imoveis/${id}/fotos`);
+  // O captado ainda espera o aceite do termo (passo 4.7).
+  if (imovel.status === "captado") redirect(`/proprietario/imoveis/${id}/aceitar`);
 
   // Depois de vendido, o contato não muda mais nada (o imóvel saiu do catálogo).
   const podeMudarContato = ["pendente", "reprovado", "disponivel"].includes(imovel.status);
@@ -76,6 +85,11 @@ async function Conteudo({ params }: { params: Promise<{ id: string }> }) {
         </div>
 
         <div className="flex flex-col gap-4 px-5 pt-[18px] md:px-0 md:pt-0">
+          {publicado === "1" && imovel.status === "disponivel" && (
+            <p role="status" className="rounded-[14px] bg-mar-soft px-3.5 py-3 text-small text-mar-dark">
+              Termo aceito. O imóvel já está no catálogo para os corretores assinantes.
+            </p>
+          )}
           <div className="flex flex-col gap-1.5">
             <SeloStatus status={seloDo[imovel.status]} />
             <h1 className="font-display text-[24px] font-bold leading-[1.15] tracking-[-0.01em] md:text-t1">{imovel.titulo}</h1>

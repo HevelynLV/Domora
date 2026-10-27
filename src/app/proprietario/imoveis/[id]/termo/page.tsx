@@ -6,6 +6,7 @@ import { MolduraDoCadastro } from "@/components/imovel/MolduraDoCadastro";
 import { exigirTipo } from "@/lib/auth";
 import { capaDoImovel, imovelDoDono, termoVigente } from "@/lib/imoveis";
 
+import { enviarParaAprovacao } from "../../acoes";
 import { FormTermo } from "./FormTermo";
 
 export const metadata: Metadata = { title: "Novo imóvel: exclusividade" };
@@ -28,7 +29,12 @@ async function Conteudo({ params }: { params: Promise<{ id: string }> }) {
 
   return (
     <MolduraDoCadastro passo={3} voltar={`/proprietario/imoveis/${id}/fotos`} previa={{ ...imovel, capa }}>
-      <FormTermo id={imovel.id} termo={termo} mostrarContato={imovel.mostrar_contato} />
+      <FormTermo
+        termo={termo}
+        mostrarContato={imovel.mostrar_contato}
+        acao={enviarParaAprovacao.bind(null, imovel.id)}
+        voltar={`/proprietario/imoveis/${id}/fotos`}
+      />
     </MolduraDoCadastro>
   );
 }

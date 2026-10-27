@@ -6,7 +6,7 @@ import { BUCKET_FOTOS, caminhoDaMiniatura, idDeImovelValido } from "@/lib/imovel
 // Leituras do imóvel no servidor, sempre com a sessão de quem está logado: o RLS
 // do banco decide o que cada um vê. Quem chama já passou pelo exigirTipo().
 
-export type StatusImovel = "rascunho" | "pendente" | "reprovado" | "disponivel" | "vendido" | "expirado";
+export type StatusImovel = "rascunho" | "pendente" | "reprovado" | "captado" | "disponivel" | "vendido" | "expirado";
 
 export type ImovelDoDono = {
   id: string;
