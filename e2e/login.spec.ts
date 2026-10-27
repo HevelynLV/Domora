@@ -47,7 +47,7 @@ test("cada tipo entra e cai na tela certa", async ({ page, context }, info) => {
 
   const casos: [string, RegExp, string][] = [
     ["prop", /\/proprietario$/, "Olá, Marina Login"],
-    ["admin", /\/admin$/, "Olá, Admin Login"],
+    ["admin", /\/admin$/, "Imóveis para aprovar"],
     ["ativo", /\/assinante$/, "Olá, Thiago Ativo"],
     ["pendente", /\/aguardando-ativacao$/, "Cadastro recebido, Rafael"],
     ["vencido", /\/acesso-suspenso$/, "A mensalidade da sua assinatura venceu."],

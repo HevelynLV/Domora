@@ -16,8 +16,14 @@ export type { ItemMenu } from "./itensMenu";
 // funciona dentro de um <Suspense>; sem isso, o npm run build falha. Veja
 // node_modules/next/dist/docs/01-app/03-api-reference/04-functions/use-pathname.md
 
+//
+// Como no protótipo, o menu só aparece nas telas das abas (o endereço de um dos
+// itens). As telas de dentro (ex.: os passos do cadastro do imóvel) têm o botão
+// de voltar no topo e a barra de ação embaixo, no lugar do menu.
 export function MenuInferior({ itens, rotulo }: { itens: ItemMenu[]; rotulo: string }) {
-  const ativoHref = hrefAtivo(usePathname(), itens);
+  const caminho = usePathname();
+  const ativoHref = hrefAtivo(caminho, itens);
+  if (!itens.some((item) => item.href === caminho && !item.semMenuInferior)) return null;
 
   return (
     <nav aria-label={rotulo} className="flex shrink-0 border-t border-line bg-card px-1.5 pt-1.5 pb-[max(1rem,env(safe-area-inset-bottom))]">

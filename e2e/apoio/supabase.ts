@@ -74,6 +74,13 @@ export async function linkDeRecuperacao(email: string) {
 // formato do Playwright (context.addCookies). Um login por conta, reaproveitado
 // pelos testes: o Supabase limita os logins por endereço.
 export async function cookiesDeSessao(email: string, senha = SENHA_TESTE) {
+  return (await entrarComo(email, senha)).cookies;
+}
+
+// Um login só, que serve para as duas coisas: os cookies para o navegador do teste
+// e o cliente do Supabase com a sessão da conta (para chamar a API direto, como
+// alguém faria fora da tela, com as regras do banco e do Storage valendo).
+export async function entrarComo(email: string, senha = SENHA_TESTE) {
   const guardados = new Map<string, string>();
   const cliente = createServerClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!, {
     cookies: {
@@ -82,17 +89,32 @@ export async function cookiesDeSessao(email: string, senha = SENHA_TESTE) {
     },
   });
   const { error } = await cliente.auth.signInWithPassword({ email, password: senha });
-  if (error) throw new Error(`cookiesDeSessao(${email}): ${error.message}`);
-  return [...guardados].map(([name, value]) => ({ name, value, domain: "localhost", path: "/" }));
+  if (error) throw new Error(`entrarComo(${email}): ${error.message}`);
+  return {
+    cookies: [...guardados].map(([name, value]) => ({ name, value, domain: "localhost", path: "/" })),
+    cliente,
+  };
 }
 
 // Apaga as contas de teste cujo e-mail começa com o prefixo. Assinante só pode
-// ser excluído pendente (RF16): antes, volta o status para pendente.
+// ser excluído pendente (RF16): antes, volta o status para pendente. Os imóveis
+// da conta vão antes (imoveis.proprietario_id não apaga em cascata), com os
+// arquivos das fotos no Storage.
 export async function apagarContas(prefixo: string) {
   const admin = clienteAdmin();
   const { data, error } = await admin.auth.admin.listUsers({ perPage: 1000 });
   if (error) throw error;
   for (const conta of data.users.filter((u) => u.email?.startsWith(prefixo))) {
+    // Os arquivos das fotos não saem sozinhos com o imóvel: apaga a pasta de cada um.
+    const { data: imoveis } = await admin.from("imoveis").select("id").eq("proprietario_id", conta.id);
+    for (const { id } of imoveis ?? []) {
+      const { data: arquivos } = await admin.storage.from("fotos-imoveis").list(id, { limit: 100 });
+      if (arquivos?.length) {
+        await admin.storage.from("fotos-imoveis").remove(arquivos.map((arquivo) => `${id}/${arquivo.name}`));
+      }
+    }
+    const { error: erroImoveis } = await admin.from("imoveis").delete().eq("proprietario_id", conta.id);
+    if (erroImoveis) throw new Error(`apagarContas(${conta.email}), imóveis: ${erroImoveis.message}`);
     await admin
       .from("assinantes")
       .update({ status: "pendente", bloqueado_pelo_admin: false })

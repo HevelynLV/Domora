@@ -14,6 +14,10 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,
   reporter: [["list"], ["html", { open: "never" }]],
+  // O npm run dev compila cada tela na primeira visita (passo 4.6: a ida para
+  // /fotos levou 5 s com o servidor recém-aberto), e 5 s de espera, o padrão, não
+  // bastavam. Um erro de verdade continua falhando, só demora mais para avisar.
+  expect: { timeout: 15_000 },
   use: {
     baseURL: "http://localhost:3000",
     trace: "on-first-retry",

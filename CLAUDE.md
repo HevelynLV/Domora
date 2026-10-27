@@ -19,7 +19,7 @@ O projeto antigo se chamava Captador (repositório `HevelynLV/imobilink`, arquiv
 ## Regras do negócio
 
 - Só imóveis aprovados aparecem no catálogo, e só assinantes ativos veem o catálogo
-- Imóvel cadastrado pelo proprietário passa pela aprovação do admin. Imóvel captado pelo admin entra direto como disponível e fica vinculado à conta de proprietário do dono real
+- Imóvel cadastrado pelo proprietário passa pela aprovação do admin. Imóvel captado pelo admin (dados e fotos) fica vinculado à conta que o dono real criou no app e só entra no catálogo quando o dono aceita o termo de exclusividade
 - Todo imóvel é exclusivo do PAUTA por 6 meses. Durante esse prazo, o proprietário não tira o imóvel de venda. Antes do vencimento, proprietário e admin recebem aviso; sem renovação, o imóvel sai do catálogo sozinho
 - Não existe reserva: qualquer corretor assinante trabalha qualquer imóvel, ao mesmo tempo que outros corretores
 - A visita é sempre marcada pelo app: o corretor sugere um horário e o proprietário confirma ou recusa
@@ -51,15 +51,15 @@ Estas decisões ainda não foram tomadas. Se uma tarefa depender delas, PERGUNTE
 - Telefone com DDD é obrigatório para proprietário e assinante
 - Imobiliária e corretor autônomo cadastrados sempre entram com assinatura `pendente`, até o admin ativar
 - Status da assinatura: `pendente`, `ativo` e `vencido` (pagamento atrasado); o bloqueio é decisão do admin e fica à parte, na coluna `bloqueado_pelo_admin`. Tem acesso quem está `ativo` e não bloqueado. Desbloquear não libera um vencido: só o pagamento libera. O corretor convidado segue a assinatura da imobiliária: bloqueada ou vencida, os corretores dela perdem o acesso na hora. Decidido em 22/10/2026; bloqueio separado do status desde a auditoria da Etapa 2
-- Ações do admin que mexem no Supabase Auth (excluir imobiliária pendente com o usuário, convite por e-mail, criar a conta do dono de imóvel captado) usam `src/lib/supabase/admin.ts`, com `server-only` e uma chave secreta de produção separada das chaves pessoais de teste. Só depois de `exigirTipo("admin")` ou ao aceitar um convite válido. Decidido em 22/10/2026
+- Ações do admin que mexem no Supabase Auth (excluir imobiliária pendente com o usuário, convite por e-mail) usam `src/lib/supabase/admin.ts`, com `server-only` e uma chave secreta de produção separada das chaves pessoais de teste. Só depois de `exigirTipo("admin")` ou ao aceitar um convite válido. Decidido em 22/10/2026
 - O admin pode reprovar imóvel. O proprietário edita o imóvel reprovado e o reenvia por um passo explícito; editar não reenvia sozinho
 - Edição de imóvel disponível vale na hora, sem nova aprovação. Cada campo alterado, inclusive fotos, fica registrado para o admin revisar. Edição feita pelo admin não é registrada
 - A aprovação de imóvel falha se o imóvel mudou depois que o admin abriu a tela
-- O proprietário só apaga imóvel pendente de aprovação ou reprovado
-- A exclusividade de 6 meses conta da aprovação do admin; imóvel captado conta do cadastro. Decidido em 22/10/2026
+- O proprietário só apaga imóvel em rascunho, pendente de aprovação ou reprovado
+- A exclusividade de 6 meses conta da aprovação do admin; imóvel captado conta do aceite do dono. Decidido em 22/10/2026; captado mudado em 27/10/2026
 - Mostrar o contato aos corretores é uma escolha por imóvel, não da conta. O contato é o telefone e o e-mail da conta, e só chega ao corretor pela função `contato_do_proprietario()`, nunca por uma coluna do imóvel. Decidido em 22/10/2026
 - Tipos de imóvel e bairros de Florianópolis são listas fixas no banco, que só o admin altera. Decidido em 22/10/2026
-- Imóvel captado com dono sem conta: o admin cria a conta do dono, que recebe e-mail para criar a senha e aceita o termo de exclusividade no primeiro acesso (data e versão guardadas). O imóvel já entra disponível. Decidido em 22/10/2026
+- Imóvel captado: o dono cria a própria conta pelo app (o admin nunca cria conta); o admin procura essa conta, cadastra dados e fotos, e o imóvel fica "aguardando o aceite do dono", fora do catálogo, até o dono aceitar o termo daquele imóvel (com pelo menos uma foto). Enquanto espera, o admin muda as fotos ou apaga; o dono só aceita. Decidido em 27/10/2026 (substitui a decisão de 22/10/2026 de o admin criar a conta do dono)
 - A visita não é obrigatória antes da proposta. Cada corretor tem no máximo uma proposta em aberto (aguardando ou aceita) por imóvel; depois de recusada, pode mandar outra. O proprietário pode desfazer o aceite enquanto o contrato daquela proposta não foi enviado. Decidido em 22/10/2026
 - No contrato, vale o valor final do contrato, registrado pelo admin ao aprovar. Ao aprovar, além de o imóvel virar vendido, todas as outras propostas em aberto (aceitas e sem resposta) são recusadas e as visitas pendentes ou marcadas são canceladas, na mesma operação. Decidido em 22/10/2026
 - O endereço do imóvel fica visível para qualquer assinante ativo. A proteção contra desintermediação é contratual, no termo de assinatura
@@ -67,6 +67,7 @@ Estas decisões ainda não foram tomadas. Se uma tarefa depender delas, PERGUNTE
 - Cache Components do Next.js 16 fica ligado (`cacheComponents` e `partialPrefetching` em `next.config.ts`, como o Next 16.4 cria). Nada é cacheado sem `"use cache"`; tudo o que lê a sessão (cookies) fica dentro de um `<Suspense>`, e a sessão nunca é lida no topo de um layout. Todo arquivo que lê a sessão começa com `import "server-only"` (ou importa um arquivo que tem, como `src/lib/supabase/server.ts`), para o build falhar se ele for parar no navegador. Decidido em 20/10/2026, porque o Next vai tornar isso obrigatório na próxima versão grande
 - Login sempre conectado até a pessoa sair, sem "manter conectado". O cadastro pede só o número do CRECI (UF sempre SC) e a comparação de CRECI repetido ignora pontos, traços e espaços. O link de recuperação de senha usa `token_hash` e funciona em qualquer navegador. O aceite do termo de assinatura no cadastro só entra no passo 13.4. Decidido em 22/10/2026 (plano da Etapa 3)
 - Os textos dos termos ficam para depois: a Etapa 4 usa um termo de exclusividade provisório, com versão marcada como provisória e guardada no aceite. O texto final entra como versão nova antes do piloto (Etapa 13); aceite da versão provisória é só de teste. Decidido em 26/10/2026
+- Cadastro do imóvel na ordem do protótipo (dados, fotos, termo) com o status `rascunho`: o passo 1 cria o rascunho, o aceite do termo no passo 3 o passa para pendente. Rascunho só o dono vê, edita e apaga, e não entra na fila do admin. O dono também edita o imóvel pendente (dados, fotos e contato), sem registro de edições; a versão sobe e a aprovação de uma tela antiga falha. O termo fica numa tabela de versões e só a vigente pode ser aceita. Tipos: casa, apartamento, cobertura, terreno e sala comercial; bairros: a lista oficial de Florianópolis. Fotos: JPG, PNG ou WebP, até 10 MB, reduzidas no navegador, de 1 a 20 por imóvel. A escolha do contato fica na página do imóvel do proprietário. Decidido em 26/10/2026 (plano da Etapa 4)
 - Fotos e PDFs não passam por Server Action (o limite padrão é 1 MB): o navegador envia direto para o Supabase Storage, com permissão dada pelo servidor (Etapas 4 e 9)
 
 ## Fora do escopo do MVP

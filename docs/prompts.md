@@ -276,7 +276,7 @@ Depois confira o "Pronto quando" da Etapa 3, item por item. Se estiver tudo cert
 
 ## Etapa 4 — Imóvel
 
-**Pronto quando:** imóvel do proprietário, com fotos e termo aceito, aparece como pendente; imóvel captado pelo admin entra disponível e vinculado ao dono.
+**Pronto quando:** imóvel do proprietário, com fotos e termo aceito, aparece como pendente; imóvel captado pelo admin fica vinculado ao dono e entra disponível quando ele aceita o termo.
 **Telas do protótipo:** ProImoveis, ProNovo, ProFotos, ProTermo, ProEnviado, AdmPainel, AdmAprovar, AdmCaptar e AdmEdicoes, e as versões Site de cada uma.
 **Decidir antes:** nada do termo: a etapa usa um texto provisório do termo de exclusividade, com versão marcada como provisória (decidido em 26/10/2026). Veja as outras pendências da Etapa 4 no ROADMAP.md.
 

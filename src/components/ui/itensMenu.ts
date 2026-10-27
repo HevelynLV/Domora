@@ -6,6 +6,9 @@ export type ItemMenu = {
   rotulo: string;
   icone: NomeIcone;
   contador?: number;
+  // A página do item é uma tela de passo a passo, sem o menu de baixo (ex.: "Novo
+  // imóvel" abre o passo 1 do cadastro, que no protótipo não tem menu).
+  semMenuInferior?: boolean;
 };
 
 // Acende o item do endereço atual e também das páginas dentro dele

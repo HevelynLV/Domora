@@ -10,7 +10,7 @@ export const menuProprietario: MenusDaArea = {
   rotulo: "Menu do proprietário",
   celular: [
     { href: "/proprietario", rotulo: "Imóveis", icone: "imoveis" },
-    { href: "/proprietario/imoveis/novo", rotulo: "Novo imóvel", icone: "novo" }, // Etapa 4
+    { href: "/proprietario/imoveis/novo", rotulo: "Novo imóvel", icone: "novo", semMenuInferior: true },
     { href: "/proprietario/avisos", rotulo: "Avisos", icone: "avisos" }, // Etapa 10
     { href: "/proprietario/conta", rotulo: "Conta", icone: "conta" }, // passo 3.5
   ],
@@ -44,7 +44,7 @@ export const menuAdmin: MenusDaArea = {
   rotulo: "Menu do admin",
   celular: [
     { href: "/admin", rotulo: "Painel", icone: "painel" },
-    { href: "/admin/imoveis", rotulo: "Imóveis", icone: "imoveis" }, // Etapa 4
+    { href: "/admin/imoveis", rotulo: "Imóveis", icone: "imoveis", semMenuInferior: true },
     { href: "/admin/assinantes", rotulo: "Assinantes", icone: "assinantes" }, // Etapa 5
     { href: "/admin/contratos", rotulo: "Contratos", icone: "contratos" }, // Etapa 9
   ],
