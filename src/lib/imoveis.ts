@@ -26,6 +26,7 @@ export type ImovelDoDono = {
   status: StatusImovel;
   motivo_reprovacao: string | null;
   exclusividade_fim: string | null;
+  versao: number;
   fotos: number;
 };
 
@@ -64,7 +65,7 @@ export async function imovelDoDono(id: string, donoId: string): Promise<ImovelDo
   const { data, error } = await supabase
     .from("imoveis")
     .select(
-      "id, titulo, descricao, tipo_id, endereco, bairro_id, preco, quartos, banheiros, vagas, area, mostrar_contato, status, motivo_reprovacao, exclusividade_fim, tipos_imovel(nome), bairros(nome), fotos_imovel(count)",
+      "id, titulo, descricao, tipo_id, endereco, bairro_id, preco, quartos, banheiros, vagas, area, mostrar_contato, status, motivo_reprovacao, exclusividade_fim, versao, tipos_imovel(nome), bairros(nome), fotos_imovel(count)",
     )
     .eq("id", id)
     .eq("proprietario_id", donoId)

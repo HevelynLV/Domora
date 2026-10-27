@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { startTransition, useActionState, useState } from "react";
 
 import { BarraDoPasso } from "@/components/imovel/MolduraDoCadastro";
@@ -19,23 +20,37 @@ const PONTOS = [
 // exclusividade, o texto do termo, a escolha de mostrar o contato e o aceite. A
 // versão do termo que está na tela vai junto com o envio. Serve ao passo 3 do
 // cadastro (acao = enviarParaAprovacao) e ao aceite do imóvel captado
-// (acao = aceitarTermoCaptado), com o id do imóvel já preso na action (bind).
+// (acao = aceitarTermoCaptado), com o id do imóvel já preso na action (bind). No
+// captado, versaoDoImovel vai junto: se a equipe PAUTA mudou o imóvel enquanto o
+// dono lia, a tela recarrega os dados novos e o aceite tem que ser marcado de novo.
 export function FormTermo({
   termo,
   mostrarContato,
   acao,
+  versaoDoImovel,
   rotuloEnviar = "Enviar para aprovação",
+  rotuloSemAceite = "Aceite o termo para enviar",
   voltar,
 }: {
   termo: { versao: string; texto: string; provisorio: boolean };
   mostrarContato: boolean;
   acao: (anterior: EstadoEnvio, formData: FormData) => Promise<EstadoEnvio>;
+  versaoDoImovel?: number;
   rotuloEnviar?: string;
+  rotuloSemAceite?: string;
   voltar?: string;
 }) {
-  const [estado, enviar, enviando] = useActionState(acao, {} satisfies EstadoEnvio);
+  const router = useRouter();
   const [contato, setContato] = useState(mostrarContato);
   const [aceito, setAceito] = useState(false);
+  const [estado, enviar, enviando] = useActionState(async (anterior: EstadoEnvio, formData: FormData) => {
+    const resposta = await acao(anterior, formData);
+    if (resposta.mudou) {
+      setAceito(false);
+      router.refresh();
+    }
+    return resposta;
+  }, {} satisfies EstadoEnvio);
 
   return (
     <form
@@ -49,6 +64,7 @@ export function FormTermo({
     >
       <input type="hidden" name="termo_versao" value={termo.versao} />
       <input type="hidden" name="mostrar_contato" value={contato ? "sim" : "nao"} />
+      {versaoDoImovel !== undefined && <input type="hidden" name="versao_imovel" value={versaoDoImovel} />}
 
       <div className="flex flex-col gap-4 px-5 md:px-0">
         <div className="flex flex-col gap-3 rounded-cartao border border-line bg-card p-4 md:border-0 md:p-0">
@@ -126,7 +142,7 @@ export function FormTermo({
           </Link>
         )}
         <Botao type="submit" disabled={!aceito || enviando}>
-          {enviando ? "Enviando…" : aceito ? rotuloEnviar : "Aceite o termo para enviar"}
+          {enviando ? "Enviando…" : aceito ? rotuloEnviar : rotuloSemAceite}
         </Botao>
       </BarraDoPasso>
     </form>

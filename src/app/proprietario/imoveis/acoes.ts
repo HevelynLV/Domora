@@ -160,19 +160,29 @@ export async function editarImovel(id: string, _anterior: EstadoEdicao, formData
 
 // O dono aceita o termo do imóvel que a equipe PAUTA captou para ele (passo 4.7):
 // o imóvel entra no catálogo e os 6 meses de exclusividade começam agora. Quem
-// confere dono, status, foto e versão do termo é a função aceitar_termo_captado().
+// confere dono, status, foto, versão do termo e versão do imóvel é a função
+// aceitar_termo_captado(). versao_imovel: a versão que a tela mostrou ao dono (o
+// admin ainda pode mudar o captado enquanto ele lê).
 export async function aceitarTermoCaptado(id: string, _anterior: EstadoEnvio, formData: FormData): Promise<EstadoEnvio> {
   await exigirTipo("proprietario");
-  if (!idDeImovelValido(id)) return { erro: "Imóvel não encontrado." };
+  const versao = Number(formData.get("versao_imovel"));
+  if (!idDeImovelValido(id) || !Number.isInteger(versao)) return { erro: "Imóvel não encontrado." };
   if (formData.get("aceito") !== "sim") return { erro: "Aceite o termo de exclusividade para publicar." };
 
   const supabase = await criarClienteServidor();
   const { error } = await supabase.rpc("aceitar_termo_captado", {
     p_imovel: id,
+    p_versao: versao,
     p_termo_versao: String(formData.get("termo_versao") ?? ""),
     p_mostrar_contato: formData.get("mostrar_contato") === "sim",
   });
   if (error) {
+    if (error.code === "P0001" && error.message.includes("mudou")) {
+      return {
+        erro: "A equipe PAUTA mudou este imóvel enquanto você lia. Confira os dados de novo antes de aceitar.",
+        mudou: true,
+      };
+    }
     if (error.code === "P0001" && error.message.includes("fotos")) {
       return { erro: "O imóvel ainda não tem fotos. Fale com a equipe PAUTA." };
     }
@@ -234,7 +244,7 @@ export async function mudarContato(id: string, mostrar: boolean): Promise<{ erro
   return { mostrar: data[0].mostrar_contato };
 }
 
-export type EstadoEnvio = { erro?: string; termoMudou?: boolean };
+export type EstadoEnvio = { erro?: string; termoMudou?: boolean; mudou?: boolean };
 
 export async function enviarParaAprovacao(id: string, _anterior: EstadoEnvio, formData: FormData): Promise<EstadoEnvio> {
   const usuario = await exigirTipo("proprietario");

@@ -135,6 +135,33 @@ test("admin capta para a dona; o imóvel só entra no catálogo quando ela aceit
   expect(vistoDepois).toHaveLength(1);
 });
 
+test("se o admin muda o captado enquanto a dona lê o termo, o aceite é barrado e a tela mostra os dados novos", async ({ browser }) => {
+  const id = await captarPelaApi(`Captado que muda ${test.info().project.name}`);
+
+  const daDona = await paginaDe(browser, "dona");
+  await daDona.goto(`/proprietario/imoveis/${id}/aceitar`);
+  await expect(daDona.getByText("R$ 3.200.000")).toBeVisible();
+  await expect(daDona.getByRole("button", { name: "Aceite o termo para continuar" })).toBeDisabled();
+  await daDona.getByLabel("Li e aceito o termo de exclusividade de 6 meses.").check();
+
+  // O admin muda o preço com a tela da dona aberta.
+  const { error } = await sessoes.admin.cliente.from("imoveis").update({ preco: 2900000 }).eq("id", id);
+  expect(error).toBeNull();
+
+  await daDona.getByRole("button", { name: "Aceitar e publicar" }).click();
+  await expect(daDona.getByRole("alert").filter({ hasText: "A equipe PAUTA mudou este imóvel enquanto você lia." })).toBeVisible();
+  await expect(daDona.getByText("R$ 2.900.000")).toBeVisible();
+  expect((await imovel(id))!.status).toBe("captado");
+
+  // Com os dados novos na tela, o aceite tem que ser marcado de novo, e aí vale.
+  await expect(daDona.getByLabel("Li e aceito o termo de exclusividade de 6 meses.")).not.toBeChecked();
+  await daDona.getByLabel("Li e aceito o termo de exclusividade de 6 meses.").check();
+  await daDona.getByRole("button", { name: "Aceitar e publicar" }).click();
+  await expect(daDona).toHaveURL(new RegExp(`/${id}\\?publicado=1$`));
+  expect((await imovel(id))!.status).toBe("disponivel");
+  await daDona.context().close();
+});
+
 test("a busca só acha proprietário; o admin apaga o captado com as fotos", async ({ browser }) => {
   const titulo = `Captado para apagar ${test.info().project.name}`;
   const id = await captarPelaApi(titulo);

@@ -58,7 +58,9 @@ async function Conteudo({ params }: { params: Promise<{ id: string }> }) {
           termo={termo}
           mostrarContato={imovel.mostrar_contato}
           acao={aceitarTermoCaptado.bind(null, imovel.id)}
+          versaoDoImovel={imovel.versao}
           rotuloEnviar="Aceitar e publicar"
+          rotuloSemAceite="Aceite o termo para continuar"
         />
       </div>
     </div>

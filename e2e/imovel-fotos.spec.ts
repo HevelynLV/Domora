@@ -5,8 +5,8 @@ import { apagarContas, clienteAdmin, criarConta, entrarComo, mudarAssinatura } f
 
 // RF09: fotos do imóvel, passo 4.3. O navegador reduz e converte cada foto para
 // JPEG (grande e miniatura) e manda direto para o bucket privado "fotos-imoveis".
-// Quem apaga arquivo no Storage só dá para testar pela API (o banco barra delete
-// direto em storage.objects), por isso esses casos estão aqui e não no testar_rls.sql.
+// Quem apaga arquivo no Storage também é testado aqui, pela API, como o app e um
+// atacante fariam (o testar_rls.sql testa as mesmas regras direto no banco).
 
 const PREFIXO = "e2e-fotos-";
 const email = (nome: string) => `${PREFIXO}${nome}@exemplo.com`;
@@ -158,12 +158,19 @@ test("arquivo que não é foto, foto grande demais e foto a mais são recusados"
   await pagina.context().close();
 });
 
-test("pela API do Storage: só JPEG entra, e só a dona apaga a foto (corretor e outra proprietária não)", async () => {
+test("pela API do Storage: só JPEG entra, ninguém apaga nem troca foto registrada, e a dona apaga arquivo solto", async () => {
   const imovelId = await criarImovel("disponivel");
   const caminho = `${imovelId}/foto-da-dona.jpg`;
+  const miniatura = `${imovelId}/foto-da-dona-mini.jpg`;
+  const solto = `${imovelId}/solto.jpg`;
   const admin = clienteAdmin().storage.from(BALDE);
   const jpeg = Buffer.from([0xff, 0xd8, 0xff, 0xd9]);
   await admin.upload(caminho, jpeg, { contentType: "image/jpeg" });
+  await admin.upload(solto, jpeg, { contentType: "image/jpeg" });
+  // A foto está registrada no imóvel (a miniatura dela ainda não chegou ao balde).
+  const { error: erroFoto } = await clienteAdmin().from("fotos_imovel").insert({ imovel_id: imovelId, caminho, ordem: 1 });
+  expect(erroFoto).toBeNull();
+  const versaoAntes = (await clienteAdmin().from("imoveis").select("versao").eq("id", imovelId).single()).data!.versao;
 
   // O balde recusa o que não é JPEG, mesmo da dona.
   const png = await sessoes.dona.cliente.storage
@@ -183,9 +190,21 @@ test("pela API do Storage: só JPEG entra, e só a dona apaga a foto (corretor e
   const intrusa = await sessoes.outra.cliente.storage.from(BALDE).upload(`${imovelId}/intrusa.jpg`, jpeg, { contentType: "image/jpeg" });
   expect(intrusa.error).not.toBeNull();
 
-  // A dona apaga.
+  // A dona também não apaga o arquivo de uma foto registrada (a troca não passaria
+  // pelo registro de edições nem subiria a versão do imóvel)...
   await sessoes.dona.cliente.storage.from(BALDE).remove([caminho]);
-  expect((await admin.exists(caminho)).data).toBe(false);
+  expect((await admin.exists(caminho)).data).toBe(true);
+  // ...nem sobrescreve, nem envia a miniatura de uma foto registrada.
+  const troca = await sessoes.dona.cliente.storage.from(BALDE).upload(caminho, jpeg, { contentType: "image/jpeg", upsert: true });
+  expect(troca.error).not.toBeNull();
+  const mini = await sessoes.dona.cliente.storage.from(BALDE).upload(miniatura, jpeg, { contentType: "image/jpeg" });
+  expect(mini.error).not.toBeNull();
+  expect((await admin.exists(miniatura)).data).toBe(false);
+  expect((await clienteAdmin().from("imoveis").select("versao").eq("id", imovelId).single()).data!.versao).toBe(versaoAntes);
+
+  // Arquivo sem foto registrada (ex.: o que sobra depois de tirar a foto) a dona apaga.
+  await sessoes.dona.cliente.storage.from(BALDE).remove([solto]);
+  expect((await admin.exists(solto)).data).toBe(false);
 });
 
 test("outra proprietária não recebe links de envio para o imóvel da dona", async ({ browser }) => {

@@ -3478,7 +3478,7 @@ do $$ declare v text; n int; i uuid; begin
     i := pg_temp.captar('00000000-0000-4000-a000-000000000001');
     perform pg_temp.criar_foto(i, 1);
     perform pg_temp.entrar_como('00000000-0000-4000-a000-000000000001');
-    perform public.aceitar_termo_captado(i, '2026-10-provisorio', true);
+    perform public.aceitar_termo_captado(i, (select versao from public.imoveis where id = i), '2026-10-provisorio', true);
     select status || ' / ' || termo_versao
            || ' / ' || case when termo_aceito_em > now() - interval '1 minute' then 'aceito agora' else 'sem data' end
            || ' / ' || case when exclusividade_inicio > now() - interval '1 minute'
@@ -3508,18 +3508,18 @@ do $$ declare v text := ''; n int; i uuid; j uuid; begin
     perform pg_temp.criar_foto(j, 1);
     perform pg_temp.entrar_como('00000000-0000-4000-a000-000000000001');
     begin
-      perform public.aceitar_termo_captado(i, '2026-10-provisorio', false);
+      perform public.aceitar_termo_captado(i, (select versao from public.imoveis where id = i), '2026-10-provisorio', false);
       v := 'permitido';
     exception when others then v := sqlstate || ' ' || sqlerrm;
     end;
     begin
-      perform public.aceitar_termo_captado(j, 'teste-antiga', false);
+      perform public.aceitar_termo_captado(j, (select versao from public.imoveis where id = j), 'teste-antiga', false);
       v := v || ' / permitido';
     exception when others then v := v || ' / ' || sqlstate || ' ' || sqlerrm;
     end;
     perform pg_temp.entrar_como('00000000-0000-4000-a000-000000000002');
     begin
-      perform public.aceitar_termo_captado(j, '2026-10-provisorio', false);
+      perform public.aceitar_termo_captado(j, (select versao from public.imoveis where id = j), '2026-10-provisorio', false);
       v := v || ' / permitido';
     exception when others then v := v || ' / ' || sqlstate || ' ' || sqlerrm;
     end;
@@ -3579,6 +3579,150 @@ do $$ declare v text := ''; n int; begin
   insert into resultado (teste, esperado, obtido)
   values ('Busca de dono: o admin acha proprietário (e não assinante); proprietário não busca',
           'Marina Buscável / 0 / P0001 Só o admin procura proprietários', v);
+end $$;
+
+-- ---------------------------------------------------------------
+-- 9. Auditoria da Etapa 4 (migrations 20261027165415_fotos_registradas_protegidas
+--    e 20261027165423_aceite_captado_com_versao)
+-- ---------------------------------------------------------------
+-- Apagar arquivo: o Supabase só deixa apagar direto em storage.objects com
+-- storage.allow_delete_query ligado (é o que a API do Storage faz); valem as mesmas
+-- regras do bucket. O set_config(..., true) é desfeito junto com o bloco.
+
+do $$ declare v text := ''; n int; i uuid; begin
+  begin
+    perform pg_temp.criar_proprietario('00000000-0000-4000-a000-000000000001');
+    i := pg_temp.criar_imovel('00000000-0000-4000-a000-000000000001', 'disponivel');
+    perform pg_temp.criar_foto(i, 1);  -- registrada: {i}/foto-1.jpg
+    perform pg_temp.criar_foto(i, 2);  -- registrada, sem arquivo (como se ele já tivesse sido apagado)
+    perform pg_temp.criar_arquivo(i, 'foto-1.jpg');
+    perform pg_temp.criar_arquivo(i, 'foto-1-mini.jpg');
+    perform pg_temp.criar_arquivo(i, 'solta.jpg');
+    perform set_config('storage.allow_delete_query', 'true', true);
+    perform pg_temp.entrar_como('00000000-0000-4000-a000-000000000001');
+    delete from storage.objects where bucket_id = 'fotos-imoveis' and name = i || '/foto-1.jpg';
+    get diagnostics n = row_count;
+    v := n::text;
+    delete from storage.objects where bucket_id = 'fotos-imoveis' and name = i || '/foto-1-mini.jpg';
+    get diagnostics n = row_count;
+    v := v || ' / ' || n;
+    delete from storage.objects where bucket_id = 'fotos-imoveis' and name = i || '/solta.jpg';
+    get diagnostics n = row_count;
+    v := v || ' / ' || n;
+    begin
+      perform pg_temp.criar_arquivo(i, 'foto-2.jpg');
+      v := v || ' / permitido';
+    exception when others then v := v || ' / ' || pg_temp.bloqueio(sqlstate, sqlerrm);
+    end;
+    begin
+      perform pg_temp.criar_arquivo(i, 'foto-2-mini.jpg');
+      v := v || ' / permitido';
+    exception when others then v := v || ' / ' || pg_temp.bloqueio(sqlstate, sqlerrm);
+    end;
+    raise exception using errcode = 'TR001';
+  exception when sqlstate 'TR001' then null;
+            when others then v := pg_temp.bloqueio(sqlstate, sqlerrm);
+  end;
+  insert into resultado (teste, esperado, obtido)
+  values ('Dono não apaga nem reenvia arquivo de foto registrada (foto e miniatura); arquivo solto ele apaga',
+          '0 / 0 / 1 / bloqueado (42501) / bloqueado (42501)', v);
+end $$;
+
+do $$ declare v text := ''; n int; i uuid; begin
+  begin
+    perform set_config('storage.allow_delete_query', 'true', true);
+    perform pg_temp.tipo_teste(); perform pg_temp.bairro_teste();
+    perform pg_temp.criar_proprietario('00000000-0000-4000-a000-000000000001');
+    perform pg_temp.criar_admin('00000000-0000-4000-a000-000000000009');
+    perform pg_temp.entrar_como('00000000-0000-4000-a000-000000000009');
+    i := pg_temp.captar('00000000-0000-4000-a000-000000000001');
+    perform pg_temp.criar_arquivo(i, 'foto-1.jpg');  -- como o app: o arquivo antes da linha
+    perform pg_temp.criar_foto(i, 1);
+    delete from storage.objects where bucket_id = 'fotos-imoveis' and name = i || '/foto-1.jpg';
+    get diagnostics n = row_count;
+    v := n::text;
+    raise exception using errcode = 'TR001';
+  exception when sqlstate 'TR001' then null;
+            when others then v := pg_temp.bloqueio(sqlstate, sqlerrm);
+  end;
+  insert into resultado (teste, esperado, obtido)
+  values ('Admin também não apaga arquivo de foto registrada do captado', '0', v);
+end $$;
+
+do $$ declare v text := ''; n int; i uuid; begin
+  begin
+    perform pg_temp.criar_proprietario('00000000-0000-4000-a000-000000000001');
+    i := pg_temp.criar_imovel('00000000-0000-4000-a000-000000000001', 'disponivel');
+    perform pg_temp.criar_foto(i, 1);
+    perform pg_temp.criar_foto(i, 2);
+    perform pg_temp.criar_arquivo(i, 'foto-2.jpg');
+    perform pg_temp.criar_arquivo(i, 'foto-2-mini.jpg');
+    perform set_config('storage.allow_delete_query', 'true', true);
+    perform pg_temp.entrar_como('00000000-0000-4000-a000-000000000001');
+    -- Como o app faz (removerFoto): primeiro a linha, depois os arquivos.
+    delete from public.fotos_imovel where imovel_id = i and ordem = 2;
+    delete from storage.objects
+    where bucket_id = 'fotos-imoveis' and name in (i || '/foto-2.jpg', i || '/foto-2-mini.jpg');
+    get diagnostics n = row_count;
+    v := n::text;
+    -- E envia uma foto nova (nome novo, ainda sem linha).
+    perform pg_temp.criar_arquivo(i, 'nova.jpg');
+    perform pg_temp.criar_arquivo(i, 'nova-mini.jpg');
+    v := v || ' / ' || pg_temp.arquivos_visiveis();
+    raise exception using errcode = 'TR001';
+  exception when sqlstate 'TR001' then null;
+            when others then v := pg_temp.bloqueio(sqlstate, sqlerrm);
+  end;
+  insert into resultado (teste, esperado, obtido)
+  values ('Fluxo do app: tirar a foto (linha, depois arquivos) e enviar uma nova continua funcionando', '2 / 2', v);
+end $$;
+
+do $$ declare v text; n int; begin
+  begin
+    perform pg_temp.entrar_como_visitante();
+    begin
+      perform public.arquivo_de_foto_registrada('00000000-0000-4000-a000-000000000000/foto.jpg');
+      v := 'permitido';
+    exception when others then v := pg_temp.bloqueio(sqlstate, sqlerrm);
+    end;
+    raise exception using errcode = 'TR001';
+  exception when sqlstate 'TR001' then null;
+            when others then v := pg_temp.bloqueio(sqlstate, sqlerrm);
+  end;
+  insert into resultado (teste, esperado, obtido)
+  values ('Visitante sem login não chama arquivo_de_foto_registrada()', 'bloqueado (42501)', v);
+end $$;
+
+do $$ declare v text := ''; n int; i uuid; vista int; begin
+  begin
+    perform pg_temp.tipo_teste(); perform pg_temp.bairro_teste();
+    perform pg_temp.criar_proprietario('00000000-0000-4000-a000-000000000001');
+    perform pg_temp.criar_admin('00000000-0000-4000-a000-000000000009');
+    perform pg_temp.entrar_como('00000000-0000-4000-a000-000000000009');
+    i := pg_temp.captar('00000000-0000-4000-a000-000000000001');
+    perform pg_temp.criar_foto(i, 1);
+    -- O dono abre a tela do termo...
+    perform pg_temp.entrar_como('00000000-0000-4000-a000-000000000001');
+    select versao into vista from public.imoveis where id = i;
+    -- ...e o admin muda o preço enquanto ele lê.
+    perform pg_temp.entrar_como('00000000-0000-4000-a000-000000000009');
+    update public.imoveis set preco = 2400000 where id = i;
+    perform pg_temp.entrar_como('00000000-0000-4000-a000-000000000001');
+    begin
+      perform public.aceitar_termo_captado(i, vista, '2026-10-provisorio', false);
+      v := 'permitido';
+    exception when others then v := sqlstate || ' ' || sqlerrm;
+    end;
+    select v || ' / ' || status into v from public.imoveis where id = i;
+    perform public.aceitar_termo_captado(i, (select versao from public.imoveis where id = i), '2026-10-provisorio', false);
+    select v || ' / ' || status into v from public.imoveis where id = i;
+    raise exception using errcode = 'TR001';
+  exception when sqlstate 'TR001' then null;
+            when others then v := pg_temp.bloqueio(sqlstate, sqlerrm);
+  end;
+  insert into resultado (teste, esperado, obtido)
+  values ('Aceite do captado com a versão velha é barrado; com a versão atual, entra',
+          'P0001 O imóvel mudou depois que a tela foi aberta / captado / disponivel', v);
 end $$;
 
 -- ---------------------------------------------------------------
