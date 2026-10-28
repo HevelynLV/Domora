@@ -83,7 +83,7 @@ O que o app faz. Todos os 32 estão a construir no repositório novo (RF01 a RF0
 | RF13 | Imóvel | Proprietário escolhe se mostra o próprio contato aos corretores | A construir |
 | RF14 | Admin | Aprovar ou reprovar imóvel cadastrado pelo proprietário; a aprovação falha se o imóvel mudou depois que o admin abriu a tela | A construir |
 | RF15 | Admin | Ativar ou bloquear assinante depois de conferir o CRECI à mão | A construir |
-| RF16 | Admin | Excluir imobiliária pendente com o usuário dela, liberando o CRECI | A construir |
+| RF16 | Admin | Excluir imobiliária ou corretor autônomo pendente com o usuário dele, liberando o CRECI | A construir |
 | RF17 | Admin | Revisar as edições de imóveis disponíveis e marcar como revisadas | A construir |
 | RF18 | Catálogo | Só assinantes ativos veem o catálogo, e só imóveis aprovados aparecem | A construir |
 | RF19 | Catálogo | Filtrar o catálogo no celular e no site (quais filtros: a definir) | A construir |
@@ -149,6 +149,20 @@ O projeto recomeça do zero num repositório `PAUTA` e num projeto Supabase novo
 | 12. Exclusividade | Aviso de vencimento e renovação | Sem renovação, o imóvel sai do catálogo sozinho | Antecedência do aviso |
 | 13. PWA, testes e deploy | SMTP, PWA, roteiro completo, Vercel | O app abre no celular de outra pessoa pelo endereço público | Texto final dos dois termos |
 
+## Decisões tomadas em 28/10/2026 (plano da Etapa 5)
+
+Substituem, sobre o CRECI, a decisão de 22/10/2026 (plano da Etapa 3), marcada abaixo.
+
+- O cadastro pede o número do CRECI **com a letra**: J (pessoa jurídica, o CRECI da empresa) ou F (pessoa física, o CRECI do corretor). CRECI sem letra é recusado, na tela e no banco. Assim `12345` e `12345-J` não entram como dois CRECIs diferentes.
+- Imobiliária só se cadastra com CRECI J. Corretor autônomo pode usar J ou F (o autônomo que abriu empresa tem CRECI J). O corretor convidado não informa CRECI: vale o da imobiliária.
+- Na comparação de CRECI repetido, pontos, traços e espaços continuam não contando ("12.345-J" e "12345J" são o mesmo CRECI). O admin continua conferindo o CRECI à mão antes de ativar.
+- O responsável pela imobiliária remove corretores da equipe na tela Equipe. O corretor removido perde o acesso ao catálogo na hora; a conta dele não é apagada (ele vê a tela de acesso suspenso) e continua ligada à imobiliária só como histórico. O responsável não remove a si mesmo. A Visão geral e o protótipo não tinham essa ação: sem ela, quem sai da imobiliária continuaria vendo o catálogo.
+- O corretor removido que for para outra imobiliária entra por um convite novo com **outra conta, de outro e-mail**. A conta antiga continua presa à imobiliária anterior, guardando o histórico dela.
+- Convite por e-mail sem envio automático até a Etapa 13: o responsável digita o e-mail do corretor, o PAUTA cria o convite preso a esse e-mail e mostra o link para o responsável mandar (WhatsApp ou o e-mail dele). Só esse e-mail consegue usar o convite. Quando o SMTP próprio entrar (passo 13.2), o PAUTA passa a mandar o e-mail sozinho, com o mesmo link. O `inviteUserByEmail` do Supabase não é usado (ele cria a conta antes de o corretor informar nome e telefone), então o convite não usa a chave secreta.
+- Convite por link, sem e-mail ("Copiar link"): cada clique gera um link novo, que vale para uma pessoa só e vence como os outros convites. Ele aparece na lista da equipe como convite por link aguardando, e o responsável pode cancelar. Não existe link fixo da imobiliária que sirva para várias pessoas.
+- O admin exclui também o corretor autônomo pendente, com o usuário dele, liberando o CRECI (RF16 ampliado): o risco de alguém travar o CRECI de outra pessoa é o mesmo da imobiliária. Assinante ativo, vencido ou bloqueado continua sem poder ser excluído.
+- O convite (por e-mail ou por link) vale 7 dias. Vencido, o responsável gera outro.
+
 ## Decisões tomadas em 27/10/2026 (passo 4.7, captação)
 
 Substituem as decisões de 22/10/2026 sobre o imóvel captado (marcadas abaixo).
@@ -173,7 +187,7 @@ Substituem as decisões de 22/10/2026 sobre o imóvel captado (marcadas abaixo).
 ## Decisões tomadas em 22/10/2026 (plano da Etapa 3)
 
 - O login fica sempre conectado até a pessoa sair: não existe a opção "manter conectado" (o app é usado principalmente no celular).
-- O cadastro pede só o número do CRECI. A UF é sempre SC, porque o piloto é só em Florianópolis. Na comparação de CRECI repetido, pontos, traços e espaços não contam ("12.345-J" e "12345J" são o mesmo CRECI).
+- O cadastro pede só o número do CRECI (**mudado em 28/10/2026**: agora com a letra J ou F obrigatória, ver acima). A UF é sempre SC, porque o piloto é só em Florianópolis. Na comparação de CRECI repetido, pontos, traços e espaços não contam ("12.345-J" e "12345J" são o mesmo CRECI).
 - O link do e-mail de recuperação de senha funciona em qualquer navegador (modelo do e-mail com `token_hash` no painel do Supabase, trocado na Etapa 3), não só no navegador em que foi pedido.
 - O aceite do termo de assinatura entra no cadastro de imobiliária e autônomo só no passo 13.4, quando o texto do termo existir. Até lá, o cadastro não mostra a caixa de aceite.
 
@@ -185,7 +199,7 @@ Decididas antes do passo 2.1, porque mudam tabelas ou status do banco.
 - A assinatura tem três status: pendente, ativo e vencido (pagamento atrasado no Asaas). O bloqueio é decisão do admin e fica à parte do status (coluna `bloqueado_pelo_admin`, desde a auditoria da Etapa 2), para o admin não tirar ninguém do vencido sem pagamento. Bloqueado e vencido perdem o acesso. Desbloquear não libera quem está vencido: só o pagamento libera.
 - O corretor convidado segue a assinatura da imobiliária: se a imobiliária for bloqueada ou vencer, os corretores dela perdem o acesso na hora.
 - O corretor autônomo se cadastra pela tela pública, com o próprio CRECI, e entra pendente até o admin ativar, como a imobiliária. O cadastro pelo app passa a ser como proprietário, imobiliária ou corretor autônomo.
-- As ações do admin que mexem no login das pessoas (excluir a imobiliária pendente com o usuário dela, mandar o convite por e-mail) usam uma chave secreta de produção, separada das chaves pessoais de teste, só no servidor (`src/lib/supabase/admin.ts`, com `server-only`, sem `NEXT_PUBLIC_`). Ela só é usada depois de conferir que quem pede é admin, ou ao aceitar um convite válido.
+- As ações do admin que mexem no login das pessoas (excluir a imobiliária pendente com o usuário dela; **mudado em 28/10/2026**: o convite não usa mais a chave secreta) usam uma chave secreta de produção, separada das chaves pessoais de teste, só no servidor (`src/lib/supabase/admin.ts`, com `server-only`, sem `NEXT_PUBLIC_`). Ela só é usada depois de conferir que quem pede é admin.
 
 **Imóvel**
 - Os 6 meses de exclusividade começam a contar na aprovação do admin. ~~Imóvel captado pelo admin começa a contar no cadastro, porque já entra disponível.~~ (Substituída em 27/10/2026: o captado conta do aceite do dono.)

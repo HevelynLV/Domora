@@ -2,8 +2,20 @@
 
 ## Onde paramos
 
-Última atualização: 27/10/2026 · por Hevelyn
-Etapa atual: 4. Imóvel, concluída na branch `etapa-4-imovel` (passos 4.1 a 4.9 feitos). Próximo: `git push -u origin etapa-4-imovel`, o Pull Request da Etapa 4 e, depois do merge, a Etapa 5 (passo 5.1)
+Última atualização: 28/10/2026 · por Gabriel
+Etapa atual: 5. Assinantes, na branch `etapa-5-assinantes` (passo 5.1 em andamento). A Etapa 4 foi para a `main` (Pull Request #5)
+
+Etapa 5:
+- 5.1 em andamento (28/10/2026): plano em discussão, uma decisão por vez
+  - Decidido: CRECI com letra obrigatória (J ou F); imobiliária só com J, autônomo com J ou F (Visão geral, "Decisões tomadas em 28/10/2026 (plano da Etapa 5)", e CLAUDE.md). Entra no 5.2 numa migration nova: regra em `assinantes` (o CRECI normalizado termina em letra; imobiliária termina em J), `creci_disponivel()` respondendo "não" sem letra, `creciValido()` exigindo a letra e conferindo o tipo, dica no campo do cadastro, testes no `testar_rls.sql` e os ajudantes do e2e com CRECI com letra
+  - Conferido em 28/10/2026 no SQL Editor: nenhum assinante no banco com CRECI sem letra. Rodar de novo logo antes do `db push` do 5.2: `select id, creci from public.assinantes where creci_normalizado !~ '[A-Z]$';` e `select id, creci from public.assinantes where tipo = 'imobiliaria' and creci_normalizado !~ 'J$';` (as duas deram 0 linhas em 28/10/2026)
+  - Decidido: o responsável remove corretores na tela Equipe (Visão geral e CLAUDE.md, mesma seção). Entra no 5.4: no banco, o corretor marcado como removido (a conta e o vínculo ficam, como histórico) e o `eh_assinante_ativo()` deixando de dar acesso a ele; uma função para o responsável remover só corretor da própria imobiliária e nunca a si mesmo; botão "Remover" na ImobEquipe e na SiteImobEquipe, com confirmação; testes no `testar_rls.sql` e Playwright (removido perde o acesso na hora, corretor comum não remove ninguém, responsável de outra imobiliária não remove)
+  - Decidido: o corretor removido que for para outra imobiliária entra com outra conta, de outro e-mail (nada muda no banco). No 5.4, o convite por e-mail para um e-mail que já tem conta precisa de mensagem clara para o responsável
+  - Decidido: até o SMTP próprio (13.2), "Enviar convite" cria o convite preso ao e-mail e mostra o link para o responsável mandar; sem `inviteUserByEmail` e sem chave secreta no convite. No 13.2, o PAUTA manda o e-mail com o mesmo link
+  - Decidido: cada "Copiar link" gera um convite novo de uso único (sem e-mail), que aparece na lista da Equipe e pode ser cancelado; sem link fixo da imobiliária (o banco já é assim)
+  - Decidido: o admin exclui também o autônomo pendente (RF16 ampliado na Visão geral; o banco já permite). Teste no 5.2: excluir autônomo pendente libera o CRECI, e autônomo ativo não é excluído
+  - Decidido: o convite vale 7 dias, como já está no banco
+  - Todas as perguntas do plano respondidas. Falta aprovar o plano e seguir para o 5.2
 
 Etapa 4:
 - 4.1 feito (26/10/2026): plano aprovado. Decisões registradas na Visão geral ("Decisões tomadas em 26/10/2026 (plano da Etapa 4)") e no CLAUDE.md: status `rascunho` para o cadastro seguir a ordem do protótipo (dados, fotos, termo); dono edita imóvel pendente sem registro; página mínima do imóvel do proprietário com a escolha do contato; listas de tipos e bairros (lista oficial de Florianópolis, conferir a fonte); fotos JPG/PNG/WebP até 10 MB, de 1 a 20; termo numa tabela de versões (`2026-10-provisorio`). Migrations previstas: `imoveis_etapa_4` (4.2: termos, rascunho, edição de pendente, listas e os itens da auditoria da Etapa 2), `fotos_storage` (4.3: bucket privado `fotos-imoveis`) e `captacao` (4.7: `captar_imovel`, `aceitar_termo_captado`, `buscar_proprietarios`). Os testes que faltam da auditoria da Etapa 2 entram no 4.2
@@ -129,7 +141,7 @@ Etapa 2 (concluída em 22/10/2026):
 - O verificador do Supabase (`npx supabase db advisors --linked`) mostra avisos "Signed-In Users Can Execute SECURITY DEFINER Function" para `meu_tipo()`, `eh_admin()`, `meu_assinante_id()`, `eh_assinante_ativo()`, `contato_do_proprietario()`, `aprovar_imovel()`, `reprovar_imovel()` e `reenviar_imovel()`. São intencionais: cada uma confere por dentro quem chama, e o roteiro testa isso. Mostra também 2 avisos de desempenho "multiple permissive policies" em `imoveis` (3 regras de leitura e 2 de edição separadas): no volume do piloto não pesa; dá para juntar numa migration nova se o catálogo ficar lento (Etapa 6)
 - Para a Etapa 4: o banco exige o termo aceito no momento do cadastro do imóvel (o `termo_versao` vai junto no insert). No protótipo, o termo vem depois das fotos (ProNovo → ProFotos → ProTermo): o plano da Etapa 4 precisa decidir a ordem (ex.: guardar o formulário e as fotos no navegador e criar o imóvel no aceite). Editar imóvel pendente está bloqueado no banco até a decisão em Pendências. A captação pelo admin (função que cria o imóvel já disponível) fica para o passo 4.7
 - Para a Etapa 3 (cadastro): o app envia em `options.data` do signUp `tipo`, `nome` e `telefone`, e mais `nome_imobiliaria` e `creci` (imobiliária), `creci` (autônomo) ou `convite` (corretor). No banco, CRECI repetido dá erro `23505` e convite inválido, tipo não permitido ou falta de CRECI dão `P0001`, mas talvez esse código não chegue ao app (ver "Pendências", Etapa 3)
-- Para a Etapa 5: a validade de 7 dias do convite foi escolhida no 2.3 por falta de definição; dá para mudar só o padrão da coluna `convites.expira_em`. Bloquear e desbloquear é a coluna `assinantes.bloqueado_pelo_admin` (passo 2.7), não o status
+- Para a Etapa 5: a validade de 7 dias do convite foi escolhida no 2.3 e confirmada no plano da Etapa 5 (28/10/2026). Bloquear e desbloquear é a coluna `assinantes.bloqueado_pelo_admin` (passo 2.7), não o status
 - Risco anotado para a Etapa 6: o `proprietario_id` do imóvel fica visível para o corretor (não é contato, mas mostra quais imóveis são do mesmo dono). Decidir na Etapa 6 se o catálogo passa por uma função
 
 Preparação da Etapa 2 (22/10/2026):
@@ -193,10 +205,8 @@ Pendências e decisões em aberto (cada uma precisa estar resolvida antes da eta
   - Rascunhos de imóvel abandonados: apagar sozinhos depois de alguns dias? Sugestão do plano: deixar para a Etapa 13
 - Etapa 5:
   - (auditoria da Etapa 2) Os gatilhos confiam em `current_user = 'authenticated'` ou em `auth.uid()`: quem usar a chave secreta (`admin.ts`, criado no 5.2) pula a regra de status do assinante, a data do aceite do termo e o registro de edições. Escrever isso no `admin.ts` e nunca usá-lo para editar imóvel ou status
-  - (auditoria da Etapa 2) Convite por e-mail: o `inviteUserByEmail` do Supabase cria a conta antes de o corretor informar nome e telefone, e o gatilho de cadastro recusa. Decidir no plano da etapa (ex.: o e-mail só leva o link do app, e o cadastro normal usa o código)
   - (auditoria da Etapa 2) O `token_hash` do convite é sha256 sem sal, escolhido por quem cria o convite: gerar o código no servidor com pelo menos 128 bits aleatórios, ou criar o convite por uma função do banco que gera o código
   - (auditoria da Etapa 2) Testes que faltam: responsável não escolhe `expira_em` nem `usado_em` ao criar convite; corretor convidado de imobiliária ativa **vê** o imóvel disponível
-  - (auditoria da Etapa 3) **(banco)** Decidir antes da ativação de assinantes (5.2): `normalizar_creci()` trata `12345` e `12345J` como CRECIs diferentes, então o mesmo número entra duas vezes, com e sem a letra. A letra conta na comparação? Até lá, o admin confere à mão
   - (auditoria da Etapa 3) Teste Playwright no 5.4: corretor convidado perde o acesso na hora quando a imobiliária é bloqueada ou vence (hoje só o `testar_rls.sql` e o `eh_assinante_ativo()` cobrem)
 - Etapa 6:
   - Quais filtros o catálogo terá (o protótipo sugere tipo, status, bairro, faixa de preço, quartos e busca por título ou bairro)
@@ -225,6 +235,7 @@ Pendências e decisões em aberto (cada uma precisa estar resolvida antes da eta
   - Com quanto tempo de antecedência sai o aviso de vencimento da exclusividade, e se a renovação é por mais 6 meses
   - **(banco)** O que acontece com as propostas aceitas se a exclusividade vencer com o imóvel em negociação
 - Etapa 13:
+  - (plano da Etapa 5) Com o SMTP próprio, o "Enviar convite" passa a mandar o e-mail sozinho, com o mesmo link do convite (modelo em português). Até lá, a tela mostra o link para o responsável mandar
   - (auditoria da Etapa 4) O texto provisório do termo diz que a exclusividade conta "da aprovação" (cláusula 1, na migration `20261026200726_imoveis_etapa_4`), mas no imóvel captado ela conta do aceite do dono. O texto final precisa cobrir os dois casos
   - (auditoria da Etapa 4) O bucket `fotos-imoveis` confere só o tipo que o navegador declara: qualquer arquivo marcado como `image/jpeg` entra. Ao registrar a foto, conferir o começo do arquivo (assinatura do JPEG)
   - (auditoria da Etapa 4) Revisão de edições (RF17): a tela do admin mostra só "Foto nova (posição N)", sem a imagem (`src/lib/imoveisAdmin.ts`, por volta das linhas 132-144). E tirar uma foto gera uma linha de registro para cada foto que mudou de posição

@@ -360,7 +360,7 @@ Me entregue o plano em passos pequenos, as mudanças no banco, os riscos e as su
 **5.2 Admin e assinantes**
 
 ```text
-Faça a área do admin para assinantes: lista de pendentes com o CRECI em destaque (o admin confere à mão), ativar e bloquear (RF15), e excluir imobiliária pendente com o usuário dela, liberando o CRECI (RF16). Bloquear tem efeito na hora, também para os corretores da imobiliária. No fim, teste Playwright.
+Faça a área do admin para assinantes: lista de pendentes com o CRECI em destaque (o admin confere à mão), ativar e bloquear (RF15), e excluir imobiliária ou autônomo pendente com o usuário dele, liberando o CRECI (RF16). Bloquear tem efeito na hora, também para os corretores da imobiliária. No fim, teste Playwright.
 ```
 
 **5.3 Corretor autônomo**
