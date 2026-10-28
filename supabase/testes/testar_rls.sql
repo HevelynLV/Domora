@@ -188,7 +188,8 @@ returns void
 language plpgsql
 as $$
 begin
-  perform pg_temp.criar_autonomo(p_id, 'CRECI-' || right(p_id::text, 4));
+  -- CRECI só com números e a letra F (migration 20261028152831_creci_com_letra).
+  perform pg_temp.criar_autonomo(p_id, '9' || right(p_id::text, 4) || '-F');
   if p_status <> 'pendente' then
     perform pg_temp.mudar_status_do_assinante_de(p_id, p_status);
   end if;
@@ -3723,6 +3724,145 @@ do $$ declare v text := ''; n int; i uuid; vista int; begin
   insert into resultado (teste, esperado, obtido)
   values ('Aceite do captado com a versão velha é barrado; com a versão atual, entra',
           'P0001 O imóvel mudou depois que a tela foi aberta / captado / disponivel', v);
+end $$;
+
+-- ---------------------------------------------------------------
+-- 10. CRECI com letra e exclusão do autônomo pendente
+--     (migration 20261028152831_creci_com_letra)
+-- ---------------------------------------------------------------
+
+do $$ declare v text; begin
+  begin
+    begin
+      perform pg_temp.criar_imobiliaria('00000000-0000-4000-a000-000000000011', '12345');
+      v := 'permitido';
+    exception when others then v := pg_temp.bloqueio(sqlstate, sqlerrm);
+    end;
+    begin
+      perform pg_temp.criar_autonomo('00000000-0000-4000-a000-000000000031', '54321');
+      v := v || ' / permitido';
+    exception when others then v := v || ' / ' || pg_temp.bloqueio(sqlstate, sqlerrm);
+    end;
+    raise exception using errcode = 'TR001';
+  exception when sqlstate 'TR001' then null;
+            when others then v := pg_temp.bloqueio(sqlstate, sqlerrm);
+  end;
+  insert into resultado (teste, esperado, obtido)
+  values ('CRECI sem letra é barrado (imobiliária / autônomo)', 'bloqueado (23514) / bloqueado (23514)', v);
+end $$;
+
+do $$ declare v text; begin
+  begin
+    perform pg_temp.criar_imobiliaria('00000000-0000-4000-a000-000000000011', '12345-F');
+    v := 'permitido';
+    raise exception using errcode = 'TR001';
+  exception when sqlstate 'TR001' then null;
+            when others then v := pg_temp.bloqueio(sqlstate, sqlerrm);
+  end;
+  insert into resultado (teste, esperado, obtido)
+  values ('Imobiliária com CRECI F é barrada', 'bloqueado (23514)', v);
+end $$;
+
+do $$ declare v text; begin
+  begin
+    perform pg_temp.criar_autonomo('00000000-0000-4000-a000-000000000031', '12345-X');
+    v := 'permitido';
+    raise exception using errcode = 'TR001';
+  exception when sqlstate 'TR001' then null;
+            when others then v := pg_temp.bloqueio(sqlstate, sqlerrm);
+  end;
+  insert into resultado (teste, esperado, obtido)
+  values ('CRECI com outra letra (nem J nem F) é barrado', 'bloqueado (23514)', v);
+end $$;
+
+do $$ declare v text; begin
+  begin
+    perform pg_temp.criar_autonomo('00000000-0000-4000-a000-000000000031', '54321-f');
+    perform pg_temp.criar_autonomo('00000000-0000-4000-a000-000000000032', '67890-J');
+    select string_agg(creci_normalizado, ' / ' order by creci_normalizado) into v
+    from public.assinantes
+    where responsavel_id in ('00000000-0000-4000-a000-000000000031', '00000000-0000-4000-a000-000000000032');
+    raise exception using errcode = 'TR001';
+  exception when sqlstate 'TR001' then null;
+            when others then v := pg_temp.bloqueio(sqlstate, sqlerrm);
+  end;
+  insert into resultado (teste, esperado, obtido)
+  values ('Autônomo entra com CRECI F ou J', '54321F / 67890J', v);
+end $$;
+
+do $$ declare v text; begin
+  begin
+    perform pg_temp.entrar_como_visitante();
+    v := public.creci_disponivel('12345')::text || ' / '
+      || public.creci_disponivel('12345-J')::text || ' / '
+      || public.creci_disponivel('12345-X')::text;
+    raise exception using errcode = 'TR001';
+  exception when sqlstate 'TR001' then null;
+            when others then v := pg_temp.bloqueio(sqlstate, sqlerrm);
+  end;
+  insert into resultado (teste, esperado, obtido)
+  values ('creci_disponivel responde não sem a letra (sem letra / com J / outra letra)', 'false / true / false', v);
+end $$;
+
+-- Excluir autônomo pendente (RF16 ampliado em 28/10/2026) -------------
+
+do $$ declare v text; begin
+  begin
+    perform pg_temp.criar_autonomo('00000000-0000-4000-a000-000000000031', '54321-F');
+    delete from auth.users where id = '00000000-0000-4000-a000-000000000031';
+    perform pg_temp.criar_autonomo('00000000-0000-4000-a000-000000000032', '54321-F');
+    select case when count(*) = 1 then 'CRECI livre: novo cadastro aceito' else 'não liberou' end
+      into v from public.assinantes
+      where creci_normalizado = '54321F' and responsavel_id = '00000000-0000-4000-a000-000000000032';
+    raise exception using errcode = 'TR001';
+  exception when sqlstate 'TR001' then null;
+            when others then v := pg_temp.bloqueio(sqlstate, sqlerrm);
+  end;
+  insert into resultado (teste, esperado, obtido)
+  values ('Excluir a conta do autônomo pendente libera o CRECI', 'CRECI livre: novo cadastro aceito', v);
+end $$;
+
+do $$ declare v text; begin
+  begin
+    perform pg_temp.criar_autonomo('00000000-0000-4000-a000-000000000031', '54321-F');
+    perform pg_temp.mudar_status_do_assinante_de('00000000-0000-4000-a000-000000000031', 'ativo');
+    begin
+      delete from auth.users where id = '00000000-0000-4000-a000-000000000031';
+      v := 'permitido';
+    exception when others then v := pg_temp.bloqueio(sqlstate, sqlerrm);
+    end;
+    perform pg_temp.mudar_status_do_assinante_de('00000000-0000-4000-a000-000000000031', 'bloqueado');
+    begin
+      delete from auth.users where id = '00000000-0000-4000-a000-000000000031';
+      v := v || ' / permitido';
+    exception when others then v := v || ' / ' || pg_temp.bloqueio(sqlstate, sqlerrm);
+    end;
+    raise exception using errcode = 'TR001';
+  exception when sqlstate 'TR001' then null;
+            when others then v := pg_temp.bloqueio(sqlstate, sqlerrm);
+  end;
+  insert into resultado (teste, esperado, obtido)
+  values ('Autônomo ativo ou bloqueado não é excluído', 'bloqueado (P0001) / bloqueado (P0001)', v);
+end $$;
+
+-- Ativar e bloquear só pelo admin -------------------------------------
+
+do $$ declare v text; n int; begin
+  begin
+    perform pg_temp.criar_autonomo('00000000-0000-4000-a000-000000000031', '54321-F');
+    perform pg_temp.criar_imobiliaria('00000000-0000-4000-a000-000000000011', '12345-J');
+    perform pg_temp.mudar_status_do_assinante_de('00000000-0000-4000-a000-000000000011', 'ativo');
+    perform pg_temp.entrar_como('00000000-0000-4000-a000-000000000011');
+    update public.assinantes set status = 'ativo', bloqueado_pelo_admin = true
+    where responsavel_id = '00000000-0000-4000-a000-000000000031';
+    get diagnostics n = row_count;
+    v := n::text;
+    raise exception using errcode = 'TR001';
+  exception when sqlstate 'TR001' then null;
+            when others then v := pg_temp.bloqueio(sqlstate, sqlerrm);
+  end;
+  insert into resultado (teste, esperado, obtido)
+  values ('Imobiliária ativa não ativa nem bloqueia outro assinante (0 linhas alteradas)', '0', v);
 end $$;
 
 -- ---------------------------------------------------------------
