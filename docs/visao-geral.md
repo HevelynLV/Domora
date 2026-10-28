@@ -162,6 +162,10 @@ Substituem, sobre o CRECI, a decisão de 22/10/2026 (plano da Etapa 3), marcada 
 - Convite por link, sem e-mail ("Copiar link"): cada clique gera um link novo, que vale para uma pessoa só e vence como os outros convites. Ele aparece na lista da equipe como convite por link aguardando, e o responsável pode cancelar. Não existe link fixo da imobiliária que sirva para várias pessoas.
 - O admin exclui também o corretor autônomo pendente, com o usuário dele, liberando o CRECI (RF16 ampliado): o risco de alguém travar o CRECI de outra pessoa é o mesmo da imobiliária. Assinante ativo, vencido ou bloqueado continua sem poder ser excluído.
 - O convite (por e-mail ou por link) vale 7 dias. Vencido, o responsável gera outro.
+- (passo 5.4) O código do convite é sorteado pelo banco, que guarda só uma versão embaralhada dele: o link aparece uma vez só, logo depois de criado. Se o responsável perder o link, cancela o convite e cria outro.
+- (passo 5.4) Convite por e-mail para um e-mail que já tem conta no PAUTA é recusado com a mensagem "Este e-mail já tem conta no PAUTA". Isso revela a uma imobiliária ativa que aquele e-mail tem conta; o risco foi aceito, porque só imobiliária conferida pelo admin consegue perguntar.
+- (passo 5.4) Um novo convite para um e-mail que já tem convite aguardando substitui o anterior: só o link novo vale.
+- (passo 5.4) Os corretores removidos continuam na tela Equipe, no fim da lista, com o selo "Removido" e a data, sem botão.
 
 ## Decisões tomadas em 27/10/2026 (passo 4.7, captação)
 
