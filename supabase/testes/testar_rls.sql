@@ -913,7 +913,7 @@ do $$ declare v text; begin
             when others then v := pg_temp.bloqueio(sqlstate, sqlerrm);
   end;
   insert into resultado (teste, esperado, obtido)
-  values ('Responsável não cria convite para outra imobiliária', 'bloqueado (42501)', v);
+  values ('Responsável não grava convite direto na tabela, nem para outra imobiliária', 'bloqueado (42501)', v);
 end $$;
 
 do $$ declare v text; begin
@@ -3933,9 +3933,11 @@ do $$ declare v text; h text; begin
     perform pg_temp.criar_imobiliaria('00000000-0000-4000-a000-000000000011', '12345-J');
     perform pg_temp.mudar_status_do_assinante_de('00000000-0000-4000-a000-000000000011', 'ativo');
     perform pg_temp.entrar_como('00000000-0000-4000-a000-000000000011');
+    -- Desde a auditoria da Etapa 5, e-mail com conta devolve null (sem erro, para a
+    -- tentativa contar no limite por hora) e não cria convite.
     begin
-      perform public.criar_convite(upper('teste-00000000-0000-4000-a000-000000000001@exemplo.com'));
-      v := 'permitido';
+      v := coalesce(public.criar_convite(upper('teste-00000000-0000-4000-a000-000000000001@exemplo.com')), 'null')
+           || ' ' || (select count(*) from public.convites)::text;
     exception when others then
       get stacked diagnostics h = pg_exception_hint;
       v := sqlstate || ' ' || h;
@@ -3952,8 +3954,8 @@ do $$ declare v text; h text; begin
             when others then v := pg_temp.bloqueio(sqlstate, sqlerrm);
   end;
   insert into resultado (teste, esperado, obtido)
-  values ('Convite para e-mail que já tem conta ou e-mail inválido é recusado (com o motivo)',
-          'P0001 email_com_conta / P0001 email_invalido', v);
+  values ('Convite para e-mail que já tem conta ou e-mail inválido é recusado (sem código e 0 convites / motivo)',
+          'null 0 / P0001 email_invalido', v);
 end $$;
 
 do $$ declare v text; a text; b text; begin
@@ -4189,6 +4191,178 @@ do $$ declare v text; begin
   end;
   insert into resultado (teste, esperado, obtido)
   values ('Só corretor pode ficar marcado como removido', 'bloqueado (23514)', v);
+end $$;
+
+-- ---------------------------------------------------------------
+-- 12. Auditoria da Etapa 5 (migration 20261028224919_auditoria_etapa_5)
+-- ---------------------------------------------------------------
+
+do $$ declare v text; n int; begin
+  begin
+    perform pg_temp.criar_imobiliaria('00000000-0000-4000-a000-000000000011', '12345-J');
+    perform pg_temp.criar_imobiliaria('00000000-0000-4000-a000-000000000012', '67890-J');
+    perform pg_temp.mudar_status_do_assinante_de('00000000-0000-4000-a000-000000000011', 'ativo');
+    perform pg_temp.mudar_status_do_assinante_de('00000000-0000-4000-a000-000000000012', 'ativo');
+    perform pg_temp.criar_convite('00000000-0000-4000-a000-000000000012', 'codigo-de-b', null, now() + interval '1 day');
+    perform pg_temp.entrar_como('00000000-0000-4000-a000-000000000011');
+    delete from public.convites;
+    get diagnostics n = row_count;
+    v := n::text;
+    raise exception using errcode = 'TR001';
+  exception when sqlstate 'TR001' then null;
+            when others then v := pg_temp.bloqueio(sqlstate, sqlerrm);
+  end;
+  insert into resultado (teste, esperado, obtido)
+  values ('Responsável não cancela convite de outra imobiliária', '0', v);
+end $$;
+
+do $$ declare v text; begin
+  begin
+    perform pg_temp.criar_imobiliaria('00000000-0000-4000-a000-000000000011', '12345-J');
+    perform pg_temp.mudar_status_do_assinante_de('00000000-0000-4000-a000-000000000011', 'bloqueado');
+    perform pg_temp.entrar_como('00000000-0000-4000-a000-000000000011');
+    begin
+      perform public.criar_convite();
+      v := 'permitido';
+    exception when others then v := pg_temp.bloqueio(sqlstate, sqlerrm);
+    end;
+    raise exception using errcode = 'TR001';
+  exception when sqlstate 'TR001' then null;
+            when others then v := pg_temp.bloqueio(sqlstate, sqlerrm);
+  end;
+  insert into resultado (teste, esperado, obtido)
+  values ('Responsável de imobiliária bloqueada não cria convite', 'bloqueado (42501)', v);
+end $$;
+
+do $$ declare v text; begin
+  begin
+    perform pg_temp.criar_imobiliaria('00000000-0000-4000-a000-000000000011', '12345-J');
+    perform pg_temp.mudar_status_do_assinante_de('00000000-0000-4000-a000-000000000011', 'vencido');
+    perform pg_temp.entrar_como('00000000-0000-4000-a000-000000000011');
+    begin
+      perform public.criar_convite();
+      v := 'permitido';
+    exception when others then v := pg_temp.bloqueio(sqlstate, sqlerrm);
+    end;
+    raise exception using errcode = 'TR001';
+  exception when sqlstate 'TR001' then null;
+            when others then v := pg_temp.bloqueio(sqlstate, sqlerrm);
+  end;
+  insert into resultado (teste, esperado, obtido)
+  values ('Responsável de imobiliária vencida não cria convite', 'bloqueado (42501)', v);
+end $$;
+
+do $$ declare v text; begin
+  begin
+    perform pg_temp.entrar_como_visitante();
+    begin
+      perform public.criar_convite();
+      v := 'permitido';
+    exception when others then v := pg_temp.bloqueio(sqlstate, sqlerrm);
+    end;
+    begin
+      perform public.remover_corretor('00000000-0000-4000-a000-000000000021');
+      v := v || ' / permitido';
+    exception when others then v := v || ' / ' || pg_temp.bloqueio(sqlstate, sqlerrm);
+    end;
+    raise exception using errcode = 'TR001';
+  exception when sqlstate 'TR001' then null;
+            when others then v := pg_temp.bloqueio(sqlstate, sqlerrm);
+  end;
+  insert into resultado (teste, esperado, obtido)
+  values ('Visitante sem login não chama criar_convite nem remover_corretor',
+          'bloqueado (42501) / bloqueado (42501)', v);
+end $$;
+
+do $$ declare v text; h text; i int; begin
+  begin
+    perform pg_temp.criar_proprietario('00000000-0000-4000-a000-000000000001');
+    perform pg_temp.criar_imobiliaria('00000000-0000-4000-a000-000000000011', '12345-J');
+    perform pg_temp.mudar_status_do_assinante_de('00000000-0000-4000-a000-000000000011', 'ativo');
+    perform pg_temp.entrar_como('00000000-0000-4000-a000-000000000011');
+    -- 20 perguntas sobre um e-mail que tem conta passam; a 21ª (mesmo um link) não.
+    for i in 1..20 loop
+      perform public.criar_convite('teste-00000000-0000-4000-a000-000000000001@exemplo.com');
+    end loop;
+    v := '20 passaram';
+    begin
+      perform public.criar_convite();
+      v := v || ' / permitido';
+    exception when others then
+      get stacked diagnostics h = pg_exception_hint;
+      v := v || ' / ' || sqlstate || ' ' || h;
+    end;
+    raise exception using errcode = 'TR001';
+  exception when sqlstate 'TR001' then null;
+            when others then v := pg_temp.bloqueio(sqlstate, sqlerrm);
+  end;
+  insert into resultado (teste, esperado, obtido)
+  values ('Limite de 20 convites por hora, contando e-mail que já tem conta',
+          '20 passaram / P0001 limite_de_convites', v);
+end $$;
+
+do $$ declare v text; begin
+  begin
+    perform pg_temp.criar_imobiliaria('00000000-0000-4000-a000-000000000011', '12345-J');
+    perform pg_temp.mudar_status_do_assinante_de('00000000-0000-4000-a000-000000000011', 'ativo');
+    perform pg_temp.entrar_como('00000000-0000-4000-a000-000000000011');
+    perform public.criar_convite();
+    begin
+      select count(*)::text into v from public.tentativas_de_convite;
+    exception when others then v := pg_temp.bloqueio(sqlstate, sqlerrm);
+    end;
+    begin
+      delete from public.tentativas_de_convite;
+      v := v || ' / permitido';
+    exception when others then v := v || ' / ' || pg_temp.bloqueio(sqlstate, sqlerrm);
+    end;
+    raise exception using errcode = 'TR001';
+  exception when sqlstate 'TR001' then null;
+            when others then v := pg_temp.bloqueio(sqlstate, sqlerrm);
+  end;
+  insert into resultado (teste, esperado, obtido)
+  values ('Responsável não lê nem apaga as tentativas de convite',
+          'bloqueado (42501) / bloqueado (42501)', v);
+end $$;
+
+do $$ declare v text; begin
+  begin
+    begin
+      perform pg_temp.criar_autonomo('00000000-0000-4000-a000-000000000031', '12345678-F');
+      v := 'permitido';
+    exception when others then v := pg_temp.bloqueio(sqlstate, sqlerrm);
+    end;
+    begin
+      perform pg_temp.criar_imobiliaria('00000000-0000-4000-a000-000000000011', '12-J');
+      v := v || ' / permitido';
+    exception when others then v := v || ' / ' || pg_temp.bloqueio(sqlstate, sqlerrm);
+    end;
+    v := v || ' / ' || public.creci_disponivel('12345678-F')::text
+           || ' / ' || public.creci_disponivel('1234567-F')::text;
+    raise exception using errcode = 'TR001';
+  exception when sqlstate 'TR001' then null;
+            when others then v := pg_temp.bloqueio(sqlstate, sqlerrm);
+  end;
+  insert into resultado (teste, esperado, obtido)
+  values ('CRECI com mais de 7 ou menos de 3 dígitos é barrado (8 / 2 / disponível 8 / disponível 7)',
+          'bloqueado (23514) / bloqueado (23514) / false / true', v);
+end $$;
+
+do $$ declare v text; begin
+  begin
+    perform pg_temp.criar_imobiliaria('00000000-0000-4000-a000-000000000011', '12345-J');
+    perform pg_temp.mudar_status_do_assinante_de('00000000-0000-4000-a000-000000000011', 'ativo');
+    perform pg_temp.criar_convite('00000000-0000-4000-a000-000000000011', 'codigo-de-teste', null, now() + interval '1 day');
+    perform pg_temp.criar_corretor('00000000-0000-4000-a000-000000000021', 'codigo-de-teste');
+    perform pg_temp.mudar_status_do_assinante_de('00000000-0000-4000-a000-000000000011', 'bloqueado');
+    perform pg_temp.entrar_como('00000000-0000-4000-a000-000000000011');
+    select count(*)::text into v from public.perfis where tipo = 'corretor';
+    raise exception using errcode = 'TR001';
+  exception when sqlstate 'TR001' then null;
+            when others then v := pg_temp.bloqueio(sqlstate, sqlerrm);
+  end;
+  insert into resultado (teste, esperado, obtido)
+  values ('Responsável de imobiliária bloqueada não lê a equipe', '0', v);
 end $$;
 
 -- ---------------------------------------------------------------

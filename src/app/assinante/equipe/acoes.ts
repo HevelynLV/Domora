@@ -3,9 +3,8 @@
 import { revalidatePath } from "next/cache";
 
 import { exigirTipo } from "@/lib/auth";
-import { idDeImovelValido as idValido } from "@/lib/imovel";
 import { criarClienteServidor } from "@/lib/supabase/server";
-import { emailValido } from "@/lib/validacao";
+import { emailValido, idValido } from "@/lib/validacao";
 
 // Ações da tela Equipe (RF05, passo 5.4), só do responsável pela imobiliária.
 // Quem decide de verdade é o banco: criar_convite() confere que a imobiliária
@@ -27,12 +26,16 @@ export async function criarConvite(email: string | null): Promise<ResultadoConvi
   const supabase = await criarClienteServidor();
   const { data: codigo, error } = await supabase.rpc("criar_convite", { p_email: limpo || null });
   if (error) {
-    // O banco diz o motivo no hint (migration convites_e_equipe).
-    if (error.hint === "email_com_conta") {
-      return { erro: "Este e-mail já tem conta no PAUTA. Peça ao corretor outro e-mail para o convite." };
-    }
+    // O banco diz o motivo no hint (migrations convites_e_equipe e auditoria_etapa_5).
     if (error.hint === "email_invalido") return { erro: "Confira o e-mail do corretor." };
+    if (error.hint === "limite_de_convites") {
+      return { erro: "Você criou muitos convites na última hora. Espere um pouco e tente de novo." };
+    }
     return { erro: "Não foi possível criar o convite. Tente de novo." };
+  }
+  // Sem código: o e-mail já tem conta (o banco conta a tentativa no limite por hora).
+  if (!codigo) {
+    return { erro: "Este e-mail já tem conta no PAUTA. Peça ao corretor outro e-mail para o convite." };
   }
 
   revalidatePath("/assinante/equipe");

@@ -46,7 +46,7 @@ export async function listaDeAssinantes(): Promise<AssinanteNaLista[]> {
         "id, tipo, nome, creci, status, bloqueado_pelo_admin, criado_em, perfis!assinantes_responsavel_id_fkey(nome, telefone)",
       )
       .order("criado_em", { ascending: true }),
-    supabase.from("perfis").select("assinante_id").eq("tipo", "corretor"),
+    supabase.from("perfis").select("assinante_id").eq("tipo", "corretor").is("removido_em", null),
   ]);
   if (error) throw new Error(`listaDeAssinantes: ${error.message}`);
 

@@ -3,9 +3,9 @@
 import { revalidatePath } from "next/cache";
 
 import { exigirTipo } from "@/lib/auth";
-import { idDeImovelValido as idValido } from "@/lib/imovel";
 import { criarClienteAdmin } from "@/lib/supabase/admin";
 import { criarClienteServidor } from "@/lib/supabase/server";
+import { idValido } from "@/lib/validacao";
 
 // Ações do admin sobre assinantes (RF15, RF16). Ativar e bloquear usam a sessão
 // do admin: o RLS só deixa o admin mudar a linha, e o gatilho

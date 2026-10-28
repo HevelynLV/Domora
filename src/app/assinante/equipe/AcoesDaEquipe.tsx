@@ -3,6 +3,7 @@
 import { useRef, useState, useTransition } from "react";
 
 import { Botao } from "@/components/ui/Botao";
+import { chamarAcao } from "@/lib/chamarAcao";
 
 import { cancelarConvite, removerCorretor } from "./acoes";
 
@@ -57,7 +58,7 @@ export function BotaoRemoverCorretor({ id, nome }: { id: string; nome: string })
               disabled={ocupado}
               onClick={() =>
                 iniciar(async () => {
-                  const resultado = await removerCorretor(id);
+                  const resultado = await chamarAcao(() => removerCorretor(id));
                   setErro(resultado.erro);
                   if (!resultado.erro) janela.current?.close();
                 })
@@ -81,7 +82,7 @@ export function BotaoCancelarConvite({ id }: { id: string }) {
       <button
         type="button"
         disabled={ocupado}
-        onClick={() => iniciar(async () => setErro((await cancelarConvite(id)).erro))}
+        onClick={() => iniciar(async () => setErro((await chamarAcao(() => cancelarConvite(id))).erro))}
         className="min-h-11 cursor-pointer text-small font-bold text-erro disabled:text-ink2"
       >
         {ocupado ? "Cancelando…" : "Cancelar"}

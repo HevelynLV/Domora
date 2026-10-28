@@ -2,6 +2,7 @@
 
 import { redirect } from "next/navigation";
 
+import { usuarioAtual } from "@/lib/auth";
 import { CODIGO_DO_CONVITE, textoDaSituacao } from "@/lib/convite";
 import { criarClienteServidor } from "@/lib/supabase/server";
 import { emailValido, limparTelefone, nomeValido, senhaValida, telefoneValido } from "@/lib/validacao";
@@ -40,6 +41,11 @@ export async function aceitarConvite(_anterior: EstadoConvite, formData: FormDat
   if (!telefoneValido(telefone)) erros.telefone = "Escreva o telefone com DDD, ex.: (48) 99812-4410.";
   if (!senhaValida(senha)) erros.senha = "A senha precisa ter pelo menos 8 caracteres.";
   if (Object.keys(erros).length > 0) return { erros, valores };
+
+  // A tela já avisa quem está logado; chamada direto, a action trocaria a sessão.
+  if (await usuarioAtual()) {
+    return { erros: {}, valores, erroGeral: "Você já está conectado. Saia e abra o link do convite de novo." };
+  }
 
   const supabase = await criarClienteServidor();
   const motivo = await motivoDoConviteNaoValer(supabase, codigo, valores.email);

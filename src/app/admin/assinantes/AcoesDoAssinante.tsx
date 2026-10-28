@@ -4,6 +4,7 @@ import { useRef, useState, useTransition } from "react";
 
 import { Botao } from "@/components/ui/Botao";
 import type { Situacao } from "@/lib/assinantesAdmin";
+import { chamarAcao } from "@/lib/chamarAcao";
 
 import { ativarAssinante, excluirPendente, mudarBloqueio, type ResultadoDaAcao } from "./acoes";
 
@@ -33,7 +34,7 @@ export function AcoesDoAssinante({
     setErro(undefined);
     setErroNaJanela(undefined);
     iniciar(async () => {
-      const resultado = await acao();
+      const resultado = await chamarAcao(acao);
       if (naJanela) setErroNaJanela(resultado.erro);
       else setErro(resultado.erro);
       if (naJanela && !resultado.erro) janela.current?.close();

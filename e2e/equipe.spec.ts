@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
 
-import { expect, test, type Browser, type Page } from "@playwright/test";
+import { expect, test, type Browser, type Page, type Request } from "@playwright/test";
 
 import { apagarContas, clienteAdmin, contaPorEmail, criarConta, entrarComo, mudarAssinatura } from "./apoio/supabase";
 
@@ -231,6 +231,89 @@ test("o responsável remove o corretor, que perde o acesso na hora; outros não 
   await expect(doRemovido.getByRole("heading", { name: "Você não faz mais parte da equipe" })).toBeVisible();
   expect(await contaPorEmail(removido.email)).not.toBeNull();
   await doRemovido.context().close();
+});
+
+test("convite de imobiliária bloqueada não serve enquanto ela está bloqueada", async ({ browser }) => {
+  const imobC = await criarImobiliaria(`Norte Equipe ${unico()}`);
+  const doResponsavel = await paginaCom(browser, imobC.sessao);
+  const caminho = await convidar(doResponsavel, null);
+  await doResponsavel.context().close();
+
+  await mudarAssinatura(imobC.id, "ativo", true);
+  const visitante = await paginaCom(browser);
+  await visitante.goto(caminho);
+  await expect(visitante.getByText("A imobiliária deste convite está sem acesso ao PAUTA agora.")).toBeVisible();
+  await expect(visitante.getByRole("button", { name: "Aceitar convite e entrar" })).toHaveCount(0);
+
+  // Desbloqueada, o mesmo link volta a valer (não foi gasto).
+  await mudarAssinatura(imobC.id, "ativo");
+  await visitante.goto(caminho);
+  await expect(visitante.getByRole("button", { name: "Aceitar convite e entrar" })).toBeVisible();
+  await visitante.context().close();
+});
+
+test("o corretor não convida nem remove chamando as actions direto", async ({ browser }) => {
+  const nome = `Alvo Action ${test.info().project.name}`;
+  const alvo = await criarCorretor(imobA, nome);
+  const colega = await criarCorretor(imobA, `Colega Action ${test.info().project.name}`);
+  const sessaoColega = await entrarComo(colega.email);
+
+  // Grava as requisições do "Copiar link" e do "Remover" na tela do responsável,
+  // sem deixá-las chegar. Para a tela, é como a conexão cair: ela mostra o aviso
+  // e continua de pé.
+  const pagina = await paginaCom(browser, imobA.sessao);
+  await pagina.goto("/assinante/equipe");
+  const gravadas: Request[] = [];
+  await pagina.route("**/assinante/equipe**", async (rota) => {
+    if (rota.request().method() === "POST" && rota.request().headers()["next-action"]) {
+      gravadas.push(rota.request());
+      await rota.abort();
+    } else {
+      await rota.continue();
+    }
+  });
+  await pagina.getByRole("button", { name: /^Copiar link/ }).click();
+  await expect.poll(() => gravadas.length).toBe(1);
+  await expect(pagina.getByText("Não foi possível falar com o PAUTA.").first()).toBeVisible();
+  await linha(pagina, nome).getByRole("button", { name: "Remover" }).click();
+  const janela = pagina.getByRole("dialog", { name: `Remover ${nome} da equipe?` });
+  await janela.getByRole("button", { name: "Remover" }).click();
+  await expect.poll(() => gravadas.length).toBe(2);
+  await expect(janela.getByText("Não foi possível falar com o PAUTA.")).toBeVisible();
+  const [convidarGravada, removerGravada] = await Promise.all(
+    gravadas.map(async (requisicao) => ({
+      endereco: requisicao.url(),
+      corpo: requisicao.postDataBuffer()!,
+      cabecalhos: Object.fromEntries(
+        Object.entries(await requisicao.allHeaders()).filter(([chave]) => !chave.startsWith(":") && chave !== "cookie"),
+      ),
+    })),
+  );
+  await pagina.context().close();
+
+  const chamar = async (cookies: Sessao["cookies"], gravada: typeof convidarGravada) => {
+    const contexto = await browser.newContext({ baseURL: ORIGEM });
+    await contexto.addCookies(cookies);
+    await contexto.request.post(gravada.endereco, { headers: gravada.cabecalhos, data: gravada.corpo, maxRedirects: 0 });
+    await contexto.close();
+  };
+  const convitesDaA = async () =>
+    (await clienteAdmin().from("convites").select("id", { count: "exact", head: true }).eq("assinante_id", imobA.assinanteId)).count;
+  const removidoEm = async () =>
+    (await clienteAdmin().from("perfis").select("removido_em").eq("id", alvo.id).single()).data!.removido_em;
+
+  // O corretor manda as duas requisições: nada muda.
+  const antes = await convitesDaA();
+  await chamar(sessaoColega.cookies, convidarGravada);
+  await chamar(sessaoColega.cookies, removerGravada);
+  expect(await convitesDaA()).toBe(antes);
+  expect(await removidoEm()).toBeNull();
+
+  // O responsável manda as mesmas requisições: valem (prova que elas funcionam).
+  await chamar(imobA.sessao.cookies, convidarGravada);
+  await chamar(imobA.sessao.cookies, removerGravada);
+  expect(await convitesDaA()).toBe(antes! + 1);
+  expect(await removidoEm()).not.toBeNull();
 });
 
 test("o corretor perde o acesso quando a imobiliária vence e volta quando ela paga", async ({ browser }) => {

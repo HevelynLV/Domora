@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 
 import { Botao } from "@/components/ui/Botao";
 import { Campo } from "@/components/ui/Campo";
+import { chamarAcao } from "@/lib/chamarAcao";
 
 import { criarConvite } from "./acoes";
 
@@ -39,7 +40,7 @@ export function ConvidarCorretor({ imobiliaria }: { imobiliaria: string }) {
       return;
     }
     iniciar(async () => {
-      const resultado = await criarConvite(porEmail ? email : null);
+      const resultado = await chamarAcao(() => criarConvite(porEmail ? email : null));
       if (!resultado.link) {
         setErro(resultado.erro);
         return;

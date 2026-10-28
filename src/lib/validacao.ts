@@ -51,6 +51,12 @@ export function erroDoCreci(creci: string, perfil: "imobiliaria" | "autonomo") {
     : "Escreva o número do CRECI com a letra F ou J, ex.: 12345-F.";
 }
 
+// Ids (uuid) que vêm do endereço ou de um campo que a pessoa pode alterar:
+// confere o formato antes de perguntar ao banco.
+export function idValido(id: string) {
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
+}
+
 export function emailValido(email: string) {
   return /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email);
 }
