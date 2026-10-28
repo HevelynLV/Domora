@@ -75,6 +75,7 @@ Estas decisões ainda não foram tomadas. Se uma tarefa depender delas, PERGUNTE
 - O admin exclui imobiliária ou corretor autônomo pendente, com o usuário, liberando o CRECI (RF16). Assinante que já foi ativado não é excluído. Decidido em 28/10/2026 (plano da Etapa 5)
 - O convite vale 7 dias (padrão da coluna `convites.expira_em`). Decidido em 28/10/2026 (plano da Etapa 5)
 - O convite só nasce pela função `criar_convite()`: o banco sorteia o código, guarda só o hash e o link aparece uma vez. Convite para e-mail que já tem conta é recusado com mensagem clara; novo convite para o mesmo e-mail substitui o que aguardava; removidos aparecem no fim da Equipe com o selo "Removido". Decidido em 28/10/2026 (passo 5.4)
+- Cada imobiliária cria no máximo 20 convites por hora (`criar_convite()` conta também a tentativa para e-mail que já tem conta). Até o 13.2, o convite por e-mail não prova que a pessoa é dona do e-mail; no 13.2, o convite só é gasto e o corretor só ganha acesso depois de confirmar o e-mail. Decidido em 28/10/2026 (auditoria da Etapa 5)
 - Fotos e PDFs não passam por Server Action (o limite padrão é 1 MB): o navegador envia direto para o Supabase Storage, com permissão dada pelo servidor (Etapas 4 e 9)
 
 ## Fora do escopo do MVP

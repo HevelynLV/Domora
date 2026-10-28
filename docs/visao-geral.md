@@ -166,6 +166,8 @@ Substituem, sobre o CRECI, a decisão de 22/10/2026 (plano da Etapa 3), marcada 
 - (passo 5.4) Convite por e-mail para um e-mail que já tem conta no PAUTA é recusado com a mensagem "Este e-mail já tem conta no PAUTA". Isso revela a uma imobiliária ativa que aquele e-mail tem conta; o risco foi aceito, porque só imobiliária conferida pelo admin consegue perguntar.
 - (passo 5.4) Um novo convite para um e-mail que já tem convite aguardando substitui o anterior: só o link novo vale.
 - (passo 5.4) Os corretores removidos continuam na tela Equipe, no fim da lista, com o selo "Removido" e a data, sem botão.
+- (passo 5.6, auditoria) Cada imobiliária cria no máximo **20 convites por hora**, contando também as tentativas para e-mail que já tem conta. Assim a mensagem "Este e-mail já tem conta" não serve para testar e-mails em série.
+- (passo 5.6, auditoria) Com a confirmação de e-mail desligada (até o passo 13.2), quem recebe um convite por e-mail repassado consegue criar a conta digitando o e-mail do convidado: ainda não há como provar que a pessoa é dona do e-mail. Fica para o 13.2: com a confirmação ligada, o convite só é gasto e o corretor só ganha acesso depois de confirmar o e-mail.
 
 ## Decisões tomadas em 27/10/2026 (passo 4.7, captação)
 
