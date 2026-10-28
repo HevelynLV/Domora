@@ -3,10 +3,10 @@
 ## Onde paramos
 
 Última atualização: 28/10/2026 · por Gabriel
-Etapa atual: 5. Assinantes, na branch `etapa-5-assinantes` (passo 5.1 em andamento). A Etapa 4 foi para a `main` (Pull Request #5)
+Etapa atual: 5. Assinantes, na branch `etapa-5-assinantes` (5.1 feito; próximo: 5.2). A Etapa 4 foi para a `main` (Pull Request #5)
 
 Etapa 5:
-- 5.1 em andamento (28/10/2026): plano em discussão, uma decisão por vez
+- 5.1 feito (28/10/2026): plano aprovado e enviado (`etapa-5-assinantes` no GitHub). Passos: 5.2 admin e assinantes (migration do CRECI, `admin.ts`, AdmAssinantes), 5.3 teste do autônomo, 5.4 convites e equipe (migration: código do convite gerado pelo banco, corretor removido, `remover_corretor`; ImobEquipe e Convite), 5.5 auditoria, 5.6 fechar
   - Decidido: CRECI com letra obrigatória (J ou F); imobiliária só com J, autônomo com J ou F (Visão geral, "Decisões tomadas em 28/10/2026 (plano da Etapa 5)", e CLAUDE.md). Entra no 5.2 numa migration nova: regra em `assinantes` (o CRECI normalizado termina em letra; imobiliária termina em J), `creci_disponivel()` respondendo "não" sem letra, `creciValido()` exigindo a letra e conferindo o tipo, dica no campo do cadastro, testes no `testar_rls.sql` e os ajudantes do e2e com CRECI com letra
   - Conferido em 28/10/2026 no SQL Editor: nenhum assinante no banco com CRECI sem letra. Rodar de novo logo antes do `db push` do 5.2: `select id, creci from public.assinantes where creci_normalizado !~ '[A-Z]$';` e `select id, creci from public.assinantes where tipo = 'imobiliaria' and creci_normalizado !~ 'J$';` (as duas deram 0 linhas em 28/10/2026)
   - Decidido: o responsável remove corretores na tela Equipe (Visão geral e CLAUDE.md, mesma seção). Entra no 5.4: no banco, o corretor marcado como removido (a conta e o vínculo ficam, como histórico) e o `eh_assinante_ativo()` deixando de dar acesso a ele; uma função para o responsável remover só corretor da própria imobiliária e nunca a si mesmo; botão "Remover" na ImobEquipe e na SiteImobEquipe, com confirmação; testes no `testar_rls.sql` e Playwright (removido perde o acesso na hora, corretor comum não remove ninguém, responsável de outra imobiliária não remove)
@@ -15,7 +15,7 @@ Etapa 5:
   - Decidido: cada "Copiar link" gera um convite novo de uso único (sem e-mail), que aparece na lista da Equipe e pode ser cancelado; sem link fixo da imobiliária (o banco já é assim)
   - Decidido: o admin exclui também o autônomo pendente (RF16 ampliado na Visão geral; o banco já permite). Teste no 5.2: excluir autônomo pendente libera o CRECI, e autônomo ativo não é excluído
   - Decidido: o convite vale 7 dias, como já está no banco
-  - Todas as perguntas do plano respondidas. Falta aprovar o plano e seguir para o 5.2
+- Próximo: passo 5.2 no Claude Code
 
 Etapa 4:
 - 4.1 feito (26/10/2026): plano aprovado. Decisões registradas na Visão geral ("Decisões tomadas em 26/10/2026 (plano da Etapa 4)") e no CLAUDE.md: status `rascunho` para o cadastro seguir a ordem do protótipo (dados, fotos, termo); dono edita imóvel pendente sem registro; página mínima do imóvel do proprietário com a escolha do contato; listas de tipos e bairros (lista oficial de Florianópolis, conferir a fonte); fotos JPG/PNG/WebP até 10 MB, de 1 a 20; termo numa tabela de versões (`2026-10-provisorio`). Migrations previstas: `imoveis_etapa_4` (4.2: termos, rascunho, edição de pendente, listas e os itens da auditoria da Etapa 2), `fotos_storage` (4.3: bucket privado `fotos-imoveis`) e `captacao` (4.7: `captar_imovel`, `aceitar_termo_captado`, `buscar_proprietarios`). Os testes que faltam da auditoria da Etapa 2 entram no 4.2
